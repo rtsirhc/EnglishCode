@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detective Case Files — Murder Mystery ESL Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button id="home-btn" class="brand" type="button" title="Back to Case Board">
+        <span class="brand-badge" aria-hidden="true">🕵️</span>
+        <span>
+          <span class="brand-title">DETECTIVE CASE FILES</span><br>
+          <span class="brand-sub">ESL Murder Mystery Bureau</span>
+        </span>
+      </button>
+
+      <div class="topbar-stats">
+        <input id="team-name" class="team-input" type="text" maxlength="32"
+               placeholder="Detective / Team name" aria-label="Detective or Team name">
+        <span class="stat-pill">Rank: <strong id="rank-label">Rookie</strong></span>
+        <span class="stat-pill">Score: <strong id="total-score">0</strong></span>
+        <span class="stat-pill">Solved: <strong id="solved-count">0 / 11</strong></span>
+        <button id="mute-btn" class="icon-btn" type="button" title="Toggle sound">🔊 Sound</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ==================== HOME: CASE BOARD ==================== -->
+    <section id="board-view">
+      <div class="hero">
+        <div>
+          <h1>Open Case Files</h1>
+          <p>
+            Choose a folder, read the mystery carefully, click sentences to collect clues in your
+            Evidence Notebook, and make your accusation. Then complete the Investigator's Report
+            and see if you solved the case.
+          </p>
+          <div class="content-warning" role="note">
+            ⚠️ <span>Contains crime &amp; mature themes — designed for teen and adult learners.</span>
+          </div>
+        </div>
+        <div>
+          <button id="reset-progress-btn" class="btn-danger" type="button">Reset Progress</button>
+        </div>
+      </div>
+
+      <div class="board-controls">
+        <div class="filter-group" role="tablist" aria-label="Filter cases">
+          <button class="filter-btn active" data-filter="all" type="button">All Cases (11)</button>
+          <button class="filter-btn" data-filter="unsolved" type="button">Unsolved</button>
+          <button class="filter-btn" data-filter="solved" type="button">Solved</button>
+        </div>
+      </div>
+
+      <div id="case-grid" class="case-grid"></div>
+    </section>
+
+    <!-- ==================== CASE WORKSPACE ==================== -->
+    <section id="case-view" class="hidden">
+      <div class="case-header">
+        <div class="case-title-block">
+          <h1 id="case-title"></h1>
+          <div id="case-sub" class="sub"></div>
+        </div>
+        <button id="back-board-btn" class="back-btn" type="button">← All Cases</button>
+      </div>
+
+      <nav class="step-tabs" aria-label="Case steps">
+        <button class="step-tab active" data-step="read" type="button">1. Read the Case</button>
+        <button class="step-tab" data-step="quiz" type="button">2. Make Your Accusation</button>
+        <button class="step-tab" data-step="report" type="button">3. Investigator's Report</button>
+        <button class="step-tab" data-step="reveal" id="tab-reveal" type="button" disabled>4. Case Closed</button>
+      </nav>
+
+      <!-- Step 1: Read the Case -->
+      <div id="panel-read">
+        <div class="read-layout">
+          <article class="dossier-paper">
+            <div class="dossier-banner">
+              <span class="label" id="dossier-code">CONFIDENTIAL CASE FILE</span>
+              <span id="dossier-victim" style="font-size:13.5px; color:#5e5243;"></span>
+            </div>
+            <div class="read-tip">
+              💡 <strong>Tip:</strong> Click or tap any sentence in the story to highlight it and save it to your
+              <strong>Evidence Notebook</strong>. Collecting key clues gives you bonus points!
+            </div>
+            <div id="story-body" class="story-body"></div>
+            <div class="action-row">
+              <span id="read-evidence-status" style="font-size:13.5px; color:#5e5243;"></span>
+              <button id="go-quiz-btn" class="btn-primary" type="button">Ready to Accuse →</button>
+            </div>
+          </article>
+
+          <aside class="sidebar">
+            <div class="side-card">
+              <h2>Suspects <span id="suspect-count" style="font-size:13px; color:#b5a998;"></span></h2>
+              <div id="suspect-list" class="suspect-list"></div>
+            </div>
+
+            <div class="side-card">
+              <h2>Evidence Notebook <span id="evidence-count" style="font-size:13px; color:#b5a998;">0</span></h2>
+              <div id="evidence-list" class="evidence-list"></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Step 2: Make Your Accusation -->
+      <div id="panel-quiz" class="hidden">
+        <div class="quiz-wrap">
+          <div id="questions-container"></div>
+          <div class="action-row">
+            <button id="back-read-btn" class="btn-secondary" type="button">← Back to Story</button>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <span id="quiz-progress" style="font-size:14px; color:#b5a998;"></span>
+              <button id="submit-quiz-btn" class="btn-primary" type="button" disabled>Submit Accusation</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Investigator's Report -->
+      <div id="panel-report" class="hidden">
+        <div class="report-sheet">
+          <h2>Investigator's Report</h2>
+          <p class="intro" id="report-meta"></p>
+
+          <div class="field-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+              <label for="rep-ev1" style="margin:0;">Quote three details from the story that support your conclusion:</label>
+              <button id="fill-evidence-btn" class="btn-secondary no-print" type="button" style="padding:5px 10px; font-size:12.5px;">
+                Fill from Evidence Notebook
+              </button>
+            </div>
+            <textarea id="rep-ev1" rows="2" placeholder="Evidence 1..."></textarea>
+          </div>
+          <div class="field-group">
+            <textarea id="rep-ev2" rows="2" placeholder="Evidence 2..."></textarea>
+          </div>
+          <div class="field-group">
+            <textarea id="rep-ev3" rows="2" placeholder="Evidence 3..."></textarea>
+          </div>
+
+          <div id="extra-report-fields"></div>
+
+          <div class="field-group">
+            <label>Rate the mystery's fairness:</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="fairness" value="We could solve it from the evidence.">
+                We could solve it from the evidence.
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="fairness" value="We had a possible answer, but evidence was missing.">
+                We had a possible answer, but evidence was missing.
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="fairness" value="The solution depended on information not in the story.">
+                The solution depended on information not in the story.
+              </label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="rep-fairness-why">Explain your rating:</label>
+            <textarea id="rep-fairness-why" rows="3" placeholder="Write a short explanation..."></textarea>
+          </div>
+
+          <div class="action-row no-print">
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <button id="copy-report-btn" class="btn-secondary" type="button">📋 Copy Report</button>
+              <button id="print-report-btn" class="btn-secondary" type="button">🖨️ Print Report</button>
+              <span id="copy-toast" class="copy-toast hidden">Copied!</span>
+            </div>
+            <button id="report-next-btn" class="btn-primary" type="button">View Case Closed →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Case Closed -->
+      <div id="panel-reveal" class="hidden">
+        <div class="reveal-wrap">
+          <div class="verdict-banner">
+            <div>
+              <div id="verdict-stamp" class="big-stamp">SOLVED</div>
+              <div id="verdict-note" style="margin-top:10px; font-size:14.5px; color:#4b3f30;"></div>
+            </div>
+            <div id="score-breakdown" class="score-breakdown"></div>
+          </div>
+
+          <div class="solution-box">
+            <h2>Official Solution — <span id="sol-culprit"></span></h2>
+            <div id="sol-text"></div>
+            <div class="solution-meta">
+              <div class="solution-pill">
+                <strong>Red Herring</strong>
+                <span id="sol-herring"></span>
+              </div>
+              <div class="solution-pill">
+                <strong>The Twist</strong>
+                <span id="sol-twist"></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="review-list" class="review-list"></div>
+
+          <div class="action-row">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="show-clues-story-btn" class="btn-secondary" type="button">🔎 Highlight Key Clues in Story</button>
+              <button id="retry-case-btn" class="btn-secondary" type="button">↻ Try This Case Again</button>
+              <button id="go-report-from-reveal-btn" class="btn-secondary" type="button">📝 Investigator's Report</button>
+            </div>
+            <button id="reveal-board-btn" class="btn-primary" type="button">Back to Case Board →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="cases.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

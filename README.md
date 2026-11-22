@@ -8,6 +8,7 @@ All of Christine's interactive English (ESL) classroom games, apps and activitie
 
 | Game | Folder | What it is | How to run |
 |---|---|---|---|
+| 🕵️ Detective Case Files | [`detective-case-files`](detective-case-files) | Murder-mystery reading game: 11 cases, collect evidence, accuse the culprit, investigator's report | Easy |
 | 🧬 Bio Master: 7th Grade Edition | [`bio-master`](bio-master) | Biology vocabulary & science quiz | Easy |
 | 👪 Classroom Feud | [`classroom-feud`](classroom-feud) | Family Feud-style team game | App |
 | 🔐 The Compliance Cipher | [`compliance-cipher`](compliance-cipher) | Escape-room activity | App (server) |
