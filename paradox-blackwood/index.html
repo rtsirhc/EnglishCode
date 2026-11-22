@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Paradox at Blackwood Manor</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Roboto+Mono:wght@300;400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <header>
+            <h1>The Paradox at Blackwood Manor</h1>
+            <div class="status-bar">
+                <span id="case-status">Status: Active Investigation</span>
+                <span id="timer">Time Remaining: 60:00</span>
+                <button id="view-evidence-btn" class="nav-btn">📂 View Case File</button>
+            </div>
+        </header>
+
+        <main>
+            <section id="narrative-log" class="narrative-box">
+                <!-- Narrative text will be injected here -->
+            </section>
+
+            <section id="evidence-display" class="evidence-box hidden">
+                <h2>Current Evidence File</h2>
+                <div id="evidence-content">
+                    <!-- Clues/Maps/Alibis go here -->
+                </div>
+            </section>
+
+            <section id="interaction-area" class="interaction-box">
+                <div id="task-instructions"></div>
+
+                <!-- Dynamic Input Areas -->
+                <div id="input-container">
+                    <textarea id="text-input" class="hidden" placeholder="Type your report here..."></textarea>
+                    <div id="options-container" class="hidden"></div>
+                    <button id="submit-btn" class="action-btn">Submit Findings</button>
+                    <button id="next-btn" class="action-btn hidden">Proceed to Next Phase</button>
+                </div>
+
+                <div id="feedback" class="feedback-msg hidden"></div>
+            </section>
+        </main>
+
+        <aside>
+            <h2>Case Files</h2>
+            <ul id="file-list">
+                <li id="file-1" class="locked">File #1: The Preposition Path</li>
+                <li id="file-2" class="locked">File #2: The Tense Timeline</li>
+                <li id="file-3" class="locked">File #3: The Trivia Encryption</li>
+                <li id="file-4" class="locked">File #4: The Final Report</li>
+            </ul>
+        </aside>
+    </div>
+    <div id="evidence-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal" class="close">&times;</span>
+            <h2>📂 Collected Evidence</h2>
+            <div id="evidence-collection">
+                <!-- Dynamic Evidence Items -->
+                <div class="evidence-slot locked" id="evidence-slot-1">
+                    <h3>File #1: Entry Point</h3>
+                    <p class="placeholder">Evidence Locked</p>
+                </div>
+                <div class="evidence-slot locked" id="evidence-slot-2">
+                    <h3>File #2: Suspect Timeline</h3>
+                    <p class="placeholder">Evidence Locked</p>
+                </div>
+                <div class="evidence-slot locked" id="evidence-slot-3">
+                    <h3>File #3: Decrypted Data</h3>
+                    <p class="placeholder">Evidence Locked</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

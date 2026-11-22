@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory Court: Library Kiosk Trial</title>
+  <style>
+    :root { --ink:#162033; --paper:#f5f7fb; --navy:#163a70; --blue:#2878c7; --green:#188a57; --red:#c53c45; --gold:#f2b138; --line:#d6deec; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:linear-gradient(135deg,#eef4ff 0%,#fdfdfd 50%,#edf8f4 100%); }
+    main { max-width:1120px; margin:0 auto; padding:32px 38px 44px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:20px; border-bottom:4px solid var(--gold); padding-bottom:16px; }
+    h1 { margin:0; font-size:clamp(26px,4vw,46px); color:var(--navy); }
+    .sub { margin:7px 0 0; font-size:18px; color:#4c607d; }
+    .timer { min-width:155px; text-align:center; font-size:42px; font-weight:800; color:var(--navy); background:white; border:3px solid var(--navy); border-radius:16px; padding:11px 16px; font-variant-numeric:tabular-nums; }
+    .panel { margin-top:26px; background:rgba(255,255,255,.94); border-radius:20px; box-shadow:0 10px 28px rgba(31,57,96,.12); padding:30px; }
+    .passage { font-size:20px; line-height:1.58; max-width:920px; margin:0 auto; }
+    .passage p { margin:0 0 18px; }
+    .notice { font-weight:700; text-align:center; font-size:19px; color:var(--navy); margin:0 0 22px; }
+    .hidden { display:none !important; }
+    .start-wrap { text-align:center; padding:62px 18px; }
+    .start-wrap h2 { font-size:34px; color:var(--navy); margin:0 0 12px; }
+    .start-wrap p { font-size:20px; margin:0 0 26px; }
+    button { font:inherit; cursor:pointer; }
+    .primary { border:0; border-radius:12px; background:var(--navy); color:#fff; font-size:25px; font-weight:700; padding:16px 36px; box-shadow:0 5px 0 #0d2448; }
+    .primary:active { transform:translateY(3px); box-shadow:0 2px 0 #0d2448; }
+    .quiz-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; }
+    .counter { display:inline-block; border-radius:999px; background:#dbeafa; color:var(--navy); padding:8px 14px; font-weight:700; }
+    .question { font-size:clamp(24px,3.3vw,35px); font-weight:700; line-height:1.28; margin:20px 0 27px; }
+    .answers { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .answer { min-height:74px; display:flex; align-items:center; text-align:left; padding:15px 18px; border:3px solid var(--line); border-radius:14px; background:#fff; font-size:20px; font-weight:600; color:var(--ink); transition:.16s ease; }
+    .answer:hover:not(:disabled) { border-color:var(--blue); background:#f0f7ff; transform:translateY(-2px); }
+    .answer.correct { color:white; background:var(--green); border-color:var(--green); }
+    .answer.incorrect { color:white; background:var(--red); border-color:var(--red); }
+    .letter { display:inline-flex; align-items:center; justify-content:center; flex:none; width:36px; height:36px; border-radius:50%; margin-right:13px; background:#e9eef7; color:var(--navy); font-weight:800; }
+    .correct .letter, .incorrect .letter { background:rgba(255,255,255,.23); color:white; }
+    .controls { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:28px; }
+    .feedback { min-height:28px; margin:0; font-size:19px; font-weight:700; }
+    .feedback.good { color:var(--green); }.feedback.bad { color:var(--red); }
+    .next { border:0; border-radius:10px; background:var(--blue); color:white; padding:12px 25px; font-weight:700; font-size:19px; }
+    .next:disabled { background:#a9b6c9; cursor:not-allowed; }
+    .restart { display:block; margin:26px auto 0; background:none; border:0; color:var(--navy); text-decoration:underline; font-weight:700; }
+    .final { text-align:center; padding:45px 18px; }.final h2 { font-size:38px; color:var(--green); margin:0 0 12px; }.final p { font-size:22px; }
+    @media (max-width:700px) { main { padding:20px; }.top { align-items:flex-start; flex-direction:column; }.timer { font-size:34px; }.panel { padding:22px; }.answers { grid-template-columns:1fr; }.passage { font-size:18px; }.controls { align-items:flex-end; flex-direction:column; }.next { width:100%; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="top">
+      <div><h1>Memory Court</h1><p class="sub">Read once. Remember what matters.</p></div>
+      <div id="timer" class="timer" aria-label="Reading time remaining">5:00</div>
+    </header>
+
+    <section id="readingScreen" class="panel">
+      <p class="notice">You have one reading only. Take short notes; do not copy full sentences.</p>
+      <article class="passage">
+        <p>On 7 April, Calder Public Library introduced three self-service kiosks at its Riverside Branch, its busiest location. The trial was scheduled to last twelve weeks, although the library board planned to review the results after the first eight. Unlike the old express desk, the kiosks could be used only to borrow or return physical items. Visitors still needed staff assistance to collect reserved books, pay fees, or update membership details.</p>
+        <p>During the first two weeks, 62% of eligible transactions were completed at a kiosk. However, this figure excluded 276 transactions in which staff had to help after scanners failed to recognise barcodes covered by protective labels. The library did not remove any staff positions. Instead, one part-time assistant was moved from the desk on Friday afternoons to teach visitors how to use the kiosks.</p>
+        <p>A survey of 89 visitors found that 71 considered the kiosks faster than the traditional desk, while 14 felt there was no difference. The remaining visitors thought the kiosks were slower. Staff members reported fewer short questions at the desk but more complicated requests from visitors who needed help. The director said that no staffing changes would be considered unless at least 70% of eligible transactions were completed independently for three consecutive weeks.</p>
+      </article>
+    </section>
+
+    <section id="startScreen" class="panel start-wrap hidden">
+      <h2>Reading time is over.</h2>
+      <p>Put your notes away. Buzzer round starts when you are ready.</p>
+      <button id="startButton" class="primary" type="button">Start Buzzer Round</button>
+    </section>
+
+    <section id="quizScreen" class="panel hidden" aria-live="polite">
+      <div class="quiz-head"><span class="counter" id="counter">Question 1 of 15</span><span class="counter">Buzzer answer: choose A, B, C, or D</span></div>
+      <div id="question" class="question"></div>
+      <div id="answers" class="answers"></div>
+      <div class="controls"><p id="feedback" class="feedback" aria-live="polite"></p><button id="nextButton" class="next" type="button" disabled>Next question →</button></div>
+    </section>
+
+    <section id="finalScreen" class="panel final hidden"><h2>Round complete.</h2><p>Review the Five Anchors: subject, event, exact details, qualifier, and main point.</p></section>
+    <button id="restartButton" class="restart" type="button">Restart the full 5-minute reading timer</button>
+  </main>
+  <script>
+    const questions = [
+      ["Why did Calder Library choose Riverside Branch for the trial?", ["It had the newest equipment.", "It was the busiest branch.", "It had the fewest staff members.", "It received the most complaints."], 1],
+      ["When will the library board first review the trial?", ["After two weeks.", "After seven weeks.", "After eight weeks.", "After twelve weeks."], 2],
+      ["Which service can visitors use a kiosk for?", ["Paying overdue fees.", "Updating a membership address.", "Collecting a reserved book.", "Returning a physical book."], 3],
+      ["What does ‘eligible transactions’ most likely mean in the passage?", ["All visits to the library.", "Transactions the kiosks were designed to handle.", "Transactions completed by staff.", "Transactions involving reserved books."], 1],
+      ["Why were 276 transactions excluded from the 62% figure?", ["Visitors refused to use the kiosks.", "The kiosks were unavailable on Fridays.", "Staff had to intervene because of barcode problems.", "The transactions happened before 7 April."], 2],
+      ["Which statement about library staff is accurate?", ["One staff position was eliminated.", "All desk staff were retrained as technicians.", "One assistant’s Friday-afternoon duties changed.", "Staff were moved to other library branches."], 2],
+      ["What was the part-time assistant’s new responsibility?", ["Repairing barcode scanners.", "Teaching visitors to use the kiosks.", "Conducting visitor surveys.", "Managing reserved books."], 1],
+      ["How many surveyed visitors thought kiosks were slower than the desk?", ["4", "14", "18", "71"], 0],
+      ["Which claim is best supported by the survey?", ["Most library visitors prefer kiosks.", "Most surveyed visitors considered kiosks faster.", "Every visitor found kiosks easy to use.", "Kiosks are definitely faster than staff."], 1],
+      ["What changed at the traditional desk after the kiosks were introduced?", ["Staff answered fewer questions overall.", "Visitors stopped asking for help.", "Staff dealt with fewer simple questions but more complex requests.", "The desk closed on Friday afternoons."], 2],
+      ["Which condition must be met before staffing changes are even considered?", ["The trial must last twelve weeks.", "All scanners must work without errors.", "70% of all visitors must use the kiosks.", "At least 70% of eligible transactions must be independent for three straight weeks."], 3],
+      ["Which statement is NOT supported by the passage?", ["The library has already decided to reduce staff.", "The library is collecting data during the trial.", "Some kiosk users needed staff assistance.", "The kiosks do not handle every library service."], 0],
+      ["What is the main purpose of the final paragraph?", ["To explain why the kiosks failed.", "To show that the trial has limits and conditions.", "To announce that staff will lose jobs.", "To compare Riverside with other branches."], 1],
+      ["Which detail most weakens the claim, ‘The kiosks worked independently for 62% of all library transactions’?", ["Riverside is the busiest branch.", "The trial lasts twelve weeks.", "The figure applies only to eligible transactions and excludes assisted transactions.", "Visitors can still pay fees at the desk."], 2],
+      ["What is the most accurate summary?", ["The kiosk trial has clearly succeeded, so the library will reduce staff soon.", "The library is testing kiosks at one busy branch, with mixed early evidence and no staffing decision yet.", "The kiosks failed because visitors preferred the traditional desk.", "The library replaced its express desk with kiosks at every branch."], 1]
+    ];
+    const letters = ["A", "B", "C", "D"];
+    const readingScreen = document.getElementById("readingScreen");
+    const startScreen = document.getElementById("startScreen");
+    const quizScreen = document.getElementById("quizScreen");
+    const finalScreen = document.getElementById("finalScreen");
+    const timerEl = document.getElementById("timer");
+    const counterEl = document.getElementById("counter");
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const feedbackEl = document.getElementById("feedback");
+    const nextButton = document.getElementById("nextButton");
+    let remaining = 300, timerId, current = 0, answered = false;
+    function formatTime(seconds) { const minutes = Math.floor(seconds / 60); return minutes + ":" + String(seconds % 60).padStart(2, "0"); }
+    function tick() { timerEl.textContent = formatTime(remaining); if (remaining <= 0) { clearInterval(timerId); readingScreen.classList.add("hidden"); startScreen.classList.remove("hidden"); timerEl.textContent = "TIME"; return; } remaining--; }
+    function beginTimer() { clearInterval(timerId); remaining = 300; tick(); timerId = setInterval(tick, 1000); }
+    function showQuestion() {
+      answered = false; feedbackEl.textContent = ""; feedbackEl.className = "feedback"; nextButton.disabled = true;
+      if (current >= questions.length) { quizScreen.classList.add("hidden"); finalScreen.classList.remove("hidden"); return; }
+      const [prompt, choices] = questions[current]; counterEl.textContent = `Question ${current + 1} of ${questions.length}`; questionEl.textContent = prompt; answersEl.innerHTML = "";
+      choices.forEach((choice, index) => { const button = document.createElement("button"); button.type = "button"; button.className = "answer"; button.innerHTML = `<span class="letter">${letters[index]}</span><span>${choice}</span>`; button.addEventListener("click", () => chooseAnswer(index, button)); answersEl.appendChild(button); });
+    }
+    function chooseAnswer(index, button) {
+      if (answered || button.classList.contains("incorrect")) return;
+      const correct = questions[current][2];
+      if (index === correct) { answered = true; button.classList.add("correct"); feedbackEl.textContent = "Correct."; feedbackEl.className = "feedback good"; nextButton.disabled = false; }
+      else { button.classList.add("incorrect"); feedbackEl.textContent = "Incorrect — another team may buzz in."; feedbackEl.className = "feedback bad"; }
+    }
+    document.getElementById("startButton").addEventListener("click", () => { startScreen.classList.add("hidden"); quizScreen.classList.remove("hidden"); showQuestion(); });
+    nextButton.addEventListener("click", () => { current++; showQuestion(); });
+    document.getElementById("restartButton").addEventListener("click", () => { current = 0; answered = false; finalScreen.classList.add("hidden"); quizScreen.classList.add("hidden"); startScreen.classList.add("hidden"); readingScreen.classList.remove("hidden"); beginTimer(); });
+    beginTimer();
+  </script>
+</body>
+</html>

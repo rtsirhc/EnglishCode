@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* ============================================
+   TIME ZONE TRAVELERS — Kids Theme
+   ============================================ */
+
+@theme {
+  /* --- Colors (Kid-Friendly Palette) --- */
+  --color-primary: #FF6B6B;
+  /* Coral Red */
+  --color-primary-dark: #E85555;
+  --color-primary-light: #FF8E8E;
+  --color-secondary: #4ECDC4;
+  /* Teal */
+  --color-secondary-dark: #3DBAB2;
+  --color-secondary-light: #6EE0D9;
+  --color-accent: #FFE66D;
+  /* Yellow */
+  --color-accent-dark: #E6CF55;
+  --color-accent-light: #FFF09E;
+  --color-background: #F7FFF7;
+  /* Mint White */
+  --color-surface: #FFFFFF;
+  --color-text-primary: #2D3436;
+  --color-text-secondary: #636E72;
+  --color-success: #00B894;
+  --color-danger: #E17055;
+
+  /* --- Font Family --- */
+  --font-sans: 'Nunito', ui-rounded, system-ui, -apple-system, sans-serif;
+
+  /* --- Font Sizes (Large for classroom) --- */
+  --font-size-xs: 0.875rem;
+  --font-size-sm: 1rem;
+  --font-size-base: 1.125rem;
+  --font-size-lg: 1.375rem;
+  --font-size-xl: 1.75rem;
+  --font-size-2xl: 2.25rem;
+  --font-size-3xl: 3rem;
+  --font-size-4xl: 4rem;
+
+  /* --- Border Radius (Rounded for kids) --- */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px rgba(78, 205, 196, 0.4);
+  --shadow-active: 0 0 30px rgba(255, 107, 107, 0.5);
+}
+
+/* ============================================
+   Global Styles
+   ============================================ */
+
+@layer base {
+
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* ============================================
+   Keyframe Animations
+   ============================================ */
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-6px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}

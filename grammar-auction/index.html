@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🏛️ ESL Grammar Auction</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f172a; color: #e2e8f0;
+  min-height: 100vh; overflow-x: hidden;
+}
+.hidden { display: none !important; }
+.gold { color: #f59e0b; }
+.green { color: #22c55e; }
+.red { color: #ef4444; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 20px; border: none; border-radius: 10px;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.btn:active { transform: scale(0.96); }
+.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; }
+.btn-gold:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 0 15px rgba(245,158,11,0.4); }
+.btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+.btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.btn-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+.btn-lg { padding: 14px 28px; font-size: 1.1rem; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px; padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+input[type="text"], input[type="number"] {
+  background: rgba(15, 23, 42, 0.8); border: 2px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px; padding: 10px 14px; color: #e2e8f0;
+  font-size: 1rem; width: 100%; outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: #f59e0b; }
+
+.glow-text { text-shadow: 0 0 10px rgba(245,158,11,0.5), 0 0 30px rgba(245,158,11,0.2); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes flashGreen { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 70% { box-shadow: 0 0 20px 10px rgba(34,197,94,0); } }
+@keyframes flashRed { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 20px 10px rgba(239,68,68,0); } }
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-400px) rotate(720deg); opacity: 0; }
+}
+.animate-in { animation: fadeIn 0.3s ease forwards; }
+
+/* ROLE SELECT */
+#roleSelect {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; gap: 24px; padding: 20px; text-align: center;
+}
+#roleSelect h1 { font-size: 2.5rem; }
+#roleSelect .subtitle { color: #94a3b8; font-size: 1.1rem; margin-top: -8px; }
+.role-cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.role-card {
+  width: 260px; padding: 28px; cursor: pointer; text-align: center; transition: all 0.3s ease;
+}
+.role-card:hover { transform: translateY(-4px); border-color: #f59e0b; box-shadow: 0 8px 30px rgba(245,158,11,0.2); }
+.role-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.role-card h2 { color: #f59e0b; font-size: 1.2rem; margin-bottom: 8px; }
+.role-card p { color: #94a3b8; font-size: 0.85rem; line-height: 1.4; }
+
+/* HOST SCREEN */
+#hostScreen { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+.host-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(30,41,59,0.9));
+  border-bottom: 1px solid rgba(245,158,11,0.2);
+}
+.host-header h1 { font-size: 1.2rem; }
+.room-badge {
+  background: rgba(245,158,11,0.15); border: 2px solid #f59e0b;
+  padding: 4px 14px; border-radius: 8px; font-size: 1.4rem;
+  font-weight: 900; color: #f59e0b; letter-spacing: 3px;
+}
+
+/* Setup */
+.setup-panel {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; padding: 16px; overflow: auto;
+}
+.setup-left { display: flex; flex-direction: column; gap: 12px; }
+.qr-section { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.qr-section canvas, .qr-section img { border-radius: 10px; margin: 8px auto; }
+.join-link {
+  background: rgba(15,23,42,0.6); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 6px; padding: 8px; font-size: 0.7rem; color: #94a3b8;
+  word-break: break-all; margin: 6px 0; max-width: 280px;
+}
+.team-count-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.team-count-selector label { color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
+.team-count-btn {
+  width: 38px; height: 38px; border-radius: 8px; font-weight: 700;
+  border: 2px solid rgba(245,158,11,0.3); background: transparent; color: #e2e8f0;
+  cursor: pointer; font-size: 1rem; transition: all 0.2s;
+}
+.team-count-btn.active, .team-count-btn:hover {
+  background: #f59e0b; color: #0f172a; border-color: #f59e0b;
+}
+.connected-teams {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px; margin: 8px 0;
+}
+.team-chip {
+  display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px;
+}
+.team-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.team-chip .name { font-weight: 600; font-size: 0.85rem; }
+.kick-btn {
+  background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444; border-radius: 50%; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; padding: 0; margin-left: auto;
+  transition: all 0.2s; line-height: 1;
+}
+.kick-btn:hover { background: #ef4444; color: #fff; }
+.bet-card { position: relative; }
+.bet-card .kick-btn { position: absolute; top: 6px; right: 6px; opacity: 0.5; }
+.bet-card:hover .kick-btn { opacity: 1; }
+
+/* HOST GAME LAYOUT — SINGLE VIEWPORT */
+.game-layout {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px; padding: 10px;
+  overflow: hidden; min-height: 0;
+}
+.game-left {
+  grid-column: 1; grid-row: 1 / 4;
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 0; overflow: hidden;
+}
+.game-right {
+  grid-column: 2; grid-row: 1 / 4;
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 0; overflow: hidden;
+}
+
+/* Question display */
+.question-display {
+  text-align: center; padding: 14px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(30,41,59,0.9));
+  border: 2px solid rgba(245,158,11,0.3);
+}
+.q-number { font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px; }
+.q-sentence { font-size: 1.4rem; font-weight: 700; line-height: 1.3; color: #fff; }
+.q-timer { font-size: 2.2rem; font-weight: 900; margin-top: 8px; transition: color 0.3s; }
+.q-timer.urgent { color: #ef4444; animation: pulse 0.5s ease infinite; }
+
+/* Answer reveal bar */
+.answer-reveal {
+  text-align: center; padding: 10px; flex-shrink: 0;
+  border-radius: 10px; display: none;
+}
+.answer-reveal.show { display: block; }
+.answer-reveal.legal-answer { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); }
+.answer-reveal.illegal-answer { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); }
+.answer-reveal .verdict { font-size: 1.4rem; font-weight: 900; }
+.answer-reveal .correction { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+
+/* Bets grid */
+.bets-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px; flex: 1; overflow-y: auto; align-content: start;
+  min-height: 0;
+}
+.bet-card {
+  padding: 12px; border-radius: 10px;
+  background: rgba(30,41,59,0.6); border: 2px solid rgba(100,116,139,0.3);
+  transition: all 0.4s ease;
+}
+.bet-card.submitted { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+.bet-card.correct-reveal {
+  border-color: #22c55e; background: rgba(34,197,94,0.15);
+  animation: flashGreen 0.6s ease;
+}
+.bet-card.incorrect-reveal {
+  border-color: #ef4444; background: rgba(239,68,68,0.15);
+  animation: flashRed 0.6s ease;
+}
+.bet-card.no-bet-reveal {
+  border-color: #ef4444; background: rgba(239,68,68,0.15);
+  animation: flashRed 0.6s ease;
+}
+.bet-card .team-name { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+.bet-card .balance { color: #94a3b8; font-size: 0.8rem; }
+.bet-card .bet-info { margin-top: 6px; font-weight: 600; font-size: 0.95rem; }
+.bet-card .bet-amount { color: #f59e0b; }
+.bet-card .reveal-choice { font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 6px; }
+.bet-card .reveal-choice.legal { background: rgba(34,197,94,0.2); color: #22c55e; }
+.bet-card .reveal-choice.illegal { background: rgba(239,68,68,0.2); color: #ef4444; }
+.bet-card .delta { font-weight: 700; font-size: 0.9rem; margin-top: 4px; }
+.bet-card .delta.positive { color: #22c55e; }
+.bet-card .delta.negative { color: #ef4444; }
+
+/* Leaderboard */
+.leaderboard-panel {
+  flex: 1; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.leaderboard-panel h3 { flex-shrink: 0; margin-bottom: 8px; font-size: 0.95rem; }
+.lb-rows { flex: 1; overflow-y: auto; min-height: 0; }
+.lb-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-radius: 8px; margin-bottom: 5px;
+  background: rgba(30,41,59,0.6); transition: all 0.3s;
+}
+.lb-row:first-child { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
+.lb-rank { font-size: 1.1rem; font-weight: 900; min-width: 28px; text-align: center; }
+.lb-name { font-weight: 600; font-size: 0.9rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-balance { font-weight: 900; font-size: 1rem; color: #f59e0b; white-space: nowrap; }
+
+/* Host controls */
+.host-controls {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  padding: 8px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(15,23,42,0.6); border: 1px solid rgba(100,116,139,0.2);
+  grid-column: 1 / -1;
+}
+
+/* Final challenge */
+.final-challenge { text-align: center; padding: 30px; }
+.final-challenge h2 { font-size: 1.8rem; margin-bottom: 15px; }
+.fc-team { font-size: 1.3rem; color: #f59e0b; font-weight: 700; margin: 8px 0; }
+.fc-amount { font-size: 2.2rem; font-weight: 900; color: #22c55e; margin: 12px 0; }
+.fc-input-group { max-width: 480px; margin: 15px auto; display: flex; gap: 8px; }
+.fc-input-group input { flex: 1; font-size: 1.1rem; }
+.fc-feedback { font-size: 1.1rem; margin-top: 12px; font-weight: 600; }
+
+/* Winner */
+.winner-screen { text-align: center; padding: 40px 20px; }
+.winner-screen h1 { font-size: 2.5rem; margin-bottom: 15px; }
+.winner-screen .crown { font-size: 5rem; }
+.winner-screen .winner-name { font-size: 2.2rem; color: #f59e0b; font-weight: 900; margin: 15px 0; }
+.winner-screen .winner-title { font-size: 1.5rem; color: #22c55e; }
+.confetti-piece {
+  position: fixed; width: 10px; height: 20px; top: -20px;
+  animation: confetti 3s ease-out forwards;
+}
+
+/* CLIENT SCREEN */
+#clientScreen { padding: 16px; max-width: 500px; margin: 0 auto; min-height: 100vh; }
+.client-join {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 80vh; gap: 16px; text-align: center;
+}
+.client-join h2 { font-size: 1.6rem; }
+.client-join input { max-width: 280px; text-align: center; font-size: 1.4rem; letter-spacing: 5px; }
+.client-join .team-input { font-size: 1rem; letter-spacing: normal; }
+
+.client-header {
+  text-align: center; padding: 12px; border-radius: 12px; margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(30,41,59,0.8));
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.client-team-name { font-size: 1.2rem; font-weight: 700; }
+.client-balance { font-size: 2.2rem; font-weight: 900; color: #f59e0b; margin: 6px 0; }
+.client-status { color: #94a3b8; font-size: 0.85rem; }
+
+.betting-panel { text-align: center; }
+.choice-buttons { display: flex; gap: 10px; margin: 12px 0; }
+.choice-btn {
+  flex: 1; padding: 16px; font-size: 1.1rem; font-weight: 900; border-radius: 12px;
+  border: 3px solid transparent; cursor: pointer; transition: all 0.2s;
+}
+.choice-btn.legal-btn { background: rgba(34,197,94,0.15); color: #22c55e; border-color: rgba(34,197,94,0.4); }
+.choice-btn.legal-btn.selected { background: #22c55e; color: #fff; border-color: #22c55e; box-shadow: 0 0 15px rgba(34,197,94,0.5); }
+.choice-btn.illegal-btn { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.4); }
+.choice-btn.illegal-btn.selected { background: #ef4444; color: #fff; border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+
+.amount-section { margin: 12px 0; }
+.amount-section label { display: block; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+.amount-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.amount-input-row input { flex: 1; text-align: center; font-size: 1.2rem; font-weight: 700; }
+.quick-amounts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.submit-bet-btn { width: 100%; padding: 16px; font-size: 1.2rem; margin-top: 12px; }
+.bet-submitted-msg { text-align: center; padding: 24px; font-size: 1.2rem; font-weight: 700; color: #f59e0b; }
+.client-result { text-align: center; padding: 24px; }
+.client-result .verdict { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+.client-result .change { font-size: 1.3rem; font-weight: 700; }
+.client-waiting { text-align: center; padding: 30px; color: #94a3b8; font-size: 1.1rem; }
+.client-waiting .dots::after { content: '...'; animation: pulse 1.5s ease infinite; }
+
+@media (max-width: 768px) {
+  .setup-panel { grid-template-columns: 1fr; }
+  .game-layout { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; }
+  .game-right { grid-column: 1; grid-row: auto; max-height: 200px; }
+  .host-header { flex-direction: column; gap: 6px; text-align: center; }
+  .q-sentence { font-size: 1.1rem; }
+  .q-timer { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ROLE SELECT -->
+<div id="roleSelect">
+  <h1 class="gold glow-text">🏛️ ESL Grammar Auction</h1>
+  <p class="subtitle">A real-time multiplayer classroom game</p>
+  <div class="role-cards">
+    <div class="role-card card" onclick="initHost()">
+      <div class="icon">🖥️</div>
+      <h2>Host / Big Screen</h2>
+      <p>Project this on the classroom display. Controls questions, timer, and scoring.</p>
+    </div>
+    <div class="role-card card" onclick="showClientJoin()">
+      <div class="icon">📱</div>
+      <h2>Student / Mobile</h2>
+      <p>Join from your phone. Place bets on whether sentences are legal or illegal.</p>
+    </div>
+  </div>
+</div>
+
+<!-- HOST SCREEN -->
+<div id="hostScreen" class="hidden">
+  <div class="host-header">
+    <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:#94a3b8;font-size:0.75rem;">ROOM</span>
+      <div class="room-badge" id="hostRoomCode"></div>
+    </div>
+  </div>
+
+  <!-- Setup -->
+  <div id="hostSetup" class="setup-panel">
+    <div class="setup-left">
+      <div class="card">
+        <h3 class="gold" style="margin-bottom:10px;font-size:0.95rem;">📋 Game Setup</h3>
+        <div class="team-count-selector">
+          <label>Teams:</label>
+          <div id="teamCountBtns"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">👥 Connected (<span id="connectedCount">0</span>)</h3>
+        <div class="connected-teams" id="connectedTeams">
+          <p style="color:#64748b;font-style:italic;font-size:0.85rem;">Waiting for students to join...</p>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-lg" id="startGameBtn" onclick="startGame()" disabled>🎮 Start Game</button>
+    </div>
+    <div class="card qr-section">
+      <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">📲 Scan to Join</h3>
+      <div id="qrCode"></div>
+      <div class="join-link" id="joinLinkDisplay"></div>
+      <button class="btn btn-blue btn-sm" onclick="copyJoinLink()">📋 Copy Student Link</button>
+      <p id="copyMsg" style="color:#22c55e;font-size:0.75rem;margin-top:4px;" class="hidden">✓ Copied!</p>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div id="hostGame" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="game-layout" id="gameLayout">
+      <!-- LEFT COLUMN -->
+      <div class="game-left">
+        <!-- Question -->
+        <div id="questionDisplay" class="question-display card hidden">
+          <div class="q-number" id="qNumber"></div>
+          <div class="q-sentence" id="qSentence"></div>
+          <div class="q-timer" id="qTimer">30</div>
+        </div>
+        <!-- Answer Reveal -->
+        <div id="answerReveal" class="answer-reveal card"></div>
+        <!-- Bets -->
+        <div class="bets-grid" id="betsGrid"></div>
+      </div>
+      <!-- RIGHT COLUMN: Leaderboard -->
+      <div class="game-right">
+        <div class="leaderboard-panel">
+          <h3 class="gold">🏆 Leaderboard</h3>
+          <div class="lb-rows" id="lbRows"></div>
+        </div>
+      </div>
+      <!-- BOTTOM: Controls -->
+      <div class="host-controls" id="hostControls">
+        <button class="btn btn-gold" id="nextQuestionBtn" onclick="nextQuestion()">▶️ Next Question</button>
+        <button class="btn btn-blue btn-sm" id="skipTimerBtn" onclick="skipTimer()" disabled>⏩ Skip Timer</button>
+        <button class="btn btn-red btn-sm" id="endGameBtn" onclick="triggerFinalChallenge()">🏁 End Game</button>
+      </div>
+    </div>
+
+    <!-- Final Challenge (replaces game layout) -->
+    <div id="finalChallenge" class="final-challenge card hidden" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <h2 class="gold glow-text">✍️ Final Challenge</h2>
+      <p style="color:#94a3b8;margin-bottom:8px;">Spell your earnings in words!</p>
+      <div class="fc-team" id="fcTeam"></div>
+      <div class="fc-amount" id="fcAmount"></div>
+      <div class="fc-input-group">
+        <input type="text" id="fcInput" placeholder="e.g. fourteen thousand five hundred" onkeydown="if(event.key==='Enter')checkSpelling()">
+        <button class="btn btn-gold" onclick="checkSpelling()">✓ Check</button>
+      </div>
+      <div class="fc-feedback" id="fcFeedback"></div>
+    </div>
+
+    <!-- Winner (replaces everything) -->
+    <div id="winnerScreen" class="winner-screen hidden" style="flex:1;">
+      <div class="crown">👑</div>
+      <h1 class="gold glow-text">🎉 WINNER! 🎉</h1>
+      <div class="winner-name" id="winnerName"></div>
+      <div class="winner-title" id="winnerTitle"></div>
+      <div id="finalStandings" style="margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT SCREEN -->
+<div id="clientScreen" class="hidden">
+  <div id="clientJoin" class="client-join">
+    <h2 class="gold glow-text">📱 Join the Auction</h2>
+    <div style="width:100%;max-width:280px;">
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Room Code</label>
+      <input type="text" id="clientRoomInput" maxlength="4" placeholder="0000" inputmode="numeric">
+    </div>
+    <div style="width:100%;max-width:280px;">
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Team Name</label>
+      <input type="text" id="clientTeamInput" class="team-input" placeholder="e.g. The Tigers" maxlength="20">
+    </div>
+    <button class="btn btn-gold btn-lg" onclick="connectToHost()">🔗 Join Game</button>
+    <p id="clientError" class="red" style="font-size:0.85rem;"></p>
+  </div>
+
+  <div id="clientGame" class="hidden">
+    <div class="client-header">
+      <div class="client-team-name" id="clientTeamDisplay"></div>
+      <div class="client-balance">$<span id="clientBalanceDisplay">1000</span></div>
+      <div class="client-status" id="clientStatusText">Waiting for game to start...</div>
+    </div>
+    <div id="clientWaiting" class="client-waiting">
+      <p>👀 Watch the big screen!</p>
+      <p class="dots" style="margin-top:8px;">Waiting</p>
+    </div>
+    <div id="clientBetting" class="betting-panel hidden">
+      <h3 style="margin-bottom:4px;">Is it LEGAL or ILLEGAL?</h3>
+      <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:8px;">Read the sentence on the big screen!</p>
+      <div class="choice-buttons">
+        <button class="choice-btn legal-btn" id="legalBtn" onclick="selectChoice('LEGAL')">✅ LEGAL</button>
+        <button class="choice-btn illegal-btn" id="illegalBtn" onclick="selectChoice('ILLEGAL')">❌ ILLEGAL</button>
+      </div>
+      <div class="amount-section">
+        <label>💰 Bet Amount</label>
+        <div class="amount-input-row">
+          <input type="number" id="betAmountInput" min="100" step="100" value="100">
+        </div>
+        <div class="quick-amounts">
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(100)">+$100</button>
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(200)">+$200</button>
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(500)">+$500</button>
+          <button class="btn btn-sm btn-gold" onclick="allIn()">🔥 ALL IN</button>
+        </div>
+      </div>
+      <button class="btn btn-gold submit-bet-btn" id="submitBetBtn" onclick="submitBet()" disabled>🎯 Submit Bet</button>
+    </div>
+    <div id="clientBetSubmitted" class="bet-submitted-msg hidden">
+      ✅ Bet Locked In!<br><span style="font-size:0.85rem;color:#94a3b8;">Watch the big screen for the answer...</span>
+    </div>
+    <div id="clientResult" class="client-result hidden"></div>
+  </div>
+</div>
+
+<script>
+// ===== SOUND EFFECTS (Web Audio API — no external files) =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function ensureAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+
+function playStartSound() {
+  const ctx = ensureAudio();
+  [0, 0.15, 0.3].forEach((delay, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = [523, 659, 784][i];
+    gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + 0.3);
+  });
+}
+
+function playBuzzerSound() {
+  const ctx = ensureAudio();
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  const gain2 = ctx.createGain();
+  osc1.connect(gain1); gain1.connect(ctx.destination);
+  osc2.connect(gain2); gain2.connect(ctx.destination);
+  osc1.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(150, ctx.currentTime);
+  osc1.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.8);
+  gain1.gain.setValueAtTime(0.25, ctx.currentTime);
+  gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+  osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 0.8);
+
+  osc2.type = 'square';
+  osc2.frequency.setValueAtTime(440, ctx.currentTime);
+  osc2.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.5);
+  gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 0.5);
+}
+
+function playCorrectSound() {
+  const ctx = ensureAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  osc.frequency.setValueAtTime(1109, ctx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.2, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+}
+
+function playWrongSound() {
+  const ctx = ensureAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(300, ctx.currentTime);
+  osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+}
+
+// ===== QUESTIONS =====
+const QUESTIONS = [
+  // Simple Present, Daily Routines, & Wh- Questions
+  {id: 1, sentence: "He wakes up at seven o'clock every day.", status: "LEGAL", correction: "Correct simple present routine."},
+  {id: 2, sentence: "She brushs her teeth after breakfast.", status: "ILLEGAL", correction: "Spelling mistake ('brushes')."},
+  {id: 3, sentence: "They don't play soccer on the weekend.", status: "LEGAL", correction: "Correct negative statement."},
+  {id: 4, sentence: "My father dosn't drink coffee in the evening.", status: "ILLEGAL", correction: "Spelling mistake ('doesn't')."},
+  {id: 5, sentence: "Do you watch television after school?", status: "LEGAL", correction: "Correct simple present question."},
+  {id: 6, sentence: "Does your brother likes to play video games?", status: "ILLEGAL", correction: "Grammar mistake ('like' instead of 'likes' with Does)."},
+  {id: 7, sentence: "Where does your best friend live?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 8, sentence: "We have our English class on Wendsday.", status: "ILLEGAL", correction: "Spelling mistake ('Wednesday')."},
+  {id: 9, sentence: "She works in a hospital downtown.", status: "LEGAL", correction: "Correct affirmative sentence."},
+  {id: 10, sentence: "What time do the supermarket close?", status: "ILLEGAL", correction: "Grammar mistake ('does' the supermarket)."},
+
+  // Adverbs of Frequency & Wh- Questions
+  {id: 11, sentence: "I usually eat a sandwich for lunch.", status: "LEGAL", correction: "Correct adverb placement."},
+  {id: 12, sentence: "He is allways late for his morning class.", status: "ILLEGAL", correction: "Spelling mistake ('always')."},
+  {id: 13, sentence: "They never go to the cinema on Mondays.", status: "LEGAL", correction: "Correct negative frequency."},
+  {id: 14, sentence: "How ofen do you go to the gym?", status: "ILLEGAL", correction: "Spelling mistake ('often')."},
+  {id: 15, sentence: "Do you often read books in bed?", status: "LEGAL", correction: "Correct question with adverb."},
+  {id: 16, sentence: "We don't usally travel during the winter.", status: "ILLEGAL", correction: "Spelling mistake ('usually')."},
+  {id: 17, sentence: "The teacher is rarely angry with the students.", status: "LEGAL", correction: "Correct adverb placement after 'to be'."},
+  {id: 18, sentence: "She always eat breakfast in the morning.", status: "ILLEGAL", correction: "Grammar mistake ('eats' for singular subject)."},
+  {id: 19, sentence: "Does she always finish her homework on time?", status: "LEGAL", correction: "Correct question."},
+  {id: 20, sentence: "They sometimes are noisy in the library.", status: "ILLEGAL", correction: "Adverb placement (should be 'are sometimes' after the verb to be)."},
+
+  // Describing Things/People, Have/Has, & Wh- Questions
+  {id: 21, sentence: "My best friend has short curly hair.", status: "LEGAL", correction: "Correct description with 'has'."},
+  {id: 22, sentence: "She have two older brothers and a sister.", status: "ILLEGAL", correction: "Grammar mistake ('has' for singular subject)."},
+  {id: 23, sentence: "This backpack is heavy because it is full of books.", status: "LEGAL", correction: "Correct descriptive statement."},
+  {id: 24, sentence: "The new student is very tall and handsom.", status: "ILLEGAL", correction: "Spelling mistake ('handsome')."},
+  {id: 25, sentence: "Do they have a big garden in their house?", status: "LEGAL", correction: "Correct question."},
+  {id: 26, sentence: "He doesn't has a car, so he takes the bus.", status: "ILLEGAL", correction: "Grammar mistake ('doesn't have')."},
+  {id: 27, sentence: "Who do you play tennis with on Saturdays?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 28, sentence: "Mary has a beautifull dress for the party.", status: "ILLEGAL", correction: "Spelling mistake ('beautiful')."},
+  {id: 29, sentence: "Is your new English teacher friendly?", status: "LEGAL", correction: "Correct descriptive question."},
+  {id: 30, sentence: "The cat has white paws and a black tale.", status: "ILLEGAL", correction: "Spelling mistake/homophone ('tail')."},
+
+  // Prepositions of Place and Time & Wh- Questions
+  {id: 31, sentence: "The keys are on the kitchen table.", status: "LEGAL", correction: "Correct preposition of place."},
+  {id: 32, sentence: "My birthday is in the 15th of August.", status: "ILLEGAL", correction: "Preposition mistake ('on' for dates)."},
+  {id: 33, sentence: "When is your brother's birthday?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 34, sentence: "Our flight leaves in night, so we can sleep.", status: "ILLEGAL", correction: "Preposition mistake ('at night')."},
+  {id: 35, sentence: "Is the library across from the supermarket?", status: "LEGAL", correction: "Correct question."},
+  {id: 36, sentence: "Why dose she wake up so early?", status: "ILLEGAL", correction: "Spelling mistake ('does')."},
+  {id: 37, sentence: "We don't have any exams in December.", status: "LEGAL", correction: "Correct preposition of time."},
+  {id: 38, sentence: "She leaves her shoes under of the bed.", status: "ILLEGAL", correction: "Grammar mistake (remove 'of', just 'under')."},
+  {id: 39, sentence: "Does the movie start at eight o'clock?", status: "LEGAL", correction: "Correct question."},
+  {id: 40, sentence: "There is a small park in front the school.", status: "ILLEGAL", correction: "Grammar mistake (missing 'of', 'in front of')."},
+
+  // There is/are (Questions & Answers), Time Expressions, & Misc
+  {id: 41, sentence: "Yes, there is a bank next to the school.", status: "LEGAL", correction: "Correct short answer and statement."},
+  {id: 42, sentence: "No, there isn't any apples in the basket.", status: "ILLEGAL", correction: "Grammar mistake ('aren't any' for plural)."},
+  {id: 43, sentence: "Are there any good restaurants near the hotel?", status: "LEGAL", correction: "Correct question."},
+  {id: 44, sentence: "There aren't no chairs in the empty room.", status: "ILLEGAL", correction: "Double negative ('aren't any' or 'are no')."},
+  {id: 45, sentence: "The museum is closed once a week on Tuesdays.", status: "LEGAL", correction: "Correct time expression."},
+  {id: 46, sentence: "Yes, there are a clock on the classroom wall.", status: "ILLEGAL", correction: "Grammar mistake ('is a clock' for singular)."},
+  {id: 47, sentence: "We practice playing the guitar every day.", status: "LEGAL", correction: "Correct statement."},
+  {id: 48, sentence: "Does she visit her grandparents every weak?", status: "ILLEGAL", correction: "Spelling mistake/homophone ('week')."},
+  {id: 49, sentence: "No, there aren't any eggs in the fridge.", status: "LEGAL", correction: "Correct negative answer."},
+  {id: 50, sentence: "He play basketball with his friends on Saturday.", status: "ILLEGAL", correction: "Grammar mistake (missing 's', 'plays')."}
+];
+
+// Helper: Shuffle Array (Fisher-Yates)
+function shuffleArray(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// ===== NUMBER TO WORDS =====
+function numberToWords(num) {
+  if (num === 0) return 'zero';
+  const ones = ['','one','two','three','four','five','six','seven','eight','nine',
+    'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function convert(n) {
+    if (n === 0) return '';
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
+    if (n < 1000) return ones[Math.floor(n/100)] + ' hundred' + (n%100 ? ' ' + convert(n%100) : '');
+    if (n < 1000000) return convert(Math.floor(n/1000)) + ' thousand' + (n%1000 ? ' ' + convert(n%1000) : '');
+    return convert(Math.floor(n/1000000)) + ' million' + (n%1000000 ? ' ' + convert(n%1000000) : '');
+  }
+  return convert(Math.abs(Math.floor(num))).trim();
+}
+function normalizeSpelling(str) {
+  return str.toLowerCase().replace(/dollars?/g,'').replace(/\band\b/g,'').replace(/[-,]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// ===== STATE =====
+let role = null, roomCode = '', peer = null, joinUrl = '';
+
+const hostState = {
+  teamCount: 4, teams: {}, currentQ: 0, bets: {},
+  shuffledQuestions: [],
+  timerInterval: null, timeLeft: 30, bettingOpen: false,
+  gameStarted: false, roundRevealed: false,
+  finalChallengeActive: false, fcTeamOrder: [], fcCurrentIndex: 0
+};
+
+const clientState = {
+  conn: null, teamName: '', balance: 1000,
+  selectedChoice: null, betSubmitted: false, peerId: null
+};
+
+// ===== AUTO-DETECT ROLE =====
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const r = params.get('role'), room = params.get('room');
+  if (r === 'host') initHost();
+  else if (r === 'client') {
+    showClientJoin();
+    if (room) document.getElementById('clientRoomInput').value = room;
+  }
+})();
+
+// ===== HOST =====
+function initHost() {
+  role = 'host';
+  roomCode = String(Math.floor(1000 + Math.random() * 9000));
+  document.getElementById('roleSelect').classList.add('hidden');
+  document.getElementById('hostScreen').classList.remove('hidden');
+  document.getElementById('hostRoomCode').textContent = roomCode;
+
+  joinUrl = `${window.location.origin}${window.location.pathname}?role=client&room=${roomCode}`;
+  document.getElementById('joinLinkDisplay').textContent = joinUrl;
+
+  new QRCode(document.getElementById('qrCode'), {
+    text: joinUrl, width: 180, height: 180,
+    colorDark: '#f59e0b', colorLight: '#0f172a', correctLevel: QRCode.CorrectLevel.M
+  });
+
+  const btnContainer = document.getElementById('teamCountBtns');
+  for (let i = 2; i <= 8; i++) {
+    const b = document.createElement('button');
+    b.className = 'team-count-btn' + (i === 4 ? ' active' : '');
+    b.textContent = i;
+    b.onclick = () => {
+      document.querySelectorAll('.team-count-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      hostState.teamCount = i;
+      updateStartBtn();
+    };
+    btnContainer.appendChild(b);
+  }
+
+  const peerId = 'ESL-AUCTION-' + roomCode;
+  peer = new Peer(peerId, { debug: 0 });
+  peer.on('open', () => console.log('Host peer open:', peerId));
+  peer.on('error', (err) => {
+    if (err.type === 'unavailable-id') {
+      roomCode = String(Math.floor(1000 + Math.random() * 9000));
+      document.getElementById('hostRoomCode').textContent = roomCode;
+      joinUrl = `${window.location.origin}${window.location.pathname}?role=client&room=${roomCode}`;
+      document.getElementById('joinLinkDisplay').textContent = joinUrl;
+      peer.destroy();
+      peer = new Peer('ESL-AUCTION-' + roomCode, { debug: 0 });
+      setupHostListeners();
+    }
+  });
+  setupHostListeners();
+}
+
+function setupHostListeners() {
+  peer.on('connection', (conn) => {
+    conn.on('open', () => { conn.on('data', (data) => handleClientMessage(conn, data)); });
+    conn.on('close', () => {
+      if (hostState.teams[conn.peer]) { delete hostState.teams[conn.peer]; updateConnectedTeams(); updateStartBtn(); }
+    });
+  });
+}
+
+function handleClientMessage(conn, data) {
+  switch (data.type) {
+    case 'join':
+      hostState.teams[conn.peer] = { name: data.teamName, balance: 1000, conn };
+      conn.send({ type: 'joined', balance: 1000 });
+      updateConnectedTeams(); updateStartBtn();
+      if (hostState.gameStarted) { conn.send({ type: 'gameStarted' }); updateLeaderboard(); }
+      break;
+    case 'bet':
+      if (hostState.bettingOpen && !hostState.bets[conn.peer]) {
+        const team = hostState.teams[conn.peer];
+        if (team) {
+          const betAmount = Math.min(Math.max(100, data.amount), team.balance);
+          hostState.bets[conn.peer] = { choice: data.choice, amount: betAmount };
+          conn.send({ type: 'betConfirmed' });
+          updateBetsDisplay();
+        }
+      }
+      break;
+  }
+}
+
+function updateConnectedTeams() {
+  const container = document.getElementById('connectedTeams');
+  const teamEntries = Object.entries(hostState.teams);
+  document.getElementById('connectedCount').textContent = teamEntries.length;
+  if (teamEntries.length === 0) {
+    container.innerHTML = '<p style="color:#64748b;font-style:italic;font-size:0.85rem;">Waiting for students to join...</p>';
+    return;
+  }
+  container.innerHTML = teamEntries.map(([pid, t]) =>
+    `<div class="team-chip"><div class="dot"></div><div class="name">${escHtml(t.name)}</div><button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button></div>`
+  ).join('');
+}
+
+function kickTeam(peerId) {
+  const t = hostState.teams[peerId];
+  if (!t) return;
+  if (confirm(`Are you sure you want to remove team "${t.name}"?`)) {
+    if (t.conn) {
+      try { t.conn.send({type: 'KICK'}); } catch(e){}
+      setTimeout(() => { try { t.conn.close(); } catch(e){} }, 500);
+    }
+    delete hostState.teams[peerId];
+    if (hostState.bets) delete hostState.bets[peerId];
+    
+    // Remove from fcTeamOrder if it exists
+    if (hostState.fcTeamOrder) {
+      hostState.fcTeamOrder = hostState.fcTeamOrder.filter(([id]) => id !== peerId);
+    }
+
+    updateConnectedTeams();
+    updateStartBtn();
+    
+    if (hostState.gameStarted) {
+      if (typeof updateBetsUI === 'function') updateBetsUI();
+      if (hostState.bettingOpen && typeof checkAllBetsIn === 'function') checkAllBetsIn();
+    }
+  }
+}
+
+function updateStartBtn() {
+  const count = Object.keys(hostState.teams).length;
+  const btn = document.getElementById('startGameBtn');
+  btn.disabled = count < 2;
+  btn.textContent = count < 2 ? `🎮 Need at least 2 teams (${count} joined)` : `🎮 Start Game (${count} teams)`;
+}
+
+function copyJoinLink() {
+  navigator.clipboard.writeText(joinUrl).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = joinUrl;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  });
+  const msg = document.getElementById('copyMsg');
+  msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000);
+}
+
+// ===== GAME FLOW =====
+function startGame() {
+  hostState.gameStarted = true;
+  // Randomize questions list on game start
+  hostState.shuffledQuestions = shuffleArray(QUESTIONS);
+  hostState.currentQ = 0;
+
+  document.getElementById('hostSetup').classList.add('hidden');
+  document.getElementById('hostGame').classList.remove('hidden');
+  broadcastToAll({ type: 'gameStarted' });
+  updateLeaderboard();
+  updateBetsDisplay();
+}
+
+function nextQuestion() {
+  if (!hostState.shuffledQuestions || hostState.shuffledQuestions.length === 0) {
+    hostState.shuffledQuestions = shuffleArray(QUESTIONS);
+  }
+
+  if (hostState.currentQ >= hostState.shuffledQuestions.length) {
+    triggerFinalChallenge(); return;
+  }
+
+  const q = hostState.shuffledQuestions[hostState.currentQ];
+  hostState.currentQ++;
+  hostState.bets = {};
+  hostState.bettingOpen = true;
+  hostState.roundRevealed = false;
+  hostState.timeLeft = 30;
+
+  playStartSound();
+
+  document.getElementById('questionDisplay').classList.remove('hidden');
+  document.getElementById('qNumber').textContent = `Question ${hostState.currentQ} / ${hostState.shuffledQuestions.length}`;
+  document.getElementById('qSentence').textContent = `"${q.sentence}"`;
+  document.getElementById('qTimer').textContent = '30';
+  document.getElementById('qTimer').classList.remove('urgent');
+  document.getElementById('nextQuestionBtn').disabled = true;
+  document.getElementById('skipTimerBtn').disabled = false;
+
+  const ar = document.getElementById('answerReveal');
+  ar.classList.remove('show', 'legal-answer', 'illegal-answer');
+  ar.innerHTML = '';
+
+  updateBetsDisplay();
+  broadcastToAll({ type: 'openBetting', questionId: hostState.currentQ });
+
+  clearInterval(hostState.timerInterval);
+  hostState.timerInterval = setInterval(() => {
+    hostState.timeLeft--;
+    const timerEl = document.getElementById('qTimer');
+    timerEl.textContent = hostState.timeLeft;
+    if (hostState.timeLeft <= 5) timerEl.classList.add('urgent');
+    if (hostState.timeLeft <= 0) {
+      clearInterval(hostState.timerInterval);
+      timerEl.textContent = "⏱️ TIME'S UP!";
+      playBuzzerSound();
+      document.getElementById('skipTimerBtn').disabled = true;
+      setTimeout(() => revealAnswer(), 800);
+    }
+  }, 1000);
+}
+
+function skipTimer() {
+  if (!hostState.bettingOpen || hostState.roundRevealed) return;
+  clearInterval(hostState.timerInterval);
+  document.getElementById('qTimer').textContent = "⏱️ SKIPPED";
+  document.getElementById('skipTimerBtn').disabled = true;
+  playBuzzerSound();
+  revealAnswer();
+}
+
+function revealAnswer() {
+  if (hostState.roundRevealed) return;
+  clearInterval(hostState.timerInterval);
+  hostState.bettingOpen = false;
+  hostState.roundRevealed = true;
+  document.getElementById('skipTimerBtn').disabled = true;
+  broadcastToAll({ type: 'bettingClosed' });
+
+  const q = hostState.shuffledQuestions[hostState.currentQ - 1];
+
+  const ar = document.getElementById('answerReveal');
+  ar.className = `answer-reveal card show ${q.status === 'LEGAL' ? 'legal-answer' : 'illegal-answer'}`;
+  ar.innerHTML = `
+    <div class="verdict ${q.status === 'LEGAL' ? 'green' : 'red'}">${q.status === 'LEGAL' ? '✅ LEGAL' : '❌ ILLEGAL'}</div>
+    <div class="correction">${escHtml(q.correction)}</div>
+  `;
+
+  // Scoring Logic:
+  // 1. Correct teams earn their bet amount.
+  // 2. Incorrect teams lose their bet amount.
+  // 3. Teams that didn't answer lose a default penalty ($100 or minimum bet).
+  // 4. Any pool of lost money (from wrong bets + non-answers) is divided among correct teams!
+  // 5. If all teams are correct, correct teams simply earn their bet amount (without taking from anywhere).
+
+  let wrongPool = 0;
+  const correctTeams = [];
+  const incorrectTeams = [];
+  const nonBettingTeams = [];
+
+  for (const pid of Object.keys(hostState.teams)) {
+    const bet = hostState.bets[pid];
+    if (bet) {
+      if (bet.choice === q.status) correctTeams.push(pid);
+      else {
+        incorrectTeams.push(pid);
+        wrongPool += bet.amount;
+      }
+    } else {
+      // Didn't answer: penalty loss of $100 or remaining balance if < $100
+      nonBettingTeams.push(pid);
+      const team = hostState.teams[pid];
+      const penalty = Math.min(100, team.balance);
+      wrongPool += penalty;
+    }
+  }
+
+  // Bonus share from wrong pool if any correct teams exist
+  const bonusShare = correctTeams.length > 0 ? Math.floor(wrongPool / correctTeams.length) : 0;
+
+  const results = {};
+
+  for (const pid of correctTeams) {
+    const team = hostState.teams[pid];
+    const bet = hostState.bets[pid];
+    // Earn their bet amount + bonus share from wrong pool (if any)
+    const gain = bet.amount + bonusShare;
+    team.balance += gain;
+    results[pid] = { correct: true, delta: +gain };
+    team.conn.send({ type: 'result', correct: true, delta: +gain, newBalance: team.balance, answer: q.status, correction: q.correction });
+  }
+
+  for (const pid of incorrectTeams) {
+    const team = hostState.teams[pid];
+    const bet = hostState.bets[pid];
+    team.balance -= bet.amount;
+    if (team.balance < 0) team.balance = 0;
+    results[pid] = { correct: false, delta: -bet.amount };
+    team.conn.send({ type: 'result', correct: false, delta: -bet.amount, newBalance: team.balance, answer: q.status, correction: q.correction });
+  }
+
+  for (const pid of nonBettingTeams) {
+    const team = hostState.teams[pid];
+    const penalty = Math.min(100, team.balance);
+    team.balance -= penalty;
+    if (team.balance < 0) team.balance = 0;
+    results[pid] = { correct: false, delta: -penalty, noBet: true };
+    team.conn.send({ type: 'result', correct: false, delta: -penalty, newBalance: team.balance, answer: q.status, correction: q.correction });
+  }
+
+  updateBetsDisplayRevealed(results);
+  updateLeaderboard();
+  document.getElementById('nextQuestionBtn').disabled = false;
+
+  if (hostState.currentQ >= hostState.shuffledQuestions.length) {
+    document.getElementById('nextQuestionBtn').textContent = '🏁 Final Challenge';
+    document.getElementById('nextQuestionBtn').onclick = triggerFinalChallenge;
+  }
+}
+
+function updateBetsDisplay() {
+  const grid = document.getElementById('betsGrid');
+  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
+    const bet = hostState.bets[pid];
+    return `
+      <div class="bet-card ${bet ? 'submitted' : ''}">
+        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
+        <div class="team-name">${escHtml(team.name)}</div>
+        <div class="balance">\$${team.balance.toLocaleString()}</div>
+        ${bet
+          ? `<div class="bet-info"><span class="bet-amount">💰 \$${bet.amount.toLocaleString()}</span></div>`
+          : `<div class="bet-info" style="color:#64748b;">⏳ Waiting...</div>`}
+      </div>`;
+  }).join('');
+}
+
+function updateBetsDisplayRevealed(results) {
+  const grid = document.getElementById('betsGrid');
+  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
+    const bet = hostState.bets[pid];
+    const res = results[pid];
+    let cardClass = 'bet-card';
+    if (res) {
+      if (res.noBet) cardClass += ' no-bet-reveal';
+      else if (res.correct) cardClass += ' correct-reveal';
+      else cardClass += ' incorrect-reveal';
+    }
+    return `
+      <div class="${cardClass}">
+        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
+        <div class="team-name">${escHtml(team.name)}</div>
+        <div class="balance">\$${team.balance.toLocaleString()}</div>
+        ${bet ? `
+          <div class="bet-info">
+            <span class="bet-amount">\$${bet.amount.toLocaleString()}</span>
+            <span class="reveal-choice ${bet.choice.toLowerCase()}">${bet.choice}</span>
+          </div>
+          <div class="delta ${res.delta > 0 ? 'positive' : res.delta < 0 ? 'negative' : ''}">${
+            res.delta > 0 ? '+$' + res.delta.toLocaleString() :
+            res.delta < 0 ? '-$' + Math.abs(res.delta).toLocaleString() : '—'
+          }</div>
+        ` : `
+          <div class="bet-info" style="color:#ef4444;">❌ No bet</div>
+          <div class="delta negative">-\$${Math.abs(res.delta).toLocaleString()}</div>
+        `}
+      </div>`;
+  }).join('');
+}
+
+function updateLeaderboard() {
+  const sorted = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  document.getElementById('lbRows').innerHTML = sorted.map((t, i) => `
+    <div class="lb-row animate-in" style="animation-delay:${i*0.04}s;">
+      <div class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#'+(i+1)}</div>
+      <div class="lb-name">${escHtml(t.name)}</div>
+      <div class="lb-balance">\$${t.balance.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+// ===== FINAL CHALLENGE =====
+function triggerFinalChallenge() {
+  clearInterval(hostState.timerInterval);
+  hostState.bettingOpen = false;
+  hostState.finalChallengeActive = true;
+  document.getElementById('gameLayout').classList.add('hidden');
+  document.getElementById('finalChallenge').classList.remove('hidden');
+  broadcastToAll({ type: 'finalChallenge' });
+  showFcTeam();
+}
+
+function showFcTeam() {
+  hostState.fcTeamOrder = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ pid, name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  const team = hostState.fcTeamOrder[0];
+  document.getElementById('fcTeam').textContent = team.name;
+  document.getElementById('fcAmount').textContent = `\$${team.balance.toLocaleString()}`;
+  document.getElementById('fcInput').value = '';
+  document.getElementById('fcFeedback').textContent = '';
+  document.getElementById('fcInput').focus();
+}
+
+function checkSpelling() {
+  const input = document.getElementById('fcInput').value;
+  const team = hostState.fcTeamOrder[0];
+  const correct = numberToWords(team.balance);
+  if (normalizeSpelling(input) === normalizeSpelling(correct)) {
+    showWinner(team);
+  } else {
+    playWrongSound();
+    const pid = team.pid;
+    hostState.teams[pid].balance = Math.max(0, hostState.teams[pid].balance - 1000);
+    for (const [op, ot] of Object.entries(hostState.teams)) {
+      if (op !== pid) ot.balance += 1000;
+    }
+    for (const [p, t] of Object.entries(hostState.teams)) {
+      t.conn.send({ type: 'balanceUpdate', newBalance: t.balance });
+    }
+    document.getElementById('fcFeedback').innerHTML = `
+      <span class="red">❌ INCORRECT!</span><br>
+      <span style="font-size:0.85rem;color:#94a3b8;">-\$1,000 to ${escHtml(team.name)}, +\$1,000 to everyone else!</span><br>
+      <span style="font-size:0.75rem;color:#64748b;">Expected: "${correct}"</span>`;
+    setTimeout(showFcTeam, 2500);
+  }
+}
+
+function showWinner(team) {
+  playCorrectSound();
+  document.getElementById('finalChallenge').classList.add('hidden');
+  document.getElementById('winnerScreen').classList.remove('hidden');
+  document.getElementById('winnerName').textContent = team.name;
+  const title = team.balance >= 1000000000 ? '🌟 BILLIONAIRE 🌟' :
+                team.balance >= 1000000 ? '💎 MILLIONAIRE 💎' : '🏆 CHAMPION 🏆';
+  document.getElementById('winnerTitle').textContent = title;
+  const sorted = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  document.getElementById('finalStandings').innerHTML = `
+    <h3 class="gold" style="margin-bottom:10px;">📊 Final Standings</h3>
+    ${sorted.map((t, i) => `
+      <div class="lb-row"><div class="lb-rank">${i===0?'👑':'#'+(i+1)}</div>
+      <div class="lb-name">${escHtml(t.name)}</div>
+      <div class="lb-balance">\$${t.balance.toLocaleString()}</div></div>
+    `).join('')}`;
+  broadcastToAll({ type: 'gameOver', winner: team.name });
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#f59e0b','#22c55e','#ef4444','#3b82f6','#a855f7','#ec4899'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw'; p.style.top = (80+Math.random()*20)+'vh';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2+Math.random()*2)+'s';
+    p.style.animationDelay = Math.random()*1.5+'s';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 5000);
+  }
+}
+
+function broadcastToAll(msg) {
+  for (const t of Object.values(hostState.teams)) { try { t.conn.send(msg); } catch(e) {} }
+}
+
+// ===== CLIENT =====
+function showClientJoin() {
+  role = 'client';
+  document.getElementById('roleSelect').classList.add('hidden');
+  document.getElementById('clientScreen').classList.remove('hidden');
+}
+
+function connectToHost() {
+  const room = document.getElementById('clientRoomInput').value.trim();
+  const name = document.getElementById('clientTeamInput').value.trim();
+  const errEl = document.getElementById('clientError');
+  if (!room || room.length !== 4) { errEl.textContent = 'Enter a 4-digit room code.'; return; }
+  if (!name) { errEl.textContent = 'Enter your team name.'; return; }
+  errEl.textContent = 'Connecting...';
+  clientState.teamName = name;
+  peer = new Peer(undefined, { debug: 0 });
+  peer.on('open', (id) => {
+    clientState.peerId = id;
+    const conn = peer.connect('ESL-AUCTION-' + room, { reliable: true });
+    clientState.conn = conn;
+    conn.on('open', () => { conn.send({ type: 'join', teamName: name }); errEl.textContent = ''; });
+    conn.on('data', (data) => handleHostMessage(data));
+    conn.on('close', () => { document.getElementById('clientStatusText').textContent = '⚠️ Disconnected'; });
+    conn.on('error', () => { errEl.textContent = 'Connection failed. Check room code.'; });
+    setTimeout(() => { if (!conn.open) errEl.textContent = 'Could not connect. Check room code.'; }, 8000);
+  });
+  peer.on('error', () => { errEl.textContent = 'Connection error. Try again.'; });
+}
+
+function handleHostMessage(data) {
+  switch (data.type) {
+    case 'KICK':
+      document.getElementById('clientScreen').innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;text-align:center;padding:20px;"><h2>You have been removed from the game by the host.</h2></div>';
+      if (clientState.conn) clientState.conn.close();
+      break;
+    case 'joined':
+      clientState.balance = data.balance;
+      document.getElementById('clientJoin').classList.add('hidden');
+      document.getElementById('clientGame').classList.remove('hidden');
+      document.getElementById('clientTeamDisplay').textContent = clientState.teamName;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      document.getElementById('clientStatusText').textContent = 'Connected! Waiting for game...';
+      break;
+    case 'gameStarted':
+      document.getElementById('clientStatusText').textContent = '🎮 Game is live!';
+      showClientWaiting(); break;
+    case 'openBetting':
+      clientState.betSubmitted = false; clientState.selectedChoice = null;
+      document.getElementById('clientStatusText').textContent = `❓ Q${data.questionId} — Place your bet!`;
+      showClientBetting(); break;
+    case 'bettingClosed':
+      if (!clientState.betSubmitted) {
+        document.getElementById('clientStatusText').textContent = "⏱️ Time's up! No bet placed.";
+        showClientWaiting();
+      } break;
+    case 'betConfirmed':
+      clientState.betSubmitted = true; showClientBetSubmitted(); break;
+    case 'result':
+      clientState.balance = data.newBalance;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      showClientResult(data); break;
+    case 'balanceUpdate':
+      clientState.balance = data.newBalance;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      break;
+    case 'finalChallenge':
+      document.getElementById('clientStatusText').textContent = '✍️ Final Challenge!';
+      showClientPanel('clientWaiting');
+      document.getElementById('clientWaiting').innerHTML = `
+        <div style="font-size:2rem;margin-bottom:10px;">✍️</div>
+        <p style="font-size:1.1rem;color:#f59e0b;font-weight:700;">FINAL CHALLENGE</p>
+        <p style="margin-top:8px;">Watch the big screen!</p>
+        <p style="margin-top:12px;font-size:1.3rem;font-weight:700;">Your balance: \$${clientState.balance.toLocaleString()}</p>`;
+      break;
+    case 'gameOver':
+      document.getElementById('clientStatusText').textContent = '🏆 Game Over!';
+      showClientPanel('clientWaiting');
+      document.getElementById('clientWaiting').innerHTML = `
+        <div style="font-size:2.5rem;margin-bottom:10px;">🏆</div>
+        <p style="font-size:1.2rem;color:#f59e0b;font-weight:700;">GAME OVER!</p>
+        <p style="margin-top:8px;">Winner: <strong class="gold">${escHtml(data.winner)}</strong></p>
+        <p style="margin-top:12px;font-size:1.8rem;font-weight:700;color:#22c55e;">\$${clientState.balance.toLocaleString()}</p>`;
+      break;
+  }
+}
+
+function showClientPanel(id) {
+  ['clientWaiting','clientBetting','clientBetSubmitted','clientResult'].forEach(p =>
+    document.getElementById(p).classList.toggle('hidden', p !== id));
+}
+function showClientWaiting() { showClientPanel('clientWaiting'); }
+function showClientBetting() {
+  showClientPanel('clientBetting');
+  document.getElementById('legalBtn').classList.remove('selected');
+  document.getElementById('illegalBtn').classList.remove('selected');
+  document.getElementById('betAmountInput').value = 100;
+  document.getElementById('submitBetBtn').disabled = true;
+  clientState.selectedChoice = null;
+}
+function showClientBetSubmitted() { showClientPanel('clientBetSubmitted'); }
+function showClientResult(data) {
+  showClientPanel('clientResult');
+  const el = document.getElementById('clientResult');
+  if (data.correct === null || (data.correct === false && data.delta < 0 && !clientState.selectedChoice)) {
+    el.innerHTML = `<div class="verdict red">⏱️ NO BET PENALTY</div>
+      <div class="change red">-\$${Math.abs(data.delta).toLocaleString()}</div>
+      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
+      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
+  } else if (data.correct) {
+    el.innerHTML = `<div class="verdict green">✅ CORRECT!</div>
+      <div class="change green">+\$${Math.abs(data.delta).toLocaleString()}</div>
+      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
+      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
+  } else {
+    el.innerHTML = `<div class="verdict red">❌ WRONG!</div>
+      <div class="change red">-\$${Math.abs(data.delta).toLocaleString()}</div>
+      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
+      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
+  }
+}
+
+function selectChoice(choice) {
+  clientState.selectedChoice = choice;
+  document.getElementById('legalBtn').classList.toggle('selected', choice === 'LEGAL');
+  document.getElementById('illegalBtn').classList.toggle('selected', choice === 'ILLEGAL');
+  document.getElementById('submitBetBtn').disabled = false;
+}
+function adjustBet(delta) {
+  const input = document.getElementById('betAmountInput');
+  let val = parseInt(input.value) || 0;
+  input.value = Math.max(100, Math.min(val + delta, clientState.balance));
+}
+function allIn() { document.getElementById('betAmountInput').value = clientState.balance; }
+function submitBet() {
+  if (!clientState.selectedChoice) return;
+  const amount = Math.min(Math.max(100, parseInt(document.getElementById('betAmountInput').value)||100), clientState.balance);
+  if (clientState.conn && clientState.conn.open) {
+    clientState.conn.send({ type: 'bet', choice: clientState.selectedChoice, amount });
+    document.getElementById('submitBetBtn').disabled = true;
+  }
+}
+function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+</script>
+</body>
+</html>

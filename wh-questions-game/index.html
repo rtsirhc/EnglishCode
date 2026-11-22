@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WH-Questions Game Show</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="start-screen" class="start-screen">
+        <h1>WH-Questions Game</h1>
+        <h2>Select Number of Teams</h2>
+        <div class="team-selection">
+            <button class="team-select-btn" data-teams="4">4 Teams</button>
+            <button class="team-select-btn" data-teams="5">5 Teams</button>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+        <header class="game-header">
+            <div class="timer-container">
+                <button id="pause-btn" class="pause-btn">❚❚</button>
+                <div id="timer-bar" class="timer-bar"></div>
+                <span id="timer-text">15</span>
+            </div>
+            <h1>WH-Questions Challenge!</h1>
+            <div class="current-turn" id="current-turn">
+                Current Team: <span id="team-name">Team 1</span>
+            </div>
+        </header>
+
+        <main class="game-content">
+            <div class="question-container">
+                <div class="question-card">
+                    <h2 id="question-text">Loading question...</h2>
+                </div>
+
+                <div id="answer-slots" class="answer-slots"></div>
+
+                <div class="controls">
+                    <input type="text" id="answer-input" placeholder="Type answer here and hit Enter..."
+                        autocomplete="off">
+
+                    <div class="secondary-controls">
+                        <button id="clue-btn" class="secondary-btn">Reveal Letter (-2 pts)</button>
+                        <button id="reveal-btn" class="reveal-btn">Reveal Answer (Teacher)</button>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="scoreboard" id="scoreboard">
+                <h3>Scores</h3>
+                <!-- Score items will be injected by JS -->
+            </aside>
+        </main>
+    </div>
+
+    <!-- Audio for sounds -->
+    <audio id="correct-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
+    <audio id="wrong-sound"
+        src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+
+    <div id="feedback-message" class="feedback hidden">
+        <div class="feedback-content"></div>
+        <button id="overlay-next-btn" class="next-arrow-btn" style="margin-top: 2rem;"
+            onclick="proceedToNext()">➜</button>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

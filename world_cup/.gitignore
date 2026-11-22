@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.agents/
+.codex/
+.git-real/
+.DS_Store
+*.log

@@ -1,0 +1,27 @@
+[
+  {
+    "room": "TRAMM",
+    "time": 1705,
+    "rawTime": 1705,
+    "penalty": 0,
+    "accuracy": 95,
+    "money": 248832,
+    "date": "2026-04-20T23:10:25.404Z"
+  },
+  {
+    "room": "TRAMM",
+    "time": 2494,
+    "accuracy": 84,
+    "money": 16,
+    "date": "2026-04-15T23:17:35.597Z"
+  },
+  {
+    "room": "TRAMM",
+    "time": 20092087865182652,
+    "rawTime": 2492,
+    "penalty": 20092087865180160,
+    "accuracy": 90,
+    "money": -33486813108633600,
+    "date": "2026-04-16T23:18:25.924Z"
+  }
+]

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operation: Chronos v2.0</title>
+    <style>
+        :root {
+            --bg-color: #0a0e17;
+            --text-color: #a0c0ff;
+            --accent-color: #00f0ff;
+            --danger-color: #ff3333;
+            --success-color: #00ff66;
+            --panel-bg: rgba(16, 24, 40, 0.95);
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-mono);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-image:
+                linear-gradient(rgba(0, 20, 40, 0.9), rgba(0, 10, 20, 0.98)),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0, 240, 255, 0.05) 2px, transparent 3px);
+            background-size: cover, 100% 4px;
+        }
+
+        /* HUD & Timer */
+        .hud-top {
+            width: 100%;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            border-bottom: 2px solid var(--accent-color);
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+        }
+
+        .hud-title {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        #timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-shadow: 0 0 5px var(--accent-color);
+        }
+
+        .timer-warning {
+            color: var(--danger-color) !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Screens */
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Images & Visuals */
+        #main-visual {
+            max-width: 100%;
+            max-height: 40vh;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+
+        /* Inputs */
+        input[type="text"] {
+            background: #000;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            padding: 15px;
+            width: 80%;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        /* Buttons */
+        .btn {
+            background: rgba(0, 240, 255, 0.1);
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 15px 40px;
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+            margin-top: 10px;
+            position: relative;
+            z-index: 50;
+            /* Ensure clickable */
+        }
+
+        .btn:hover {
+            background: var(--accent-color);
+            color: black;
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        /* Phase 1 Cards */
+        .card-container {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tactical-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--accent-color);
+            padding: 20px;
+            cursor: pointer;
+            width: 45%;
+            /* 2x2 Grid */
+            text-align: center;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .tactical-card:hover {
+            background: var(--accent-color);
+            color: black;
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        /* Phase 3 Strikes */
+        .strike-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .strike {
+            color: #333;
+        }
+
+        .strike.active {
+            color: var(--danger-color);
+            text-shadow: 0 0 10px red;
+        }
+
+        /* Modal */
+        #feedback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 200;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #feedback-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .tragic {
+            color: var(--danger-color);
+            text-shadow: 0 0 20px red;
+        }
+
+        .success {
+            color: var(--success-color);
+            text-shadow: 0 0 20px green;
+        }
+
+        /* Utility */
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #333;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hud-top">
+        <div class="hud-title">Operation: Chronos</div>
+        <div id="timer-display">30:00</div>
+    </div>
+
+    <div id="game-container">
+
+        <!-- INTRO SCREEN -->
+        <div id="intro-screen" class="screen active">
+            <h2>Mission Briefing</h2>
+            <img src="complex_tactical_blueprint.png" id="main-visual" alt="Overall Map">
+            <p>Welcome, Negotiator. The clock is ticking.</p>
+            <p>You have 30 Minutes to guide Alpha Team through the facility.</p>
+            <p>Precision is required. Errors will be fatal.</p>
+            <button class="btn" style="pointer-events: auto;" onclick="startGame()">INITIATE SEQUENCE</button>
+        </div>
+
+        <!-- PHASE 1: INFILTRATION (Visual Choice) -->
+        <div id="phase-1-screen" class="screen">
+            <h3>Phase 1: Infiltration</h3>
+            <div class="progress-bar">
+                <div id="p1-progress" class="progress-fill"></div>
+            </div>
+            <p id="p1-desc" style="font-size: 1.2rem; min-height: 60px;">Mission Text</p>
+            <img id="p1-image" src="" alt="Obstacle View"
+                style="max-height: 300px; width: auto; max-width: 100%; border: 1px solid #444;">
+            <div class="card-container" id="p1-cards"></div>
+        </div>
+
+        <!-- PHASE 2: CHRONO-LOCK (Strict Input) -->
+        <div id="phase-2-screen" class="screen">
+            <h3>Phase 2: Chrono-Lock</h3>
+            <div class="progress-bar">
+                <div id="p2-progress" class="progress-fill"></div>
+            </div>
+            <p>Construct the Timeline. Type the answer EXACTLY.</p>
+            <div
+                style="background: rgba(255,255,255,0.05); padding: 20px; width: 80%; border: 1px solid var(--accent-color); margin-bottom: 20px;">
+                <p>Event 1: <span id="p2-event1" style="color: white; font-weight: bold;"></span></p>
+                <p>Event 2: <span id="p2-event2" style="color: white; font-weight: bold;"></span></p>
+            </div>
+            <p style="font-size: 0.9rem; color: #888;">Format: "Someone HAD done X before Y happened." (Check
+                punctuation)</p>
+            <input type="text" id="p2-input" placeholder="Type answer here..." autocomplete="off">
+            <button class="btn" onclick="submitP2()">VERIFY TIMELINE</button>
+        </div>
+
+        <!-- PHASE 3: MAD SCIENTIST (3 Strikes Rule) -->
+        <div id="phase-3-screen" class="screen">
+            <h3>Phase 3: The Mad Scientist</h3>
+            <div class="progress-bar">
+                <div id="p3-progress" class="progress-fill"></div>
+            </div>
+            <div class="strike-box" id="strike-display">
+                <span class="strike">X</span><span class="strike">X</span><span class="strike">X</span>
+            </div>
+            <p id="p3-question" style="font-size: 1.2rem;">Question Text</p>
+            <div class="card-container" id="p3-options"></div>
+        </div>
+
+        <!-- PHASE 4: DEBRIEF (Draft Rewrite) -->
+        <div id="phase-4-screen" class="screen">
+            <h3>Phase 4: Press Debrief</h3>
+            <div class="progress-bar">
+                <div id="p4-progress" class="progress-fill"></div>
+            </div>
+            <p>Retype the ENTIRE draft with the ONE necessary correction.</p>
+            <div
+                style="background: #fff; color: #000; padding: 15px; width: 80%; margin-bottom: 20px; font-family: sans-serif;">
+                <p style="margin:0; font-weight: bold;">DRAFT:</p>
+                <p id="p4-draft" style="font-size: 1.1rem; margin-top: 5px;">The sentence text.</p>
+            </div>
+            <input type="text" id="p4-input" placeholder="Retype corrected sentence..." autocomplete="off">
+            <button class="btn" onclick="submitP4()">SUBMIT RELEASE</button>
+        </div>
+
+        <!-- GAME OVER / WIN -->
+        <div id="end-screen" class="screen">
+            <h2 id="end-title" style="font-size: 3rem;">MISSION END</h2>
+            <p id="end-msg">Status Report</p>
+            <button class="btn" onclick="location.reload()">SYSTEM REBOOT</button>
+        </div>
+
+    </div>
+
+    <div id="feedback-modal">
+        <h2 id="feedback-title">Title</h2>
+        <p id="feedback-msg">Message</p>
+        <button class="btn" id="feedback-btn">CONTINUE</button>
+    </div>
+
+    <script>
+        // --- DATA ---
+
+        // Phase 1: 10 Tactical Navigation Tasks (Sector Clearance)
+        const P1_TASKS = [
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 1: Main Entrance Breach. Double doors ahead.",
+                opts: [
+                    { t: "Stack UP on the door", ok: false, msg: "We need entry, not a waiting position." },
+                    { t: "Move THROUGH the doors", ok: true, msg: "Breach successful. Entry secured." },
+                    { t: "Go AROUND the doors", ok: false, msg: "Wall is reinforced concrete. Impossible." },
+                    { t: "Look INTO the doors", ok: false, msg: "Opaque steel. No visibility." }
+                ]
+            },
+            {
+                img: 'messy_desk_blocking_hallway.png', desc: "Sector 2: Administration. Barricade detected (Desks/Chairs).",
+                opts: [
+                    { t: "Vault OVER the barricade", ok: true, msg: "Athletic clearance. Momentum maintained." },
+                    { t: "Crawl UNDER the barricade", ok: false, msg: "Too slow. Exposed to potential fire." },
+                    { t: "Walk THROUGH the barricade", ok: false, msg: "It's solid furniture. You can't phase through." },
+                    { t: "Push AGAINST the barricade", ok: false, msg: "It's wedged tight. No movement." }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 3: T-Junction. Map indicates Vault is North.",
+                opts: [
+                    { t: "Turn LEFT towards East Wing", ok: false, msg: "Dead end. Check your compass." },
+                    { t: "Proceed ALONG the North Hall", ok: true, msg: "Correct vector. Moving to target." },
+                    { t: "Go ACROSS the junction", ok: false, msg: "That leads to the cafeteria. Wrong way." },
+                    { t: "Back UP the hallway", ok: false, msg: "Retreat is not authorized." }
+                ]
+            },
+            {
+                img: 'broken_balcony_railing.png', desc: "Sector 4: Industrial Catwalk. Structural failure ahead.",
+                opts: [
+                    { t: "Rappel DOWN the shaft", ok: false, msg: "Ropes not rigged. Fatal fall." },
+                    { t: "Jump ACROSS the gap", ok: true, msg: "Gap cleared. Team is across." },
+                    { t: "Walk ONTO the gap", ok: false, msg: "Gravity takes over immediately." },
+                    { t: "Run ALONG the railing", ok: false, msg: "Railing is unstable. It collapsed." }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 5: Stairwell Access. Target is on Sub-Level 2.",
+                opts: [
+                    { t: "Go UP the stairs", ok: false, msg: "That leads to the roof." },
+                    { t: "Descend DOWN the stairs", ok: true, msg: "Moving to lower levels." },
+                    { t: "Jump OVER the railing", ok: false, msg: "30-foot drop. Legs broken." },
+                    { t: "Walk ACROSS the landing", ok: false, msg: "You're just pacing in circles." }
+                ]
+            },
+            {
+                img: 'laser_grid_near_floor.png', desc: "Sector 6: Laser Tripwires detected at ankle height.",
+                opts: [
+                    { t: "Crawl UNDER the lasers", ok: false, msg: "They are AT floor level. Detective triggered." },
+                    { t: "Step OVER the lasers", ok: true, msg: "Clean step. No trigger." },
+                    { t: "Walk THROUGH the lasers", ok: false, msg: "Alarm triggered immediately." },
+                    { t: "Slide INTO the lasers", ok: false, msg: "Why would you do that?" }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 7: Ventilation Duct. Shortcut to Vault Antechamber.",
+                opts: [
+                    { t: "Crawl INTO the vent", ok: true, msg: "Accessing maintenance tunnels." },
+                    { t: "Walk AROUND the vent", ok: false, msg: "No alternate route visible." },
+                    { t: "Step ON the vent", ok: false, msg: "It's on the wall. Physics error." },
+                    { t: "Look FROM the vent", ok: false, msg: "You need to enter it, not just look." }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 8: Server Room. Narrow passage between racks.",
+                opts: [
+                    { t: "Squeeze BETWEEN the servers", ok: true, msg: "Tight fit, but through." },
+                    { t: "Climb ONTOP of servers", ok: false, msg: "Equipment damage. Alarm triggered." },
+                    { t: "Walk AROUND the room", ok: false, msg: "Detour too long. Time wasted." },
+                    { t: "Push THROUGH the racks", ok: false, msg: "Toppled a $50k server stack." }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 9: Security Checkpoint. Glass partition.",
+                opts: [
+                    { t: "Smash THROUGH the glass", ok: true, msg: "Dynamic entry. Quickest path." },
+                    { t: "Walk INTO the glass", ok: false, msg: "Faceplant. Embarrassing." },
+                    { t: "Look BEHIND the glass", ok: false, msg: "Yes, the vault is there. Go get it." },
+                    { t: "Go OVER the glass", ok: false, msg: "It's ceiling-high. Impossible." }
+                ]
+            },
+            {
+                img: 'tactical_blueprint.png', desc: "Sector 10: The Value Door. Massive steel blast door.",
+                opts: [
+                    { t: "Place charge ON the door", ok: true, msg: "Breach charge set. Fire in the hole!" },
+                    { t: "Knock ON the door", ok: false, msg: "No one is home." },
+                    { t: "Slide UNDER the door", ok: false, msg: "Clearance is 0mm." },
+                    { t: "Walk OF the door", ok: false, msg: "Grammar error. Operation failed." }
+                ]
+            }
+        ];
+
+        // Phase 2: 10 Strict Input Tasks (ALL MUST USE 'BEFORE')
+        const P2_TASKS = [
+            {
+                e1: "10:00 PM - Police Arrived", e2: "9:50 PM - Ate Sandwich",
+                answers: ["You had eaten the sandwich before the police arrived.", "I had eaten the sandwich before the police arrived."]
+            },
+            {
+                e1: "Now - Vault Open", e2: "5 Mins Ago - Code Entered",
+                answers: ["We had entered the code before the vault opened.", "I had entered the code before the vault opened."]
+            },
+            {
+                e1: "Morning - Guards Woke Up", e2: "Night - Gas Released",
+                answers: ["The gas had been released before the guards woke up.", "We had released the gas before the guards woke up."]
+            },
+            {
+                e1: "12:00 - Alarm Rang", e2: "11:59 - Wire Cut",
+                answers: ["I had cut the wire before the alarm rang.", "We had cut the wire before the alarm rang."]
+            },
+            {
+                e1: "She felt sick", e2: "She ate bad sushi",
+                answers: ["She had eaten bad sushi before she felt sick."]
+            },
+            {
+                e1: "The movie started", e2: "We arrived",
+                answers: ["The movie had started before we arrived."]
+            },
+            {
+                e1: "He passed the test", e2: "He studied hard",
+                answers: ["He had studied hard before he passed the test."]
+            },
+            {
+                e1: "The road became wet", e2: "It rained heavily",
+                answers: ["It had rained heavily before the road became wet."]
+            },
+            {
+                e1: "I called for help", e2: "I lost my key",
+                answers: ["I had lost my key before I called for help."]
+            },
+            {
+                e1: "They were hungry", e2: "They missed lunch",
+                answers: ["They had missed lunch before they were hungry."]
+            }
+        ];
+
+        // Phase 3: 30 Science Questions (Harder Levels)
+        const P3_TASKS = [
+            // Level 1 (Warm up)
+            { q: "What is the powerhouse of the cell?", opts: ["Mitochondria", "Nucleus", "Ribosome"], a: 0 },
+            { q: "What is the chemical symbol for Gold?", opts: ["Au", "Ag", "Fe"], a: 0 },
+            { q: "Which planet is known as the Red Planet?", opts: ["Venus", "Mars", "Jupiter"], a: 1 },
+            { q: "What is the hardest natural substance?", opts: ["Steel", "Diamond", "Gold"], a: 1 },
+            { q: "What is the boiling point of water at sea level (C)?", opts: ["90", "100", "212"], a: 1 },
+
+            // Level 2 (Intermediate)
+            { q: "What is the most abundant gas in Earth's atmosphere?", opts: ["Oxygen", "Nitrogen", "Carbon Dioxide"], a: 1 },
+            { q: "Which subatomic particle has a negative charge?", opts: ["Proton", "Neutron", "Electron"], a: 2 },
+            { q: "What is the pH level of pure water?", opts: ["0", "7", "14"], a: 1 },
+            { q: "Which organ produces insulin?", opts: ["Liver", "Pancreas", "Kidney"], a: 1 },
+            { q: "What is the speed of light in a vacuum (approx)?", opts: ["300,000 km/s", "150,000 km/s", "1,000 km/s"], a: 0 },
+            { q: "What is the chemical formula for table salt?", opts: ["NaCl", "KCl", "NaOH"], a: 0 },
+            { q: "Which Newton's Law states 'Action = Reaction'?", opts: ["First", "Second", "Third"], a: 2 },
+            { q: "What type of rock is formed from lava?", opts: ["Sedimentary", "Metamorphic", "Igneous"], a: 2 },
+            { q: "Which vitamin is produced by sunlight on skin?", opts: ["Vitamin C", "Vitamin D", "Vitamin A"], a: 1 },
+            { q: "Which blood type is the universal donor?", opts: ["AB+", "O-", "A+"], a: 1 },
+
+            // Level 3 (Hard / Mad Scientist - Adjusted)
+            { q: "What carries genetic information in most living organisms?", opts: ["DNA", "RNA", "Protein"], a: 0 },
+            { q: "What is the most common element in the universe?", opts: ["Hydrogen", "Helium", "Oxygen"], a: 0 },
+            { q: "Which planet has the most moons?", opts: ["Saturn", "Jupiter", "Uranus"], a: 0 },
+            { q: "What is the process by which plants release water vapor?", opts: ["Transpiration", "Respiration", "Photosynthesis"], a: 0 },
+            { q: "Which part of the atom has no electric charge?", opts: ["Neutron", "Proton", "Electron"], a: 0 },
+            { q: "What is the speed of sound in dry air at 20C (approx)?", opts: ["343 m/s", "1000 m/s", "300,000 km/s"], a: 0 },
+            { q: "What is the main gas found in the air we breathe?", opts: ["Nitrogen", "Oxygen", "Argon"], a: 0 },
+            { q: "Who developed the Theory of Relativity?", opts: ["Einstein", "Newton", "Tesla"], a: 0 },
+            { q: "What is the largest bone in the human body?", opts: ["Femur", "Tibia", "Humerus"], a: 0 },
+            { q: "Which blood cells fight infection?", opts: ["White Blood Cells", "Red Blood Cells", "Platelets"], a: 0 }
+        ];
+
+        // Phase 4: 10 Correction Tasks
+        const P4_TASKS = [
+            { draft: "The suspect shoots at us before we entered.", ans: "The suspect shot at us before we had entered." },
+            { draft: "By the time backup arrives, they escaped.", ans: "By the time backup arrived, they had escaped." },
+            { draft: "I have finish the report yesterday.", ans: "I finished the report yesterday." },
+            { draft: "She live here since 2010.", ans: "She has lived here since 2010." },
+            { draft: "If I was you, I will go.", ans: "If I were you, I would go." },
+            { draft: "I look forward to meet you.", ans: "I look forward to meeting you." },
+            { draft: "He is married with a doctor.", ans: "He is married to a doctor." },
+            { draft: "I am agree with you.", ans: "I agree with you." },
+            { draft: "She is good in math.", ans: "She is good at math." },
+            { draft: "It depend on the weather.", ans: "It depends on the weather." }
+        ];
+
+
+        // --- STATE ENGINE ---
+        let state = {
+            phase: 'INTRO',
+            index: 0,
+            strikes: 0,
+            startTime: 0,
+            timerInterval: null
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function startGame() {
+            state.phase = 'P1';
+            state.index = 0;
+            state.strikes = 0;
+            state.startTime = Date.now() + (30 * 60 * 1000); // 30 mins
+
+            // Start Timer
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(updateTimer, 1000);
+
+            updateHUD("PHASE 1: INFILTRATION");
+            render();
+        }
+
+        function updateTimer() {
+            const now = Date.now();
+            const diff = state.startTime - now;
+
+            if (diff <= 0) {
+                endGame("TIME EXPIRED", "Mission Failed. The timeline collapsed.");
+                return;
+            }
+
+            const mins = Math.floor(diff / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            const display = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            const timerEl = document.getElementById('timer-display');
+            timerEl.innerText = display;
+
+            if (mins < 5) timerEl.classList.add('timer-warning');
+            else timerEl.classList.remove('timer-warning');
+        }
+
+        function endGame(title, msg) {
+            clearInterval(state.timerInterval);
+            state.phase = 'END';
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('end-screen').classList.add('active');
+
+            const h2 = document.getElementById('end-title');
+            h2.innerText = title;
+            if (title === "TIME EXPIRED") h2.style.color = "var(--danger-color)";
+            else h2.style.color = "var(--success-color)";
+
+            document.getElementById('end-msg').innerText = msg;
+        }
+
+        function updateHUD(text) {
+            // Can add more hud info
+        }
+
+        function render() {
+            // Clear Screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+            if (state.phase === 'P1') renderP1();
+            else if (state.phase === 'P2') renderP2();
+            else if (state.phase === 'P3') renderP3();
+            else if (state.phase === 'P4') renderP4();
+        }
+
+        function showFeedback(title, msg, type, callback) {
+            const modal = document.getElementById('feedback-modal');
+            const t = document.getElementById('feedback-title');
+            const m = document.getElementById('feedback-msg');
+            const b = document.getElementById('feedback-btn');
+
+            t.innerText = title;
+            t.className = type;
+            m.innerText = msg;
+            modal.style.display = 'flex';
+
+            b.onclick = () => {
+                modal.style.display = 'none';
+                if (callback) callback();
+            };
+        }
+
+        // --- PHASE 1 LOGIC ---
+        function renderP1() {
+            document.getElementById('phase-1-screen').classList.add('active');
+            updateHUD(`P1: TASK ${state.index + 1}/${P1_TASKS.length}`);
+
+            const task = P1_TASKS[state.index];
+            document.getElementById('p1-desc').innerText = task.desc;
+            document.getElementById('p1-image').src = task.img;
+
+            // Progress Bar
+            document.getElementById('p1-progress').style.width = `${((state.index) / P1_TASKS.length) * 100}%`;
+
+            const c = document.getElementById('p1-cards');
+            c.innerHTML = '';
+            task.opts.forEach(o => {
+                const div = document.createElement('div');
+                div.className = 'tactical-card';
+                div.innerText = o.t;
+                div.onclick = () => {
+                    if (o.ok) {
+                        showFeedback("CLEAR", o.msg, "success", () => {
+                            state.index++;
+                            if (state.index >= P1_TASKS.length) {
+                                state.phase = 'P2';
+                                state.index = 0;
+                            }
+                            render();
+                        });
+                    } else {
+                        showFeedback("FAILURE", o.msg + " (Retry)", "tragic", () => { }); // No progress, retry
+                    }
+                };
+                c.appendChild(div);
+            });
+        }
+
+        // --- PHASE 2 LOGIC ---
+        function renderP2() {
+            document.getElementById('phase-2-screen').classList.add('active');
+            updateHUD(`P2: PUZZLE ${state.index + 1}/${P2_TASKS.length}`);
+
+            const task = P2_TASKS[state.index];
+            document.getElementById('p2-event1').innerText = task.e1;
+            document.getElementById('p2-event2').innerText = task.e2;
+            document.getElementById('p2-input').value = ""; // clear
+            document.getElementById('p2-progress').style.width = `${((state.index) / P2_TASKS.length) * 100}%`;
+        }
+
+        function submitP2() {
+            const input = document.getElementById('p2-input').value.trim();
+            const task = P2_TASKS[state.index];
+
+            // Check against all valid answers
+            const isCorrect = task.answers.some(ans => ans === input); // Strict: Case sensitive? "only the correct answer down to the letter"
+
+            if (isCorrect) {
+                showFeedback("ACCEPTED", "Timeline Stabilized.", "success", () => {
+                    state.index++;
+                    if (state.index >= P2_TASKS.length) {
+                        state.phase = 'P3';
+                        state.index = 0;
+                        state.strikes = 0;
+                    }
+                    render();
+                });
+            } else {
+                // Trolling message
+                const trolls = ["Pathetic.", "Are we rewriting history badly?", "Access Denied. Learn grammar.", "The Robber laughs at you."];
+                const msg = trolls[Math.floor(Math.random() * trolls.length)];
+                showFeedback("ERROR", msg, "tragic");
+            }
+        }
+
+        // --- PHASE 3 LOGIC (Mad Scientist) ---
+        function renderP3() {
+            document.getElementById('phase-3-screen').classList.add('active');
+            updateHUD(`P3: SCIENTIST Q${state.index + 1}/${P3_TASKS.length}`);
+
+            // Strikes
+            const strikesEl = document.getElementById('strike-display');
+            strikesEl.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const s = document.createElement('span');
+                s.className = `strike ${i < state.strikes ? 'active' : ''}`;
+                s.innerText = 'X ';
+                strikesEl.appendChild(s);
+            }
+
+            const task = P3_TASKS[state.index];
+            document.getElementById('p3-question').innerText = task.q;
+            document.getElementById('p3-progress').style.width = `${((state.index) / P3_TASKS.length) * 100}%`;
+
+            const c = document.getElementById('p3-options');
+            c.innerHTML = '';
+            task.opts.forEach((optText, idx) => {
+                const div = document.createElement('div');
+                div.className = 'tactical-card';
+                div.innerText = optText;
+                div.onclick = () => {
+                    if (idx === task.a) {
+                        // Correct
+                        state.index++;
+                        if (state.index >= P3_TASKS.length) {
+                            state.phase = 'P4';
+                            state.index = 0;
+                        }
+                        render();
+                    } else {
+                        // Wrong
+                        state.strikes++;
+                        if (state.strikes >= 3) {
+                            showFeedback("SYSTEM RESET", "Too many errors. The Scientist rejects you. RESTARTING PHASE.", "tragic", () => {
+                                state.strikes = 0;
+                                state.index = 0;
+                                render();
+                            });
+                        } else {
+                            showFeedback("INCORRECT", "Strike " + state.strikes, "tragic", () => render());
+                        }
+                    }
+                };
+                c.appendChild(div);
+            });
+        }
+
+
+        // --- PHASE 4 LOGIC (Debrief) ---
+        function renderP4() {
+            document.getElementById('phase-4-screen').classList.add('active');
+            updateHUD(`P4: FINAL EDIT ${state.index + 1}/${P4_TASKS.length}`);
+
+            const task = P4_TASKS[state.index];
+            document.getElementById('p4-draft').innerText = task.draft;
+            document.getElementById('p4-input').value = "";
+            document.getElementById('p4-progress').style.width = `${((state.index) / P4_TASKS.length) * 100}%`;
+        }
+
+        function submitP4() {
+            const input = document.getElementById('p4-input').value.trim();
+            const task = P4_TASKS[state.index];
+
+            if (input === task.ans) {
+                showFeedback("APPROVED", "Draft saved.", "success", () => {
+                    state.index++;
+                    if (state.index >= P4_TASKS.length) {
+                        endGame("MISSION SUCCESS", "The hostages are safe. The timeline is restored. You are a hero.");
+                    } else {
+                        render();
+                    }
+                });
+            } else {
+                showFeedback("REJECTED", "Your grammar is flawed. The press will destroy us.", "tragic");
+            }
+        }
+
+    </script>
+</body>
+
+</html>

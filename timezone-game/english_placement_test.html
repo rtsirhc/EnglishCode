@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Proficiency Test (A1/A2)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #22c55e;
+            --error: #ef4444;
+            --background: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        /* Sticky Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .timer-container {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            background: #eef2ff;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #c7d2fe;
+        }
+
+        .timer-warning {
+            color: var(--error);
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .score-board {
+            text-align: right;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        #current-score {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease;
+        }
+
+        .question-header {
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .context-text {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: #eef2ff;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Feedback States */
+        .option-btn.correct {
+            border-color: var(--success);
+            background-color: #dcfce7;
+            color: #14532d;
+            font-weight: 600;
+        }
+
+        .option-btn.correct::after {
+            content: "✓";
+            position: absolute;
+            right: 1rem;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--error);
+            background-color: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .option-btn.incorrect::after {
+            content: "✕";
+            position: absolute;
+            right: 1rem;
+            color: var(--error);
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .result-message {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+
+        .restart-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        @media (min-width: 640px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>English Test (A1/A2)</h1>
+        <div id="timer" class="timer-container">45:00</div>
+    </header>
+
+    <main>
+        <div class="score-board">
+            Current Score: <span id="current-score">0</span> / 30
+        </div>
+        <div id="questions-container">
+            <!-- Questions will be injected here -->
+        </div>
+    </main>
+
+    <div id="result-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Test Completed!</h2>
+            <p>Your final score is:</p>
+            <div class="final-score"><span id="final-score-val">0</span>/30</div>
+            <p id="feedback-msg" class="result-message">Great job!</p>
+            <button class="restart-btn" onclick="location.reload()">Take Test Again</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Data: 30 Questions (A1/A2 Level) ---
+        const questionData = [
+            // Vocabulary (1-10)
+            {
+                id: 1,
+                type: 'text',
+                question: "I usually ___ up at 7:00 AM.",
+                options: ["get", "gets", "getting", "got"],
+                answer: 0
+            },
+            {
+                id: 2,
+                type: 'text',
+                question: "My mother's brother is my ___.",
+                options: ["aunt", "uncle", "cousin", "grandfather"],
+                answer: 1
+            },
+            {
+                id: 3,
+                type: 'text',
+                question: "He works in a hospital and helps sick people. He is a ___.",
+                options: ["teacher", "doctor", "chef", "driver"],
+                answer: 1
+            },
+            {
+                id: 4,
+                type: 'text',
+                question: "It is snowing. It is very ___ today.",
+                options: ["hot", "sunny", "cold", "warm"],
+                answer: 2
+            },
+            {
+                id: 5,
+                type: 'text',
+                question: "Tokyo is the capital city of ___.",
+                options: ["China", "Korea", "Japan", "Thailand"],
+                answer: 2
+            },
+            {
+                id: 6,
+                type: 'text',
+                question: "___, can you tell me the time?",
+                options: ["Sorry", "Excuse me", "Hello", "Please"],
+                answer: 1
+            },
+            {
+                id: 7,
+                type: 'text',
+                question: "My father's wife is my ___.",
+                options: ["sister", "grandmother", "mother", "aunt"],
+                answer: 2
+            },
+            {
+                id: 8,
+                type: 'text',
+                question: "Take an umbrella. It is ___ outside.",
+                options: ["raining", "sunny", "cloudy", "windy"],
+                answer: 0
+            },
+            {
+                id: 9,
+                type: 'text',
+                question: "She works in a school. She is a ___.",
+                options: ["student", "teacher", "nurse", "pilot"],
+                answer: 1
+            },
+            {
+                id: 10,
+                type: 'text',
+                question: "We eat ___ in the morning.",
+                options: ["dinner", "lunch", "breakfast", "snack"],
+                answer: 2
+            },
+
+            // Grammar (11-25)
+            {
+                id: 11,
+                type: 'text',
+                question: "He ___ football every Sunday.",
+                options: ["play", "plays", "playing", "played"],
+                answer: 1
+            },
+            {
+                id: 12,
+                type: 'text',
+                question: "Look! She ___ to music right now.",
+                options: ["listens", "listening", "is listening", "listened"],
+                answer: 2
+            },
+            {
+                id: 13,
+                type: 'text',
+                question: "Yesterday, I ___ to the park.",
+                options: ["go", "goes", "went", "gone"],
+                answer: 2
+            },
+            {
+                id: 14,
+                type: 'text',
+                question: "Where ___ you live?",
+                options: ["do", "are", "is", "does"],
+                answer: 0
+            },
+            {
+                id: 15,
+                type: 'text',
+                question: "The cat is sleeping ___ the table.",
+                options: ["in", "at", "under", "to"],
+                answer: 2
+            },
+            {
+                id: 16,
+                type: 'text',
+                question: "I live ___ London.",
+                options: ["on", "at", "in", "to"],
+                answer: 2
+            },
+            {
+                id: 17,
+                type: 'text',
+                question: "___ is your favorite color?",
+                options: ["Who", "What", "Where", "When"],
+                answer: 1
+            },
+            {
+                id: 18,
+                type: 'text',
+                question: "___ old are you?",
+                options: ["How", "Who", "What", "When"],
+                answer: 0
+            },
+            {
+                id: 19,
+                type: 'text',
+                question: "My sister ___ like spiders.",
+                options: ["don't", "doesn't", "isn't", "not"],
+                answer: 1
+            },
+            {
+                id: 20,
+                type: 'text',
+                question: "They ___ watching TV at the moment.",
+                options: ["is", "am", "are", "be"],
+                answer: 2
+            },
+            {
+                id: 21,
+                type: 'text',
+                question: "Did you ___ the movie last night?",
+                options: ["watch", "watched", "watches", "watching"],
+                answer: 0
+            },
+            {
+                id: 22,
+                type: 'text',
+                question: "We ___ happy yesterday.",
+                options: ["was", "were", "are", "is"],
+                answer: 1
+            },
+            {
+                id: 23,
+                type: 'text',
+                question: "I was born ___ 1995.",
+                options: ["on", "at", "in", "to"],
+                answer: 2
+            },
+            {
+                id: 24,
+                type: 'text',
+                question: "This is my book. Give it to ___.",
+                options: ["I", "my", "me", "mine"],
+                answer: 2
+            },
+            {
+                id: 25,
+                type: 'text',
+                question: "There ___ two apples on the desk.",
+                options: ["is", "are", "be", "am"],
+                answer: 1
+            },
+
+            // Reading / Dialogue (26-30)
+            {
+                id: 26,
+                type: 'dialogue',
+                question: "Complete the dialogue: 'Nice to meet you.' -> '___'",
+                options: ["I am fine.", "Nice to meet you too.", "You are welcome.", "Goodbye."],
+                answer: 1
+            },
+            {
+                id: 27,
+                type: 'dialogue',
+                question: "Complete the dialogue: 'Can I have a coffee, please?' -> '___'",
+                options: ["Yes, I can.", "Here you go.", "I don't know.", "Thank you."],
+                answer: 1
+            },
+            {
+                id: 28,
+                type: 'reading',
+                context: "Read the text: 'Sarah loves animals. She has two dogs and one cat. She wants to be a vet.'",
+                question: "How many pets does Sarah have?",
+                options: ["One", "Two", "Three", "Four"],
+                answer: 2
+            },
+            {
+                id: 29,
+                type: 'reading',
+                context: "Read the text: 'Pedro is from Spain. He lives in Madrid. He speaks Spanish and English.'",
+                question: "Where does Pedro live?",
+                options: ["Spain", "Madrid", "London", "Mexico"],
+                answer: 1
+            },
+            {
+                id: 30,
+                type: 'reading',
+                context: "Read the text: 'The library opens at 9:00 AM and closes at 5:00 PM. It is closed on Sundays.'",
+                question: "When is the library closed?",
+                options: ["9:00 AM", "5:00 PM", "Mondays", "Sundays"],
+                answer: 3
+            }
+        ];
+
+        // --- State ---
+        let currentScore = 0;
+        let timeLeft = 45 * 60; // 45 minutes in seconds
+        let timerInterval;
+        let answeredQuestions = new Set(); // Track answered IDs
+
+        // --- DOM Elements ---
+        const timerDisplay = document.getElementById('timer');
+        const scoreDisplay = document.getElementById('current-score');
+        const container = document.getElementById('questions-container');
+        const modal = document.getElementById('result-modal');
+        const finalScoreVal = document.getElementById('final-score-val');
+        const questionCards = []; // Store references
+
+        // --- Render Functions ---
+        function renderQuestions() {
+            container.innerHTML = questionData.map((q, index) => {
+                const contextHtml = q.context ? `<div class="context-text">${q.context}</div>` : '';
+
+                return `
+                <div class="question-card" id="q-${index}">
+                    <div class="question-header">
+                        <span class="question-number">Question ${index + 1} of ${questionData.length}</span>
+                        ${contextHtml}
+                        <div class="question-text">${q.question}</div>
+                    </div>
+                    <div class="options-grid">
+                        ${q.options.map((opt, optIndex) => `
+                            <button class="option-btn" 
+                                onclick="handleAnswer(${index}, ${optIndex})"
+                                id="btn-${index}-${optIndex}">
+                                ${String.fromCharCode(65 + optIndex)}. ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // --- Game Logic ---
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    endTest();
+                } else {
+                    timeLeft--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft < 300) { // 5 mins left
+                timerDisplay.classList.add('timer-warning');
+            }
+        }
+
+        window.handleAnswer = function (qIndex, optIndex) {
+            if (answeredQuestions.has(qIndex) || timeLeft <= 0) return;
+
+            const question = questionData[qIndex];
+            const selectedBtn = document.getElementById(`btn-${qIndex}-${optIndex}`);
+            const correctBtn = document.getElementById(`btn-${qIndex}-${question.answer}`);
+
+            // Mark as answered
+            answeredQuestions.add(qIndex);
+
+            // Locking inputs for this question ONLY
+            const allOptionsInCard = document.querySelectorAll(`#q-${qIndex} .option-btn`);
+            allOptionsInCard.forEach(btn => {
+                btn.disabled = true;
+                btn.style.cursor = 'default';
+            });
+
+            if (optIndex === question.answer) {
+                // Correct - Green
+                selectedBtn.classList.add('correct');
+                selectedBtn.style.opacity = '1'; // Ensure it stays visible
+                currentScore++;
+                scoreDisplay.textContent = currentScore;
+            } else {
+                // Incorrect - Red
+                selectedBtn.classList.add('incorrect');
+                selectedBtn.style.opacity = '1';
+                // Show correct answer - Green
+                correctBtn.classList.add('correct');
+                correctBtn.style.opacity = '1';
+            }
+
+            // Check if all answered
+            if (answeredQuestions.size === questionData.length) {
+                // Small delay before showing result
+                setTimeout(() => {
+                    if (timeLeft > 0) { // Only if time hasn't run out
+                        clearInterval(timerInterval);
+                        showModal();
+                    }
+                }, 1000);
+            }
+        };
+
+        function endTest() {
+            clearInterval(timerInterval);
+
+            // Disable everything globally
+            const allButtons = document.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            // Alert user time happened
+            if (timeLeft <= 0) {
+                // Maybe a small toast or just show modal
+            }
+            showModal();
+        }
+
+        function showModal() {
+            finalScoreVal.textContent = currentScore;
+
+            // Custom feedback message
+            const percentage = (currentScore / questionData.length) * 100;
+            let msg = "Keep practicing!";
+            if (percentage >= 90) msg = "Excellent work! You are ready for the next level.";
+            else if (percentage >= 70) msg = "Good job! You have a solid foundation.";
+            else if (percentage >= 50) msg = "Not bad, but review your grammar.";
+
+            document.getElementById('feedback-msg').textContent = msg;
+            modal.style.display = 'flex';
+        }
+
+        // --- Init ---
+        renderQuestions();
+        startTimer();
+
+    </script>
+
+</body>
+
+</html>

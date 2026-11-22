@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Compliance Cipher - Escape Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Role Selection View -->
+    <div id="role-selection" class="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl text-center">
+        <h1 class="text-3xl font-extrabold text-emerald-400 mb-2">The Compliance Cipher</h1>
+        <p class="text-slate-400 mb-6 text-sm">Industrial Sustainability & Policy Escape Room</p>
+        <div class="space-y-4">
+            <button onclick="setupTeacherView()" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition duration-200">Teacher Dashboard</button>
+            <button onclick="setupStudentView()" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold rounded-xl transition duration-200">Student Device</button>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard View -->
+    <div id="teacher-view" class="hidden w-full max-w-5xl bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+            <div>
+                <h2 class="text-2xl font-bold text-emerald-400">Teacher Control Hub</h2>
+                <p class="text-xs text-slate-400">Live Student Progress & Room Synchronization</p>
+            </div>
+            <div id="qrcode" class="bg-white p-2 rounded-lg"></div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-slate-300">Active Teams Progress (0% - 100%)</h3>
+            <div id="leaderboard-container" class="space-y-3">
+                <p class="text-slate-500 text-sm italic">Waiting for teams to connect...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Game View -->
+    <div id="student-view" class="hidden w-full max-w-2xl bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
+        <div id="team-login-screen">
+            <h2 class="text-2xl font-bold text-emerald-400 mb-2">Enter Team Credentials</h2>
+            <p class="text-sm text-slate-400 mb-4">Choose a team name to enter the vault simulation.</p>
+            <input type="text" id="team-name-input" placeholder="Team Name (e.g., EcoConsultants)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-4 text-slate-100 focus:outline-none focus:border-emerald-500">
+            <button onclick="joinTeam()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition">Initialize Simulation</button>
+        </div>
+
+        <div id="game-arena" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider block">Current Level</span>
+                    <span id="current-level-display" class="text-xl font-bold text-emerald-400">Level 1 / 4</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider block">Elapsed Time</span>
+                    <span id="timer-display" class="text-xl font-mono font-bold text-amber-400">00:00</span>
+                </div>
+            </div>
+
+            <!-- Puzzle Box Container -->
+            <div id="puzzle-container" class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+                <h3 id="puzzle-title" class="text-lg font-bold text-slate-200">Level 1: The Triple P & Resource Leak Cipher</h3>
+                <p id="puzzle-desc" class="text-sm text-slate-300 leading-relaxed">
+                    Analyze the Ramos Arizpe manufacturing plant audit. Severe aquifer depletion is occurring alongside high profitability. Extract the primary affected Triple P pillar index and leak code format.
+                </p>
+                <div class="space-y-2">
+                    <input type="text" id="passcode-input" placeholder="Enter Cryptic Passcode (e.g., PLAN-3)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 uppercase font-mono focus:outline-none focus:border-emerald-500">
+                    <button onclick="submitPasscode()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition">Bypass Firewall / Submit Key</button>
+                </div>
+                <div id="feedback-msg" class="text-xs font-mono text-center text-red-400 h-4"></div>
+            </div>
+
+            <!-- Hint Section -->
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="requestHint()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg transition text-amber-400">Request Hint (+1m / +5m Penalty)</button>
+                <span id="hints-status" class="text-xs text-slate-400">Hints used: 0 / 2</span>
+            </div>
+            <div id="hint-text-box" class="hidden p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg text-xs text-amber-300 font-mono"></div>
+        </div>
+
+        <div id="victory-screen" class="hidden text-center space-y-4 py-8">
+            <h2 class="text-3xl font-extrabold text-emerald-400">Vault Successfully Bypassed!</h2>
+            <p class="text-slate-300 text-sm">Your team completed all four sustainability and policy levels.</p>
+            <div id="final-stats" class="text-lg font-mono font-bold text-amber-400"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+        let currentLevel = 1;
+
+        function setupTeacherView() {
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('teacher-view').classList.remove('hidden');
+            
+            // Generate QR code pointing to current student link
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: window.location.href,
+                width: 128,
+                height: 128
+            });
+        }
+
+        function setupStudentView() {
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('student-view').classList.remove('hidden');
+        }
+
+        function joinTeam() {
+            const teamName = document.getElementById('team-name-input').value.trim();
+            if (!teamName) {
+                alert('Please enter a valid team name!');
+                return;
+            }
+            socket.emit('join_game', { teamName });
+            document.getElementById('team-login-screen').classList.add('hidden');
+            document.getElementById('game-arena').classList.remove('hidden');
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                let mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                let secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+                socket.emit('sync_timer', { totalSeconds: secondsElapsed });
+            }, 1000);
+        }
+
+        function requestHint() {
+            socket.emit('request_hint');
+        }
+
+        function submitPasscode() {
+            const passcode = document.getElementById('passcode-input').value;
+            socket.emit('submit_passcode', { level: currentLevel, passcode });
+        }
+
+        // Socket Listeners
+        socket.on('update_leaderboard', (teams) => {
+            const container = document.getElementById('leaderboard-container');
+            if (teams.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 text-sm italic">Waiting for teams to connect...</p>`;
+                return;
+            }
+            container.innerHTML = teams.map(t => `
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-sm font-semibold">
+                        <span class="text-slate-200">${t.name} ${t.finished ? '🏆 (Finished)' : ''}</span>
+                        <span class="text-emerald-400 font-mono">Progress: ${t.progress}% | Time: ${Math.floor((t.timeElapsed + t.penaltySeconds)/60)}m ${(t.timeElapsed + t.penaltySeconds)%60}s | Penalties: +${Math.floor(t.penaltySeconds/60)}m</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-800">
+                        <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${t.progress}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        socket.on('hint_response', (data) => {
+            const hintBox = document.getElementById('hint-text-box');
+            hintBox.classList.remove('hidden');
+            hintBox.innerText = `[${data.penalty}] Hint: ${data.text}`;
+            document.getElementById('hints-status').innerText = `Hints used: ${data.hintLevel} / 2`;
+        });
+
+        socket.on('level_passed', (data) => {
+            currentLevel = data.nextLevel;
+            document.getElementById('current-level-display').innerText = `Level ${currentLevel} / 4`;
+            document.getElementById('passcode-input').value = '';
+            document.getElementById('feedback-msg').innerText = '';
+            document.getElementById('hint-text-box').classList.add('hidden');
+            
+            // Update puzzle descriptions dynamically per level
+            const descriptions = {
+                2: { title: "Level 2: Climate Feedback Loops & Footprints", desc: "Analyze regional temperature anomalies and industrial greenhouse gas emissions. Identify the causal chain code." },
+                3: { title: "Level 3: Circular Supply Chain Optimization", desc: "Re-engineer the broken linear electronic supply chain using closed-loop 3 Rs strategies." },
+                4: { title: "Level 4: The Final Policy Enforcement Matrix", desc: "Simultaneous violations detected. Deploy the exact 2 policy tools required to clear the vault firewall." }
+            };
+            if(descriptions[currentLevel]) {
+                document.getElementById('puzzle-title').innerText = descriptions[currentLevel].title;
+                document.getElementById('puzzle-desc').innerText = descriptions[currentLevel].desc;
+            }
+        });
+
+        socket.on('wrong_passcode', (data) => {
+            document.getElementById('feedback-msg').innerText = data.message;
+        });
+
+        socket.on('game_won', (data) => {
+            clearInterval(timerInterval);
+            document.getElementById('game-arena').classList.add('hidden');
+            document.getElementById('victory-screen').classList.remove('hidden');
+            let finalMins = Math.floor(data.finalTime / 60);
+            let finalSecs = data.finalTime % 60;
+            document.getElementById('final-stats').innerText = `Total Completion Time (incl. penalties): ${finalMins} minutes ${finalSecs} seconds`;
+        });
+    </script>
+</body>
+</html>

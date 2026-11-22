@@ -1,0 +1,29 @@
+# Dependencies & build output
+node_modules/
+dist/
+.npm-cache/
+.vercel/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.claude/
+
+# Local backups of the old per-game git histories
+.git-backups/
+
+# Not games (tools, raw assets, installers)
+antigravity-reinstall/
+video-transfer/
+mcpservers/
+classroom/
+GRAMMAR PRACTICE ROB/
+futbol_game/
+
+# Python
+__pycache__/
+*.pyc

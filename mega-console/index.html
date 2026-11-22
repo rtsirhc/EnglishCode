@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEGA-CONSOLE 30-WORD FINAL OVERRIDE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="scanlines"></div>
+    <div class="overlay"></div>
+    <div id="app">
+        <header class="status-bar">
+            <div class="status-item">
+                <span class="label">SYSTEM:</span>
+                <span class="value blink">SECURE</span>
+            </div>
+            <div class="status-item">
+                <span class="label">SCORE:</span>
+                <span id="score-display" class="value">000000</span>
+            </div>
+            <div class="status-item">
+                <span class="label">PROTOCOL:</span>
+                <span class="value">OVERRIDE</span>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <!-- Game Play Screen -->
+            <div id="game-screen">
+                <div class="level-meta">
+                    <div id="level-title" class="glitch" data-text="INITIATION">INITIATION</div>
+                    <div class="level-display">
+                        <span class="bracket">[</span>
+                        <span id="level-indicator">LEVEL 01 | SEQ 01</span>
+                        <span class="bracket">]</span>
+                    </div>
+                </div>
+
+                <div class="clue-section">
+                    <div class="section-label">TARGET DEFINITION</div>
+                    <div id="clue-text" class="large-text">WAITING FOR INPUT...</div>
+                </div>
+
+                <div class="input-section">
+                    <div class="section-label">INPUT CODE</div>
+                    <div id="word-mask" class="word-mask"></div>
+                    <div id="options-container" class="options-container hidden"></div>
+                    <input type="text" id="word-input" autocomplete="off" spellcheck="false" autofocus placeholder="">
+                    <div id="input-focus-border"></div>
+                    <button id="hint-btn" class="cyber-btn small hint-btn">DECRYPT LETTER [-50 PTS]</button>
+                </div>
+
+                <div id="feedback-message" class="feedback"></div>
+            </div>
+
+            <!-- Victory / Leaderboard Screen -->
+            <div id="victory-screen" class="hidden">
+                <div class="victory-content">
+                    <h1 class="victory-title glitch" data-text="MISSION COMPLETE">MISSION COMPLETE</h1>
+                    <div class="victory-details">
+                        <p>SYSTEM OVERRIDE: <span class="success">SUCCESSFUL</span></p>
+                        <p>FINAL SCORE: <span id="final-score" class="success">0</span></p>
+                    </div>
+
+                    <div id="leaderboard-section">
+                        <div class="input-name-container">
+                            <p>IDENTIFY YOURSELF AGENT:</p>
+                            <input type="text" id="player-name" maxlength="10" placeholder="ENTER NAME">
+                            <button id="save-score-btn" class="cyber-btn small">UPLOAD DATA</button>
+                        </div>
+                        <div id="high-scores" class="hidden">
+                            <h3>TOP 3 OPERATIVES</h3>
+                            <ul id="score-list"></ul>
+                        </div>
+                    </div>
+
+                    <div id="certificate-display"></div>
+                    <button id="restart-btn" class="cyber-btn hidden">SYSTEM REBOOT</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mission-tracker">
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div id="progress-bar" class="progress-bar-fill"></div>
+                </div>
+                <div id="progress-text">0% DETECTED</div>
+            </div>
+        </footer>
+    </div>
+    <script src="words.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

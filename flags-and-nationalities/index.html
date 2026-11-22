@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A fun educational game where kids learn about countries, flags, and nationalities. Perfect for classrooms and group play!">
+  <title>🌍 Flags & Nationalities — The Big Quiz!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ============================
+       DESIGN SYSTEM
+    ============================ */
+    :root {
+      --bg-dark: #0f0e17;
+      --bg-card: rgba(255, 255, 255, 0.06);
+      --bg-card-hover: rgba(255, 255, 255, 0.10);
+      --text-primary: #fffffe;
+      --text-secondary: #a7a9be;
+      --accent-blue: #7f5af0;
+      --accent-pink: #e84393;
+      --accent-teal: #2cb67d;
+      --accent-orange: #ff9f43;
+      --accent-yellow: #feca57;
+      --correct-green: #00e676;
+      --correct-glow: rgba(0, 230, 118, 0.35);
+      --gradient-hero: linear-gradient(135deg, #7f5af0 0%, #e84393 50%, #ff9f43 100%);
+      --gradient-timer: linear-gradient(90deg, #2cb67d, #feca57, #e84393);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(127, 90, 240, 0.3);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --font: 'Outfit', sans-serif;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================
+       RESET & BASE
+    ============================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(127, 90, 240, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(232, 67, 147, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(44, 182, 125, 0.08) 0%, transparent 50%);
+      z-index: 0;
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgPulse {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    /* ============================
+       SCREENS
+    ============================ */
+    .screen {
+      display: none;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 960px;
+      padding: 32px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================
+       START SCREEN
+    ============================ */
+    #start-screen {
+      text-align: center;
+      gap: 32px;
+    }
+
+    .hero-emoji {
+      font-size: 96px;
+      animation: bounce 2s ease-in-out infinite;
+      filter: drop-shadow(0 10px 30px rgba(127, 90, 240, 0.4));
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    /* ============================
+       BUTTONS
+    ============================ */
+    .btn-primary {
+      background: var(--gradient-hero);
+      color: white;
+      border: none;
+      padding: 20px 56px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-family: var(--font);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-glow);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 40px rgba(127, 90, 240, 0.5);
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, var(--accent-teal), #0be881);
+      color: var(--bg-dark);
+      border: none;
+      padding: 12px 36px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: var(--font);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 8px 30px rgba(44, 182, 125, 0.4);
+      animation: pulseBtn 1.5s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 12px 40px rgba(44, 182, 125, 0.6);
+    }
+
+    @keyframes pulseBtn {
+      0%, 100% { box-shadow: 0 8px 30px rgba(44, 182, 125, 0.4); }
+      50% { box-shadow: 0 8px 40px rgba(44, 182, 125, 0.7); }
+    }
+
+    /* ============================
+       LOADING SCREEN
+    ============================ */
+    #loading-screen {
+      text-align: center;
+      gap: 24px;
+    }
+
+    .loading-spinner {
+      width: 64px;
+      height: 64px;
+      border: 5px solid var(--bg-card);
+      border-top: 5px solid var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* ============================
+       GAME SCREEN
+    ============================ */
+    #game-screen {
+      gap: 10px;
+      max-height: 100vh;
+      height: 100vh;
+      padding: 16px 24px;
+      justify-content: space-between;
+    }
+
+    /* Top bar: progress + question type */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .progress-badge {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .progress-badge span {
+      color: var(--accent-blue);
+      font-size: 1.1rem;
+    }
+
+    .question-type-badge {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-orange));
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: var(--bg-card);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--gradient-hero);
+      border-radius: 100px;
+      transition: width 0.5s ease;
+    }
+
+    /* Question prompt */
+    .question-prompt {
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    /* Flag display */
+    .flag-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: var(--shadow-lg);
+      animation: flagEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes flagEnter {
+      from { opacity: 0; transform: scale(0.7) rotateY(20deg); }
+      to { opacity: 1; transform: scale(1) rotateY(0); }
+    }
+
+    .flag-container img {
+      width: min(220px, 50vw);
+      height: auto;
+      max-height: 18vh;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Timer */
+    .timer-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .timer-bar-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      background: var(--gradient-timer);
+      background-size: 200% 100%;
+      border-radius: 100px;
+      transition: width 1s linear;
+      animation: timerShimmer 2s ease-in-out infinite;
+      position: relative;
+    }
+
+    .timer-bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 30px;
+      height: 100%;
+      background: rgba(255,255,255,0.4);
+      border-radius: 100px;
+      filter: blur(4px);
+    }
+
+    @keyframes timerShimmer {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 100% 0%; }
+    }
+
+    .timer-text {
+      font-size: 1.6rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.3s;
+      line-height: 1;
+    }
+
+    .timer-text.warning {
+      color: var(--accent-orange);
+      animation: timerPulse 0.5s ease-in-out infinite;
+    }
+
+    .timer-text.danger {
+      color: var(--accent-pink);
+      animation: timerPulse 0.3s ease-in-out infinite;
+    }
+
+    @keyframes timerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    /* Answer options grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .option-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: var(--transition);
+      cursor: default;
+      animation: optionSlideIn 0.4s ease backwards;
+    }
+
+    .option-card:nth-child(1) { animation-delay: 0.1s; }
+    .option-card:nth-child(2) { animation-delay: 0.2s; }
+    .option-card:nth-child(3) { animation-delay: 0.3s; }
+    .option-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes optionSlideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .option-letter {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .option-card:nth-child(1) .option-letter {
+      background: linear-gradient(135deg, #7f5af0, #a78bfa);
+      color: white;
+    }
+    .option-card:nth-child(2) .option-letter {
+      background: linear-gradient(135deg, #e84393, #fd79a8);
+      color: white;
+    }
+    .option-card:nth-child(3) .option-letter {
+      background: linear-gradient(135deg, #ff9f43, #feca57);
+      color: var(--bg-dark);
+    }
+    .option-card:nth-child(4) .option-letter {
+      background: linear-gradient(135deg, #2cb67d, #0be881);
+      color: var(--bg-dark);
+    }
+
+    .option-text {
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    /* Correct answer highlight */
+    .option-card.correct {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--correct-green);
+      box-shadow: 0 0 30px var(--correct-glow), inset 0 0 20px var(--correct-glow);
+      transform: scale(1.04);
+      animation: correctPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .option-card.correct .option-letter {
+      background: var(--correct-green) !important;
+      color: var(--bg-dark) !important;
+    }
+
+    .option-card.correct .option-text {
+      color: var(--correct-green);
+    }
+
+    .option-card.dimmed {
+      opacity: 0.35;
+    }
+
+    @keyframes correctPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1.04); }
+    }
+
+    /* Correct answer banner + buttons row */
+    .reveal-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      width: 100%;
+      min-height: 52px;
+      flex-wrap: wrap;
+    }
+
+    .correct-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--correct-green);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .correct-banner.visible {
+      display: flex;
+    }
+
+    .correct-banner .checkmark {
+      font-size: 1.4rem;
+    }
+
+    /* Reveal Answer button */
+    .reveal-btn-area {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .reveal-btn-area.visible {
+      display: block;
+    }
+
+    .btn-reveal {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      color: var(--bg-dark);
+      border: none;
+      padding: 12px 36px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: var(--font);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 8px 30px rgba(255, 159, 67, 0.4);
+      animation: pulseReveal 1.2s ease-in-out infinite;
+      white-space: nowrap;
+    }
+
+    .btn-reveal:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 12px 40px rgba(255, 159, 67, 0.6);
+    }
+
+    @keyframes pulseReveal {
+      0%, 100% { box-shadow: 0 8px 30px rgba(255, 159, 67, 0.4); }
+      50% { box-shadow: 0 8px 40px rgba(255, 159, 67, 0.7); }
+    }
+
+    /* Next button area */
+    .next-btn-area {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .next-btn-area.visible {
+      display: block;
+    }
+
+    /* ============================
+       END SCREEN
+    ============================ */
+    #end-screen {
+      text-align: center;
+      gap: 32px;
+    }
+
+    .end-emoji {
+      font-size: 96px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .end-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: var(--gradient-hero);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .end-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ============================
+       ERROR SCREEN
+    ============================ */
+    #error-screen {
+      text-align: center;
+      gap: 24px;
+    }
+
+    .error-emoji {
+      font-size: 72px;
+    }
+
+    .error-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-pink);
+    }
+
+    .error-text {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 460px;
+      line-height: 1.6;
+    }
+
+    /* ============================
+       FLOATING EMOJIS (decorative)
+    ============================ */
+    .floating-emojis {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .floating-emoji {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.12;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.12; }
+      90% { opacity: 0.12; }
+      100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* ============================
+       RESPONSIVE
+    ============================ */
+    @media (max-width: 640px) {
+      .screen { padding: 20px 16px; }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .option-card {
+        padding: 16px 20px;
+      }
+
+      .flag-container {
+        padding: 16px;
+      }
+
+      .flag-container img {
+        width: min(280px, 80vw);
+      }
+
+      .top-bar {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating background emojis -->
+  <div class="floating-emojis" id="floating-emojis-container"></div>
+
+  <!-- ==================== START SCREEN ==================== -->
+  <div class="screen active" id="start-screen">
+    <div class="hero-emoji">🌍</div>
+    <h1 class="hero-title">Flags &<br>Nationalities</h1>
+    <p class="hero-subtitle">Can you guess the country from its flag? Do you know what people from that country are called? Let's find out!</p>
+    <button class="btn-primary" id="btn-start" onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- ==================== LOADING SCREEN ==================== -->
+  <div class="screen" id="loading-screen">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Loading flags from around the world...</p>
+  </div>
+
+  <!-- ==================== GAME SCREEN ==================== -->
+  <div class="screen" id="game-screen">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="progress-badge" id="progress-badge">
+        Question <span id="current-q">1</span> of <span id="total-q">20</span>
+      </div>
+      <div class="question-type-badge" id="question-type-badge">🏳️ Country</div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progress-bar-fill" style="width: 5%"></div>
+    </div>
+
+    <!-- Question Prompt -->
+    <p class="question-prompt" id="question-prompt">What country does this flag belong to?</p>
+
+    <!-- Flag -->
+    <div class="flag-container">
+      <img id="flag-img" src="" alt="Country flag">
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-section">
+      <div class="timer-bar-container">
+        <div class="timer-bar-fill" id="timer-bar-fill" style="width: 100%"></div>
+      </div>
+      <div class="timer-text" id="timer-text">15</div>
+    </div>
+
+    <!-- Answer Options -->
+    <div class="options-grid" id="options-grid">
+      <div class="option-card" id="option-a">
+        <div class="option-letter">A</div>
+        <div class="option-text" id="option-a-text">—</div>
+      </div>
+      <div class="option-card" id="option-b">
+        <div class="option-letter">B</div>
+        <div class="option-text" id="option-b-text">—</div>
+      </div>
+      <div class="option-card" id="option-c">
+        <div class="option-letter">C</div>
+        <div class="option-text" id="option-c-text">—</div>
+      </div>
+      <div class="option-card" id="option-d">
+        <div class="option-letter">D</div>
+        <div class="option-text" id="option-d-text">—</div>
+      </div>
+    </div>
+
+    <!-- Reveal Answer + Correct Answer Banner + Next Button -->
+    <div class="reveal-row">
+      <div class="reveal-btn-area" id="reveal-btn-area">
+        <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">Reveal Answer 👁️</button>
+      </div>
+      <div class="correct-banner" id="correct-banner">
+        <span class="checkmark">✅</span>
+        <span id="correct-banner-text">The answer is: Brazil!</span>
+      </div>
+      <div class="next-btn-area" id="next-btn-area">
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Question ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== END SCREEN ==================== -->
+  <div class="screen" id="end-screen">
+    <div class="end-emoji">🎉</div>
+    <h1 class="end-title">Amazing Job!</h1>
+    <p class="end-subtitle">You explored flags and nationalities from all over the world. Ready for another round?</p>
+    <button class="btn-primary" id="btn-play-again" onclick="startGame()">Play Again 🔄</button>
+  </div>
+
+  <!-- ==================== ERROR SCREEN ==================== -->
+  <div class="screen" id="error-screen">
+    <div class="error-emoji">😕</div>
+    <h2 class="error-title">Oops! Something went wrong.</h2>
+    <p class="error-text">We couldn't load the country data. Please check your internet connection and try again.</p>
+    <button class="btn-primary" id="btn-retry" onclick="startGame()">Try Again</button>
+  </div>
+
+  <!-- ============================
+       JAVASCRIPT
+  ============================ -->
+  <script>
+    // =========================
+    // STATE
+    // =========================
+    let allCountries = [];    // Full bank of valid countries
+    let questions = [];       // 20 questions for this session
+    let currentIndex = 0;     // Current question index
+    let timerInterval = null; // Timer interval ID
+    let timeLeft = 15;        // Seconds remaining
+    let audioCtx = null;      // Web Audio context (created on first user click)
+
+    const TOTAL_QUESTIONS = 20;
+    const TIMER_SECONDS = 15;
+
+    // =========================
+    // DING SOUND (Web Audio API)
+    // =========================
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playDing() {
+      try {
+        ensureAudioContext();
+        const now = audioCtx.currentTime;
+
+        // Main chime tone (bright, pleasant)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);       // A5
+        osc1.frequency.setValueAtTime(1318.5, now + 0.08); // E6
+        gain1.gain.setValueAtTime(0.35, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.6);
+
+        // Harmonic shimmer
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1760, now + 0.05); // A6
+        gain2.gain.setValueAtTime(0.12, now + 0.05);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.05);
+        osc2.stop(now + 0.45);
+      } catch (e) {
+        // Audio not supported — fail silently
+      }
+    }
+
+    // =========================
+    // FLOATING EMOJIS (decorative)
+    // =========================
+    (function initFloatingEmojis() {
+      const container = document.getElementById('floating-emojis-container');
+      const emojis = ['🌍', '🌎', '🌏', '🇺🇳', '🗺️', '✈️', '🏳️', '⭐', '🌟', '🎌'];
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.textContent = emojis[i % emojis.length];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (1.2 + Math.random() * 1.5) + 'rem';
+        el.style.animationDuration = (18 + Math.random() * 25) + 's';
+        el.style.animationDelay = -(Math.random() * 30) + 's';
+        container.appendChild(el);
+      }
+    })();
+
+    // =========================
+    // SCREEN MANAGEMENT
+    // =========================
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // =========================
+    // FETCH & PREPARE DATA
+    // =========================
+    async function fetchCountries() {
+      const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,demonyms,population');
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      return data;
+    }
+
+    function prepareCountryBank(raw) {
+      // Filter: must have a flag SVG, a common name, and a demonym
+      const valid = raw.filter(c =>
+        c.flags?.svg &&
+        c.name?.common &&
+        c.demonyms?.eng?.m
+      ).map(c => ({
+        name: c.name.common,
+        flag: c.flags.svg,
+        nationality: c.demonyms.eng.m,
+        population: c.population || 0,
+      }));
+
+      // Sort by population descending
+      valid.sort((a, b) => b.population - a.population);
+
+      // Assign difficulty tiers
+      return valid.map((c, i) => {
+        if (i < 50) c.difficulty = 'easy';
+        else if (i < 125) c.difficulty = 'medium';
+        else c.difficulty = 'hard';
+        return c;
+      });
+    }
+
+    // =========================
+    // QUESTION GENERATION
+    // =========================
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function pickRandom(arr, n) {
+      const shuffled = shuffle([...arr]);
+      return shuffled.slice(0, n);
+    }
+
+    function generateQuestions(bank) {
+      const easy = bank.filter(c => c.difficulty === 'easy');
+      const medium = bank.filter(c => c.difficulty === 'medium');
+      const hard = bank.filter(c => c.difficulty === 'hard');
+
+      // Pick: ~7 easy, ~7 medium, ~6 hard = 20
+      const easyPicks = pickRandom(easy, 7);
+      const mediumPicks = pickRandom(medium, 7);
+      const hardPicks = pickRandom(hard, 6);
+
+      // If any tier doesn't have enough, backfill from others
+      const selected = [...easyPicks, ...mediumPicks, ...hardPicks];
+
+      // If we somehow have fewer than 20, top up from the full bank
+      if (selected.length < TOTAL_QUESTIONS) {
+        const remaining = bank.filter(c => !selected.includes(c));
+        const extra = pickRandom(remaining, TOTAL_QUESTIONS - selected.length);
+        selected.push(...extra);
+      }
+
+      // Build questions (easy first, then medium, then hard within each group)
+      const orderedSelections = [
+        ...shuffle(easyPicks),
+        ...shuffle(mediumPicks),
+        ...shuffle(hardPicks),
+      ].slice(0, TOTAL_QUESTIONS);
+
+      return orderedSelections.map((country, idx) => {
+        // Randomly decide question type
+        const type = Math.random() < 0.5 ? 'country' : 'nationality';
+
+        // Find distractors from the same difficulty tier
+        const sameTier = bank.filter(c =>
+          c.difficulty === country.difficulty && c.name !== country.name
+        );
+        const distractors = pickRandom(sameTier, 3);
+
+        // If not enough from same tier, pull from neighbors
+        while (distractors.length < 3) {
+          const any = bank.filter(c =>
+            c.name !== country.name && !distractors.some(d => d.name === c.name)
+          );
+          distractors.push(pickRandom(any, 1)[0]);
+        }
+
+        // Build options
+        const correctOption = type === 'country' ? country.name : country.nationality;
+        const distractorOptions = distractors.map(d =>
+          type === 'country' ? d.name : d.nationality
+        );
+
+        // Deduplicate options (some countries share nationalities)
+        const allOpts = [correctOption, ...distractorOptions];
+        const uniqueOpts = [...new Set(allOpts)];
+
+        // If dedup removed options, backfill
+        while (uniqueOpts.length < 4) {
+          const extras = bank.filter(c =>
+            c.name !== country.name &&
+            !uniqueOpts.includes(type === 'country' ? c.name : c.nationality)
+          );
+          if (extras.length === 0) break;
+          const pick = extras[Math.floor(Math.random() * extras.length)];
+          uniqueOpts.push(type === 'country' ? pick.name : pick.nationality);
+        }
+
+        // Shuffle options and track correct index
+        const options = shuffle(uniqueOpts.slice(0, 4));
+        const correctIndex = options.indexOf(correctOption);
+
+        return {
+          country: country.name,
+          nationality: country.nationality,
+          flag: country.flag,
+          type,
+          options,
+          correctIndex,
+          difficulty: country.difficulty,
+        };
+      });
+    }
+
+    // =========================
+    // GAME FLOW
+    // =========================
+    async function startGame() {
+      showScreen('loading-screen');
+
+      try {
+        // Only fetch once; reuse on replay
+        if (allCountries.length === 0) {
+          const raw = await fetchCountries();
+          allCountries = prepareCountryBank(raw);
+        }
+
+        if (allCountries.length < 20) {
+          throw new Error('Not enough country data');
+        }
+
+        questions = generateQuestions(allCountries);
+        currentIndex = 0;
+        showScreen('game-screen');
+        loadQuestion();
+      } catch (err) {
+        console.error('Failed to start game:', err);
+        showScreen('error-screen');
+      }
+    }
+
+    function loadQuestion() {
+      const q = questions[currentIndex];
+
+      // Update progress
+      document.getElementById('current-q').textContent = currentIndex + 1;
+      document.getElementById('total-q').textContent = TOTAL_QUESTIONS;
+      const progressPct = ((currentIndex + 1) / TOTAL_QUESTIONS) * 100;
+      document.getElementById('progress-bar-fill').style.width = progressPct + '%';
+
+      // Question type badge
+      const typeBadge = document.getElementById('question-type-badge');
+      if (q.type === 'country') {
+        typeBadge.textContent = '🏳️ Country';
+        document.getElementById('question-prompt').textContent =
+          'What country does this flag belong to?';
+      } else {
+        typeBadge.textContent = '👤 Nationality';
+        document.getElementById('question-prompt').textContent =
+          'What is the nationality of the people from this country?';
+      }
+
+      // Flag
+      const flagImg = document.getElementById('flag-img');
+      flagImg.src = q.flag;
+      flagImg.alt = 'Flag of a mystery country';
+      // Re-trigger animation
+      const flagContainer = flagImg.parentElement;
+      flagContainer.style.animation = 'none';
+      flagContainer.offsetHeight; // Force reflow
+      flagContainer.style.animation = '';
+
+      // Options
+      const letters = ['A', 'B', 'C', 'D'];
+      letters.forEach((letter, i) => {
+        const card = document.getElementById('option-' + letter.toLowerCase());
+        const textEl = document.getElementById('option-' + letter.toLowerCase() + '-text');
+        textEl.textContent = q.options[i] || '—';
+        card.classList.remove('correct', 'dimmed');
+        // Re-trigger slide animation
+        card.style.animation = 'none';
+        card.offsetHeight;
+        card.style.animation = '';
+      });
+
+      // Hide all reveal-row elements
+      document.getElementById('reveal-btn-area').classList.remove('visible');
+      document.getElementById('correct-banner').classList.remove('visible');
+      document.getElementById('next-btn-area').classList.remove('visible');
+
+      // Start timer
+      startTimer();
+    }
+
+    // =========================
+    // TIMER
+    // =========================
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = TIMER_SECONDS;
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          onTimerEnd();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerText = document.getElementById('timer-text');
+      const timerBar = document.getElementById('timer-bar-fill');
+
+      timerText.textContent = timeLeft;
+      timerBar.style.width = (timeLeft / TIMER_SECONDS) * 100 + '%';
+
+      // Color states
+      timerText.classList.remove('warning', 'danger');
+      if (timeLeft <= 3) {
+        timerText.classList.add('danger');
+      } else if (timeLeft <= 7) {
+        timerText.classList.add('warning');
+      }
+    }
+
+    // =========================
+    // TIMER END → show Reveal button
+    // =========================
+    function onTimerEnd() {
+      // Play ding to signal time's up
+      playDing();
+
+      // Show the "Reveal Answer" button
+      document.getElementById('reveal-btn-area').classList.add('visible');
+    }
+
+    // =========================
+    // ANSWER REVEAL (manual)
+    // =========================
+    function revealAnswer() {
+      const q = questions[currentIndex];
+      const letters = ['a', 'b', 'c', 'd'];
+
+      // Hide the reveal button
+      document.getElementById('reveal-btn-area').classList.remove('visible');
+
+      // Highlight correct / dim wrong
+      letters.forEach((letter, i) => {
+        const card = document.getElementById('option-' + letter);
+        if (i === q.correctIndex) {
+          card.classList.add('correct');
+        } else {
+          card.classList.add('dimmed');
+        }
+      });
+
+      // Show correct banner
+      const banner = document.getElementById('correct-banner');
+      const bannerText = document.getElementById('correct-banner-text');
+      if (q.type === 'country') {
+        bannerText.textContent = `The answer is: ${q.country}!`;
+      } else {
+        bannerText.textContent = `People from ${q.country} are ${q.nationality}!`;
+      }
+      banner.classList.add('visible');
+
+      // Show next button (or finish button)
+      const nextArea = document.getElementById('next-btn-area');
+      const nextBtn = document.getElementById('btn-next');
+      if (currentIndex >= TOTAL_QUESTIONS - 1) {
+        nextBtn.textContent = 'See Results 🎉';
+        nextBtn.onclick = () => showScreen('end-screen');
+      } else {
+        nextBtn.textContent = 'Next Question ▶';
+        nextBtn.onclick = nextQuestion;
+      }
+      nextArea.classList.add('visible');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex >= TOTAL_QUESTIONS) {
+        showScreen('end-screen');
+        return;
+      }
+      loadQuestion();
+    }
+
+    // =========================
+    // CLEANUP on page unload
+    // =========================
+    window.addEventListener('beforeunload', () => {
+      clearInterval(timerInterval);
+    });
+  </script>
+</body>
+</html>

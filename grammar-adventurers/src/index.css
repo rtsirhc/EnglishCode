@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-adventure-blue: #4facfe;
+  --color-adventure-green: #00f260;
+  --color-adventure-yellow: #f093fb;
+  --color-adventure-red: #ff5858;
+  --font-comic: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-comic);
+  @apply bg-slate-50 text-slate-800;
+}

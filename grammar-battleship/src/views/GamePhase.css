@@ -1,0 +1,158 @@
+.game-phase-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 1600px;
+    /* Wider to support dual boards beautifully */
+}
+
+.turn-banner {
+    text-align: center;
+    padding: 1rem;
+}
+
+.turn-banner h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    transition: color 0.3s;
+}
+
+.my-turn {
+    color: var(--color-success) !important;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.opponent-turn {
+    color: var(--color-warning) !important;
+}
+
+.winner-banner {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--color-success);
+}
+
+.winner-banner h1 {
+    background: linear-gradient(135deg, #10B981, #34D399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.boards-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.board-section {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.board-section h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--accent-primary);
+    font-size: 1.25rem;
+}
+
+.board-scroll-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
+}
+
+/* Tracking Board highlighting specifically */
+.tracking-board {
+    border: 1px solid var(--accent-primary);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* Modal CSS */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    max-width: 500px;
+    width: 90%;
+    padding: 2.5rem;
+    text-align: center;
+    background: radial-gradient(circle at center, #1b2438, #0B0E14);
+}
+
+.modal-title {
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.prompt-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.prompt-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.prompt-sentence {
+    color: var(--accent-primary);
+    font-size: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.loader {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    animation: spin 1s linear infinite;
+    margin: 1.5rem auto 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1100px) {
+    .boards-layout {
+        grid-template-columns: 1fr;
+    }
+}

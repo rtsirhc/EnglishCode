@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Sentence Scramble Game</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glow-amber {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+    }
+    .glow-indigo {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+    }
+    /* Custom inner scrollbar for roster only */
+    .roster-scroll::-webkit-scrollbar { width: 5px; }
+    .roster-scroll::-webkit-scrollbar-track { background: #0f172a; }
+    .roster-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    .roster-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header / Navigation Bar (Compact Height) -->
+  <header class="w-full bg-slate-900/90 border-b border-slate-800 px-5 py-2.5 flex justify-between items-center gap-4 flex-shrink-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-amber-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+        <i data-lucide="shuffle" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-black tracking-tight text-white flex items-center gap-2">
+          Human Sentence Scramble
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">ESL A1-A2</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Header Controls -->
+    <div class="flex items-center gap-2">
+      <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all">
+        <i id="soundIcon" data-lucide="volume-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span id="soundLabel">Sound ON</span>
+      </button>
+
+      <button onclick="shufflePromptsDeck()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span>Reshuffle Deck</span>
+      </button>
+
+      <button onclick="openRosterModal()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition-all">
+        <i data-lucide="users" class="w-3.5 h-3.5"></i>
+        <span>Manage Roster</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Screen Container (Locked to Screen Height, No Outer Scroll) -->
+  <main class="flex-1 w-full max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4 overflow-hidden h-[calc(100vh-52px)]">
+    
+    <!-- LEFT PANEL: Prompt Screen & Timer (8 Cols) -->
+    <section class="col-span-12 lg:col-span-8 flex flex-col gap-3 h-full overflow-hidden">
+
+      <!-- PROMPT CARD (Projector Display Area - Flexible 65% Height) -->
+      <div class="glass-card rounded-2xl p-5 flex flex-col justify-between flex-1 min-h-0 relative overflow-hidden glow-indigo">
+        <!-- Top Info Bar -->
+        <div class="flex justify-between items-center z-10 border-b border-slate-700/50 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider border border-indigo-500/30 flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3 h-3"></i>
+              Round <span id="currentRoundNum">1</span> of <span id="totalRoundsNum">48</span>
+            </span>
+            <span id="challengeBadge" class="hidden px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider border border-amber-500/30 flex items-center gap-1 animate-pulse">
+              <i data-lucide="trophy" class="w-3 h-3"></i>
+              Challenge Round
+            </span>
+          </div>
+
+          <div class="text-xs text-slate-400 font-semibold flex items-center gap-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span id="promptCategory">Category</span>
+          </div>
+        </div>
+
+        <!-- Central Prompt Text (Optimized font for screen readability without overflowing) -->
+        <div class="my-auto py-2 text-center z-10 flex flex-col justify-center items-center flex-1">
+          <h2 class="text-[11px] uppercase tracking-widest text-slate-400 font-bold mb-2">Sentence Challenge Prompt:</h2>
+          <div id="promptDisplay" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-amber-300 tracking-wide leading-relaxed drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] px-4 max-w-3xl">
+            Loading prompt...
+          </div>
+        </div>
+
+        <!-- Bottom Controls inside Prompt Card -->
+        <div class="pt-2.5 border-t border-slate-700/50 flex items-center justify-between gap-3 z-10">
+          <div class="flex items-center gap-2">
+            <button id="prevBtn" onclick="prevPrompt()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold text-xs flex items-center gap-1 transition-all">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Prev
+            </button>
+            <button id="nextBtn" onclick="nextPrompt()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+              Next Round <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="text-[11px] text-slate-400 italic hidden sm:block">
+            💡 Form this sentence physically with your word tags!
+          </div>
+        </div>
+
+        <!-- Background Glow -->
+        <div class="absolute -right-16 -bottom-16 w-48 h-48 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
+      <!-- TIMER PANEL (Compact Fixed Height - ~120px) -->
+      <div class="glass-card rounded-2xl p-4 flex items-center justify-between gap-4 flex-shrink-0 h-32">
+        <!-- Timer Clock Display -->
+        <div class="flex items-center gap-4">
+          <!-- Circular Progress -->
+          <div class="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-slate-800" fill="transparent"/>
+              <circle id="timerProgress" cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" stroke-dasharray="251.32" stroke-dashoffset="0" stroke-linecap="round" class="text-amber-500 transition-all duration-300 ease-linear" fill="transparent"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="timerSeconds" class="text-2xl font-black tracking-tight text-white">30</span>
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">SEC</span>
+            </div>
+          </div>
+
+          <!-- Timer Status Info -->
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span id="timerStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="timerStatusText" class="text-xs font-extrabold text-emerald-400 uppercase tracking-wider">Countdown Active</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-200 mt-0.5">30s Round Clock</h3>
+            <p class="text-[11px] text-slate-400">Starts automatically on Next Round.</p>
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex flex-col gap-2 min-w-[130px]">
+          <button id="pausePlayBtn" onclick="toggleTimer()" class="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 transition-all">
+            <i id="pausePlayIcon" data-lucide="pause" class="w-3.5 h-3.5"></i>
+            <span id="pausePlayText">Pause Timer</span>
+          </button>
+          <button onclick="resetTimer()" class="w-full py-1.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] flex items-center justify-center gap-1.5 border border-slate-700 transition-all">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-indigo-400"></i>
+            Restart Clock
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT PANEL: Leaderboard & Roster (4 Cols - Height Locked) -->
+    <section class="col-span-12 lg:col-span-4 flex flex-col gap-3 h-full overflow-hidden">
+
+      <!-- TOP 5 LEADERBOARD CARD (Compact Top Box) -->
+      <div class="glass-card rounded-2xl p-3.5 border border-amber-500/20 glow-amber flex-shrink-0">
+        <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-700/60">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+            <h3 class="text-xs font-extrabold text-white tracking-tight">Top 5 Leaderboard</h3>
+          </div>
+          <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">LIVE</span>
+        </div>
+
+        <div id="leaderboardList" class="space-y-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- ALPHABETICAL STUDENT ROSTER & SCORING (Flex-1 Box with inner scrolling roster list) -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-700/60 flex-shrink-0">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="users-2" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <h3 class="text-xs font-extrabold text-white tracking-tight">Alphabetical Roster</h3>
+          </div>
+          <span id="studentCountBadge" class="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">0 Students</span>
+        </div>
+
+        <!-- Quick Add Student Input -->
+        <div class="flex gap-1.5 mb-2 flex-shrink-0">
+          <input type="text" id="quickAddInput" placeholder="+ Add student..." onkeydown="if(event.key==='Enter') addSingleStudent()" class="flex-grow px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          <button onclick="addSingleStudent()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 transition-all">
+            <i data-lucide="plus" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <!-- Student Roster List (ONLY THIS SCROLLS!) -->
+        <div id="rosterList" class="flex-1 overflow-y-auto roster-scroll space-y-1.5 pr-1 min-h-0">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="mt-2 pt-2 border-t border-slate-700/60 flex items-center justify-between text-[11px] flex-shrink-0">
+          <button onclick="resetAllScores()" class="text-slate-400 hover:text-amber-400 flex items-center gap-1 transition-colors">
+            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset Scores
+          </button>
+          <button onclick="openRosterModal()" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition-colors">
+            <i data-lucide="edit-3" class="w-3 h-3"></i> Manage Roster
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- MODAL: Manage Student Roster (Bulk Add / Delete) -->
+  <div id="rosterModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl max-w-md w-full p-5 border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700 mb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> Roster Manager
+        </h3>
+        <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Paste Student Names (One per line or comma-separated):</label>
+          <textarea id="bulkRosterInput" rows="5" placeholder="e.g.&#10;Anna&#10;Ben&#10;Carlos&#10;David&#10;Emma" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <button onclick="saveBulkRoster()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add to Roster
+          </button>
+          
+          <button onclick="clearEntireRoster()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition-all flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Roster
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- GAME JAVASCRIPT & AUDIO LOGIC -->
+  <script>
+    // --- 48 A1-A2 PROMPTS DATASET (Short, punchy & open-ended) ---
+    const PROMPTS_DATASET = [
+      // To Be
+      { id: 1, text: 'Form a sentence with "am", "is", or "are".', category: 'To Be' },
+      { id: 2, text: 'Form a negative sentence with "is not" or "are not".', category: 'To Be' },
+      { id: 3, text: 'Form a Yes/No question starting with "Is" or "Are".', category: 'To Be' },
+      { id: 4, text: 'Form a sentence starting with "There is" or "There are".', category: 'To Be' },
+      { id: 5, text: 'Form a sentence with "There are" with 5 words.', category: 'To Be', challenge: true },
+      { id: 6, text: 'Form a negative sentence with "to be" with 5 words.', category: 'To Be', challenge: true },
+
+      // Have / Has & Numbers
+      { id: 7, text: 'Form a sentence with "has" or "have".', category: 'Have / Has' },
+      { id: 8, text: 'Form an affirmative sentence with "has" and a number.', category: 'Have / Has' },
+      { id: 9, text: 'Form a negative sentence with "don\'t" or "doesn\'t".', category: 'Have / Has' },
+      { id: 10, text: 'Form a question with "Do you have".', category: 'Have / Has' },
+      { id: 11, text: 'Form a sentence with "have" with 6 words.', category: 'Have / Has', challenge: true },
+      { id: 12, text: 'Form a negative sentence with "doesn\'t" with 7 words.', category: 'Have / Has', challenge: true },
+
+      // Daily Routines & Habits
+      { id: 13, text: 'Form a sentence about a daily routine.', category: 'Daily Routine' },
+      { id: 14, text: 'Form a sentence with "always", "usually", or "never".', category: 'Daily Routine' },
+      { id: 15, text: 'Form a sentence with a 3rd person singular verb (he / she / it).', category: 'Simple Present' },
+      { id: 16, text: 'Form a sentence about a daily routine with 6 words.', category: 'Daily Routine', challenge: true },
+      { id: 17, text: 'Form a negative 3rd person sentence with 8 words.', category: 'Simple Present', challenge: true },
+      { id: 18, text: 'Form a sentence about habits with 7 words.', category: 'Daily Routine', challenge: true },
+
+      // Do / Does & Questions
+      { id: 19, text: 'Form a Yes/No question with "Do you".', category: 'Do / Does Questions' },
+      { id: 20, text: 'Form a Yes/No question with "Does he" or "Does she".', category: 'Do / Does Questions' },
+      { id: 21, text: 'Form a question with "What".', category: 'Wh- Questions' },
+      { id: 22, text: 'Form a question with "Where".', category: 'Wh- Questions' },
+      { id: 23, text: 'Form a question with "When" or "What time".', category: 'Wh- Questions' },
+      { id: 24, text: 'Form a question with "How many".', category: 'Wh- Questions' },
+      { id: 25, text: 'Form a question with "Who" or "Why".', category: 'Wh- Questions' },
+      { id: 26, text: 'Form a Yes/No question with "Do" or "Does" with 6 words.', category: 'Do / Does Questions', challenge: true },
+      { id: 27, text: 'Form a question with "Where" with 7 words.', category: 'Wh- Questions', challenge: true },
+      { id: 28, text: 'Form a question with "What time" with 7 words.', category: 'Wh- Questions', challenge: true },
+      { id: 29, text: 'Form a Yes/No question with "Does" with 7 words.', category: 'Do / Does Questions', challenge: true },
+
+      // Prepositions of Place
+      { id: 30, text: 'Form a sentence with "in", "on", or "under".', category: 'Prepositions of Place' },
+      { id: 31, text: 'Form a sentence with "next to" or "behind".', category: 'Prepositions of Place' },
+      { id: 32, text: 'Form a sentence with "between".', category: 'Prepositions of Place' },
+      { id: 33, text: 'Form a sentence with a preposition of place with 6 words.', category: 'Prepositions of Place', challenge: true },
+      { id: 34, text: 'Form a sentence with "There is" with 6 words.', category: 'To Be', challenge: true },
+      { id: 35, text: 'Form a sentence with a preposition of place and a number.', category: 'Prepositions of Place' },
+
+      // Prepositions of Time
+      { id: 36, text: 'Form a sentence with "at", "on", or "in" (for time).', category: 'Prepositions of Time' },
+      { id: 37, text: 'Form a sentence with "at" + a specific time (e.g. at 7 o\'clock).', category: 'Prepositions of Time' },
+      { id: 38, text: 'Form a sentence with "before" or "after".', category: 'Prepositions of Time' },
+      { id: 39, text: 'Form a sentence with time with 7 words.', category: 'Prepositions of Time', challenge: true },
+
+      // Directions & Movement
+      { id: 40, text: 'Form a sentence with "Turn left" or "Turn right".', category: 'Directions' },
+      { id: 41, text: 'Form a sentence with "Go straight".', category: 'Directions' },
+      { id: 42, text: 'Form a sentence with "across from" or "next to".', category: 'Directions' },
+      { id: 43, text: 'Form a direction question starting with "How do I get to...".', category: 'Directions' },
+      { id: 44, text: 'Form a direction sentence with 8 words.', category: 'Directions', challenge: true },
+
+      // Combo & Challenges
+      { id: 45, text: 'Form an affirmative 3rd person sentence with 6 words.', category: 'Simple Present', challenge: true },
+      { id: 46, text: 'Form a question with "Do" and a preposition of time.', category: 'Combo Challenge' },
+      { id: 47, text: 'Form a sentence with a number with 6 words.', category: 'Numbers', challenge: true },
+      { id: 48, text: 'Form a sentence with "have/has", a number, and a preposition of place with 8 words.', category: 'Super Challenge', challenge: true }
+    ];
+
+    // --- GAME STATE ---
+    let promptsDeck = [];
+    let currentPromptIndex = 0;
+    let students = []; // { id, name, score }
+    let audioEnabled = true;
+
+    // Timer Variables
+    let timerDuration = 30;
+    let timerRemaining = 30;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Web Audio API Synthesizer
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // --- SOUND EFFECTS GENERATOR ---
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'start') {
+          [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, now + i * 0.08);
+            gain.gain.linearRampToValueAtTime(0.18, now + i * 0.08 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.3);
+          });
+        } 
+        else if (type === 'tick') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } 
+        else if (type === 'end') {
+          const freqs = [392.00, 311.13, 261.63];
+          freqs.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, now + i * 0.12);
+            gain.gain.linearRampToValueAtTime(0.2, now + i * 0.12 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.12);
+            osc.stop(now + i * 0.12 + 0.55);
+          });
+        }
+        else if (type === 'score') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        }
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundLabel = document.getElementById('soundLabel');
+      if (audioEnabled) {
+        soundIcon.setAttribute('data-lucide', 'volume-2');
+        soundIcon.className = 'w-3.5 h-3.5 text-emerald-400';
+        soundLabel.textContent = 'Sound ON';
+        playSound('score');
+      } else {
+        soundIcon.setAttribute('data-lucide', 'volume-x');
+        soundIcon.className = 'w-3.5 h-3.5 text-rose-400';
+        soundLabel.textContent = 'Sound OFF';
+      }
+      lucide.createIcons();
+    }
+
+    // --- INIT APP ---
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadStudentsFromStorage();
+      shufflePromptsDeck();
+      renderPrompt();
+      renderRoster();
+      renderLeaderboard();
+      startTimer();
+    });
+
+    // --- PROMPT DECK MANAGEMENT ---
+    function shufflePromptsDeck() {
+      promptsDeck = [...PROMPTS_DATASET];
+      for (let i = promptsDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [promptsDeck[i], promptsDeck[j]] = [promptsDeck[j], promptsDeck[i]];
+      }
+      currentPromptIndex = 0;
+      document.getElementById('totalRoundsNum').textContent = promptsDeck.length;
+      renderPrompt();
+      resetTimer();
+    }
+
+    function renderPrompt() {
+      if (promptsDeck.length === 0) return;
+      const current = promptsDeck[currentPromptIndex];
+
+      document.getElementById('currentRoundNum').textContent = currentPromptIndex + 1;
+      document.getElementById('promptDisplay').textContent = `"${current.text}"`;
+      document.getElementById('promptCategory').textContent = current.category;
+
+      const challengeBadge = document.getElementById('challengeBadge');
+      if (current.challenge) {
+        challengeBadge.classList.remove('hidden');
+      } else {
+        challengeBadge.classList.add('hidden');
+      }
+
+      document.getElementById('prevBtn').disabled = (currentPromptIndex === 0);
+      document.getElementById('prevBtn').style.opacity = (currentPromptIndex === 0) ? '0.5' : '1';
+    }
+
+    function nextPrompt() {
+      if (currentPromptIndex < promptsDeck.length - 1) {
+        currentPromptIndex++;
+      } else {
+        currentPromptIndex = 0;
+      }
+      renderPrompt();
+      resetTimer();
+      startTimer();
+    }
+
+    function prevPrompt() {
+      if (currentPromptIndex > 0) {
+        currentPromptIndex--;
+        renderPrompt();
+        resetTimer();
+      }
+    }
+
+    // --- TIMER LOGIC ---
+    function startTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = true;
+      updateTimerUI();
+      playSound('start');
+
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          if (timerRemaining <= 3 && timerRemaining > 0) {
+            playSound('tick');
+          }
+          updateTimerUI();
+        } else {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          playSound('end');
+          updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+      } else {
+        if (timerRemaining === 0) timerRemaining = 30;
+        startTimer();
+      }
+      updateTimerUI();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerRemaining = 30;
+      isTimerRunning = false;
+      updateTimerUI();
+    }
+
+    function updateTimerUI() {
+      const timerDisplay = document.getElementById('timerSeconds');
+      const timerProgress = document.getElementById('timerProgress');
+      const statusText = document.getElementById('timerStatusText');
+      const statusDot = document.getElementById('timerStatusDot');
+      const pausePlayText = document.getElementById('pausePlayText');
+      const pausePlayIcon = document.getElementById('pausePlayIcon');
+
+      timerDisplay.textContent = timerRemaining;
+
+      // Circular ring offset (Radius 40 => Circumference = 251.32)
+      const offset = 251.32 - (timerRemaining / 30) * 251.32;
+      timerProgress.style.strokeDashoffset = offset;
+
+      if (timerRemaining <= 5) {
+        timerProgress.className = 'text-rose-500 transition-all duration-300 ease-linear animate-pulse';
+        timerDisplay.className = 'text-2xl font-black tracking-tight text-rose-400';
+      } else if (timerRemaining <= 10) {
+        timerProgress.className = 'text-amber-500 transition-all duration-300 ease-linear';
+        timerDisplay.className = 'text-2xl font-black tracking-tight text-amber-300';
+      } else {
+        timerProgress.className = 'text-indigo-400 transition-all duration-300 ease-linear';
+        timerDisplay.className = 'text-2xl font-black tracking-tight text-white';
+      }
+
+      if (isTimerRunning) {
+        statusText.textContent = 'Countdown Active';
+        statusText.className = 'text-xs font-extrabold text-emerald-400 uppercase tracking-wider';
+        statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping';
+        pausePlayText.textContent = 'Pause Timer';
+        pausePlayIcon.setAttribute('data-lucide', 'pause');
+      } else if (timerRemaining === 0) {
+        statusText.textContent = "TIME'S UP!";
+        statusText.className = 'text-xs font-extrabold text-rose-500 uppercase tracking-wider animate-bounce';
+        statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+        pausePlayText.textContent = 'Start Timer';
+        pausePlayIcon.setAttribute('data-lucide', 'play');
+      } else {
+        statusText.textContent = 'Paused';
+        statusText.className = 'text-xs font-extrabold text-amber-400 uppercase tracking-wider';
+        statusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+        pausePlayText.textContent = 'Resume Timer';
+        pausePlayIcon.setAttribute('data-lucide', 'play');
+      }
+      lucide.createIcons();
+    }
+
+    // --- STUDENT ROSTER & SCORING ---
+    function loadStudentsFromStorage() {
+      const saved = localStorage.getItem('scramble_students');
+      if (saved) {
+        try {
+          students = JSON.parse(saved);
+        } catch (e) {
+          students = [];
+        }
+      } else {
+        students = [
+          { id: '1', name: 'Alex', score: 0 },
+          { id: '2', name: 'Bella', score: 0 },
+          { id: '3', name: 'Carlos', score: 0 },
+          { id: '4', name: 'Diana', score: 0 },
+          { id: '5', name: 'Ethan', score: 0 }
+        ];
+        saveStudentsToStorage();
+      }
+    }
+
+    function saveStudentsToStorage() {
+      localStorage.setItem('scramble_students', JSON.stringify(students));
+    }
+
+    function addSingleStudent() {
+      const input = document.getElementById('quickAddInput');
+      const name = input.value.trim();
+      if (name) {
+        students.push({
+          id: Date.now().toString(),
+          name: name,
+          score: 0
+        });
+        saveStudentsToStorage();
+        input.value = '';
+        renderRoster();
+        renderLeaderboard();
+      }
+    }
+
+    function addPoints(studentId, amount) {
+      const student = students.find(s => s.id === studentId);
+      if (student) {
+        student.score = Math.max(0, student.score + amount);
+        saveStudentsToStorage();
+        
+        if (amount > 0) {
+          playSound('score');
+          try {
+            confetti({
+              particleCount: 20,
+              spread: 50,
+              origin: { y: 0.85 }
+            });
+          } catch(e){}
+        }
+
+        renderRoster();
+        renderLeaderboard();
+      }
+    }
+
+    function deleteStudent(studentId) {
+      students = students.filter(s => s.id !== studentId);
+      saveStudentsToStorage();
+      renderRoster();
+      renderLeaderboard();
+    }
+
+    function resetAllScores() {
+      if (confirm('Reset scores for all students to 0?')) {
+        students.forEach(s => s.score = 0);
+        saveStudentsToStorage();
+        renderRoster();
+        renderLeaderboard();
+      }
+    }
+
+    // --- ALPHABETICAL ROSTER RENDER ---
+    function renderRoster() {
+      const container = document.getElementById('rosterList');
+      const countBadge = document.getElementById('studentCountBadge');
+      container.innerHTML = '';
+
+      countBadge.textContent = `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+
+      if (students.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">No students added.</div>`;
+        return;
+      }
+
+      const sortedRoster = [...students].sort((a, b) => a.name.localeCompare(b.name));
+
+      sortedRoster.forEach(student => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all';
+        row.innerHTML = `
+          <div class="flex items-center gap-2 overflow-hidden">
+            <div class="w-6 h-6 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[11px] flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
+              ${student.name.charAt(0).toUpperCase()}
+            </div>
+            <span class="font-bold text-xs text-slate-200 truncate" title="${student.name}">${student.name}</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <span class="text-xs font-black text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 min-w-[24px] text-center">${student.score}</span>
+            <button onclick="addPoints('${student.id}', 1)" class="px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-sm shadow-emerald-600/30 flex items-center transition-all transform active:scale-95">
+              +1
+            </button>
+            <button onclick="deleteStudent('${student.id}')" class="text-slate-600 hover:text-rose-400 p-0.5 transition-colors" title="Delete">
+              <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    // --- LEADERBOARD RENDER ---
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboardList');
+      container.innerHTML = '';
+
+      if (students.length === 0) {
+        container.innerHTML = `<div class="text-center py-2 text-[11px] text-slate-500">No student scores yet</div>`;
+        return;
+      }
+
+      const sortedByScore = [...students]
+        .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+        .slice(0, 5);
+
+      const rankIcons = ['🥇', '🥈', '🥉', '4th', '5th'];
+
+      sortedByScore.forEach((student, index) => {
+        const row = document.createElement('div');
+        const isTop3 = index < 3;
+        
+        row.className = `flex items-center justify-between p-1.5 rounded-lg text-[11px] ${
+          index === 0 ? 'bg-amber-500/15 border border-amber-500/30 text-amber-200' :
+          index === 1 ? 'bg-slate-800/80 border border-slate-700 text-slate-200' :
+          index === 2 ? 'bg-amber-900/20 border border-amber-800/30 text-amber-300' :
+          'bg-slate-900/40 text-slate-400'
+        }`;
+
+        row.innerHTML = `
+          <div class="flex items-center gap-1.5 overflow-hidden">
+            <span class="w-5 text-center font-bold">${rankIcons[index]}</span>
+            <span class="font-bold truncate">${student.name}</span>
+          </div>
+          <span class="font-black px-1.5 py-0.5 rounded ${isTop3 ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-300'}">
+            ${student.score} pts
+          </span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // --- MODAL FUNCTIONS ---
+    function openRosterModal() {
+      document.getElementById('rosterModal').classList.remove('hidden');
+    }
+
+    function closeRosterModal() {
+      document.getElementById('rosterModal').classList.add('hidden');
+    }
+
+    function saveBulkRoster() {
+      const text = document.getElementById('bulkRosterInput').value;
+      if (!text.trim()) return;
+
+      const lines = text.split(/[\n,]/).map(s => s.trim()).filter(s => s.length > 0);
+      lines.forEach(name => {
+        if (!students.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+          students.push({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
+            name: name,
+            score: 0
+          });
+        }
+      });
+
+      saveStudentsToStorage();
+      document.getElementById('bulkRosterInput').value = '';
+      closeRosterModal();
+      renderRoster();
+      renderLeaderboard();
+    }
+
+    function clearEntireRoster() {
+      if (confirm('Are you sure you want to delete ALL students from the roster?')) {
+        students = [];
+        saveStudentsToStorage();
+        closeRosterModal();
+        renderRoster();
+        renderLeaderboard();
+      }
+    }
+  </script>
+</body>
+</html>
