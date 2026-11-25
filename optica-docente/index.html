@@ -33,21 +33,28 @@ summary{cursor:pointer;font-weight:650;padding:.25rem 0}
 #answer{border-top:1px solid var(--border);padding-top:.75rem;color:var(--lime)}
 #timer{font-variant-numeric:tabular-nums}
 [hidden]{display:none!important}
+header{padding-bottom:.55rem} h1{font-size:clamp(1.65rem,6vw,2.6rem)}
+.settings{grid-template-columns:5rem minmax(0,1fr);margin:.7rem 0;gap:.45rem}.game-picker{grid-column:auto;grid-row:1;grid-column:2}.settings>div{grid-column:1/-1}.settings>div label{display:none}#timer-button{min-height:44px}
+#counter{margin:0;font-weight:700;color:var(--lime)}#mode{font-size:.95rem;color:var(--muted)}
+#prompt{line-height:1.28;font-size:clamp(1.65rem,6.5vw,2.4rem)}#direction{color:var(--muted)}#answer{font-size:1.18rem}
+.controls{position:sticky;bottom:0;background:var(--bg);padding:.65rem 0 max(.65rem,env(safe-area-inset-bottom));margin:.25rem 0;z-index:2}
+input{font:inherit;padding:.75rem;min-width:0;border-radius:.5rem}#unlock{margin:1rem 0}#unlock button{margin-top:.6rem}
 </style>
 <script src="./app.js" defer></script>
 </head>
 <body><main>
 <header><p>EnglishCode · Apoyo docente</p><h1>Concurso de la óptica</h1></header>
-<p id="locked" role="status">Abriendo el panel…</p>
+<form id="unlock" hidden><label>Enlace privado del docente<input id="access" type="password" autocomplete="off" placeholder="Pega tu enlace de acceso"></label><button class="primary">Abrir panel</button></form><p id="locked" role="status">Abriendo el panel…</p>
 <div id="panel" hidden>
-<details><summary>Orden de la clase</summary><p><strong>45 min:</strong> 5 de repaso, 12 de teléfono, 10 de doblaje, 9 de venta y 9 de entrevista.</p><p><strong>30 min:</strong> 8 de vocabulario, 12 de teléfono y 10 de doblaje.</p><p>Primera sesión de 45 min: 15 de vocabulario, 12 de teléfono, 9 de doblaje y 9 de entrevista. Da un punto por conservar la idea o responder en inglés con sentido.</p></details>
+
 <div class="settings">
-<label>Grado<select id="grade"><option value="0">1.º · Con apoyo</option><option value="1">2.º · Frase completa</option><option value="2">3.º · Improvisación</option></select></label>
+<label>Nivel<select id="grade"><option value="0">A1</option><option value="1">A2</option><option value="2">B1</option><option value="3">B2</option></select></label>
 <div><label for="timer-button">Cronómetro</label><button id="timer-button" type="button"><span id="timer">30 s</span> · Iniciar</button></div>
 <label class="game-picker">Juego<select id="game"></select></label>
 </div>
-<h2 id="game-title"></h2><p id="rules" class="muted"></p>
-<section class="card"><p class="muted" id="counter"></p><p id="mode"></p><p id="prompt" lang="en"></p><p id="direction"></p><button type="button" id="reveal">Ver respuesta o modelo</button><p id="answer" lang="en" hidden></p></section>
+<details><summary>Cómo se juega</summary><p id="rules" class="muted"></p></details>
+<section class="card"><p class="muted" id="counter"></p><p id="mode"></p><p id="prompt" lang="en"></p><p id="direction"></p><button type="button" id="reveal">Ver ejemplo</button><p id="answer" lang="en" hidden></p></section>
 <div class="controls"><button id="back" type="button">Anterior</button><button id="next" class="primary" type="button">Siguiente</button></div>
+<details><summary>Orden de la clase</summary><p><strong>45 min:</strong> 5 de repaso, 12 de teléfono, 10 de doblaje, 9 de venta y 9 de entrevista.</p><p><strong>30 min:</strong> 8 de vocabulario, 12 de teléfono y 10 de doblaje.</p><p>Primera sesión de 45 min: 15 de vocabulario, 12 de teléfono, 9 de doblaje y 9 de entrevista. Da un punto por conservar la idea o responder en inglés con sentido.</p></details>
 <details><summary>Vocabulario y pronunciación</summary><div id="words"></div></details>
 </div></main></body></html>
