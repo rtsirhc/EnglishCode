@@ -17,7 +17,10 @@ export default function GamePhase({ gameState, roomId }) {
 
     // Derive tracking board (Opponent's board from my perspective, hitting it)
     // Opponent boardStatus: 0 = unknown, 2 = hit, 3 = miss
-    const trackingGrid = opponent ? opponent.boardStatus : [];
+    const trackingGrid = opponent ? opponent.boardStatus.map(row => [...row]) : [];
+    for (const cell of me?.duds || []) {
+        if (trackingGrid[cell.y]?.[cell.x] === 0) trackingGrid[cell.y][cell.x] = 4;
+    }
 
     // My board (Shows my ships, hits, and misses)
     const myGrid = me ? me.boardStatus : [];
@@ -59,13 +62,14 @@ export default function GamePhase({ gameState, roomId }) {
                     <h2 className={isMyTurn ? 'my-turn' : 'opponent-turn'}>
                         {isMyTurn ? 'YOUR TURN TO ATTACK' : `WAITING FOR ${opponent.name.toUpperCase()}...`}
                     </h2>
-                    {error && <div className="error-text" style={{ marginTop: '0.5rem' }}>{error}</div>}
+                    {error && <div role="alert" className="error-text" style={{ marginTop: '0.5rem' }}>{error}</div>}
                 </div>
             )}
 
             <div className="boards-layout">
                 <div className="board-section glass-panel tracking-board">
                     <h3>Target Tracking Board (Attack Here)</h3>
+                    <p className="board-scroll-hint">Scroll sideways to reach every column.</p>
                     <div className="board-scroll-wrapper">
                         <Board
                             axes={gameState.axes}
@@ -78,6 +82,7 @@ export default function GamePhase({ gameState, roomId }) {
 
                 <div className="board-section glass-panel my-board">
                     <h3>Your Deployment Board</h3>
+                    <p className="board-scroll-hint">Scroll sideways to reach every column.</p>
                     <div className="board-scroll-wrapper">
                         <Board
                             axes={gameState.axes}

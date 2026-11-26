@@ -1046,3 +1046,13 @@ button {
     background: #fff;
   }
 }
+
+.sentence:focus-visible { outline: 2px solid #d9b76a; outline-offset: 3px; }
+
+html { scroll-padding-top: 110px; }
+@media (max-width: 880px) {
+  html { scroll-padding-top: 0; }
+  .topbar { position: static; }
+}
+
+.verdict-banner { overflow: hidden; }

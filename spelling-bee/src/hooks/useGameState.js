@@ -71,6 +71,7 @@ export const useGameState = (broadcastState, broadcastSpin) => {
         liveText: '',
         // Return targetIndex so TeacherPanel / App can use it
         _lastSpinTarget: targetIndex,
+        spinNumber: (prev.spinNumber || 0) + 1,
       };
     });
   }, [broadcastSpin]);
@@ -96,7 +97,8 @@ export const useGameState = (broadcastState, broadcastSpin) => {
       let newEliminated = prev.eliminated;
       let newSpinQueue = prev.spinQueue;
 
-      if (!correct) {
+      const practiceRetry = !correct && prev.students.length === 1;
+      if (!correct && !practiceRetry) {
         newEliminated = [...prev.eliminated, prev.currentStudent];
         newStudents = prev.students.filter((s) => s !== prev.currentStudent);
         newSpinQueue = prev.spinQueue.filter((s) => s !== prev.currentStudent);
@@ -109,6 +111,7 @@ export const useGameState = (broadcastState, broadcastSpin) => {
         spinQueue: newSpinQueue,
         lastResult: {
           correct,
+          practiceRetry,
           answer: answer.trim(),
           word: prev.currentWord,
           eliminatedName: !correct ? prev.currentStudent : null,
@@ -122,7 +125,8 @@ export const useGameState = (broadcastState, broadcastSpin) => {
 
   const gameNext = useCallback(() => {
     setState((prev) => {
-      if (prev.students.length <= 1) {
+      if (prev.lastResult?.practiceRetry) return { ...prev, phase: 'playing', lastResult: null };
+      if (prev.students.length === 1) {
         // Build podium
         const champion = prev.students[0];
         const podium = [champion];
@@ -155,7 +159,7 @@ export const useGameState = (broadcastState, broadcastSpin) => {
     const t = name.trim();
     if (!t) return;
     setState((prev) => {
-      if (prev.students.includes(t)) return prev;
+      if ([...prev.students, ...prev.eliminated].some(name => name.toLowerCase() === t.toLowerCase())) return prev;
       return { ...prev, students: [...prev.students, t] };
     });
   }, []);

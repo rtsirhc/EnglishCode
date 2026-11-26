@@ -34,7 +34,7 @@ export default function Game1Student({ state }) {
   const handleNext   = () => socket.emit('game1_next');
 
   const totalQs     = game1.totalQuestions ?? 20;
-  const remaining   = game1.queue.length + (game1.current ? 1 : 0);
+  const remaining   = totalQs - game1.correctCount;
   const answered    = game1.correctCount;
   const progressPct = Math.round((answered / totalQs) * 100);
 

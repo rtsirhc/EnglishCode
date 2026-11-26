@@ -2,7 +2,7 @@ export type ButtonKey = 'A' | 'B' | 'X' | 'Y';
 
 export type Question = {
   prompt: string;
-  answers: Record<ButtonKey, string>;
+  answers: Partial<Record<ButtonKey, string>>;
   correct: ButtonKey;
 };
 

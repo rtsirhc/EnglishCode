@@ -6,7 +6,6 @@
   <title>🌍 Escape Planet Earth — Teacher Dashboard</title>
   <link rel="stylesheet" href="css/shared.css">
   <link rel="stylesheet" href="css/teacher.css">
-  <script src="js/supabase.js"></script>
 </head>
 <body>
   <div class="teacher-container">
@@ -16,23 +15,32 @@
       <p class="subtitle">Teacher Dashboard</p>
     </div>
 
+    <div class="card" id="room-create-panel">
+      <label for="mode">Connection</label>
+      <select id="mode" class="input-field">
+        <option value="local">Same browser · multiple tabs</option>
+        <option value="online">Separate devices · internet</option>
+      </select>
+      <button id="create-room" class="btn mt-2">Create Room</button>
+      <p id="room-status" role="status"></p>
+    </div>
     <!-- Setup Section (before game starts) -->
-    <div id="setup-section" class="setup-section">
+    <div id="setup-section" class="setup-section hidden">
       <div class="card">
-        <p class="text-center text-secondary mb-2">Students: scan the QR code or enter the room code</p>
+        <p class="text-center text-secondary mb-2" id="join-guidance"></p>
         <div class="text-center">
           <div class="room-code-display" id="room-code-display">------</div>
         </div>
         <div class="text-center">
           <div class="qr-container" id="qr-container"></div>
         </div>
-        <p class="join-url text-center" id="join-url"></p>
+        <a class="join-url text-center" id="join-url" target="_blank" rel="noopener"></a>
       </div>
 
       <div class="teams-section" id="waiting-teams">
         <div class="teams-header">
           <h2>👥 Teams Joined</h2>
-          <span class="teams-count" id="teams-count">0 teams</span>
+          <span class="teams-count" id="teams-count">0</span>
         </div>
         <div id="waiting-teams-list">
           <p class="no-teams">Waiting for teams to join...</p>
@@ -40,10 +48,10 @@
       </div>
 
       <div class="text-center">
-        <button class="btn btn--large start-btn" id="start-btn" disabled onclick="startGame()">
+        <button class="btn btn--large start-btn" id="start-btn" disabled>
           🚀 Start Game
         </button>
-        <p class="text-secondary mt-1" id="start-hint">Need at least 1 team to start</p>
+
       </div>
     </div>
 
@@ -52,18 +60,18 @@
       <div class="teams-section">
         <div class="teams-header">
           <h2>🏆 Leaderboard</h2>
-          <span class="teams-count" id="active-teams-count">0 teams</span>
+          <span class="teams-count" id="active-teams-count">0</span>
         </div>
         <div id="leaderboard"></div>
       </div>
 
       <div class="new-game-section">
-        <button class="btn btn--danger" onclick="newGame()">🔄 New Game</button>
+        <button class="btn btn--danger" id="new-game">🔄 New Game</button>
       </div>
     </div>
   </div>
 
-  <script src="js/supabase-config.js"></script>
-  <script src="js/teacher.js"></script>
+  <script src="/qrcode.js"></script>
+  <script type="module" src="js/teacher.js"></script>
 </body>
 </html>

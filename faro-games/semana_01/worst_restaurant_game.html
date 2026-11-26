@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Worst Restaurant in the World</title>
+<style>
+:root{--ink:#141414;--paper:#fffdf5;--cyan:#00c9e8;--lime:#b8f52a;--yellow:#ffe44f;--pink:#ff62bb;--red:#f13b30;--blue:#d9f8ff;--muted:#6a6a63;--shadow:4px 5px 0 var(--ink)}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Trebuchet MS",Arial,sans-serif;color:var(--ink);background:var(--paper)}body{background-image:radial-gradient(#b6b4ac 1px,transparent 1px);background-size:20px 20px}button,input{font:inherit;color:inherit}button{cursor:pointer}.hidden{display:none!important}.sketch{border:3px solid var(--ink);border-radius:16px 5px 15px 7px/7px 16px 6px 17px;box-shadow:var(--shadow)}.small{font-size:11px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase}.teacher{height:100vh;min-height:680px;display:grid;grid-template-columns:320px minmax(0,1fr);overflow:hidden}.teacher-rail{background:var(--cyan);border-right:4px solid var(--ink);padding:15px;display:flex;flex-direction:column;gap:12px;overflow:hidden}.brand{display:flex;align-items:center;gap:10px;min-height:55px}.brand img{width:61px;height:61px;object-fit:contain;background:#fff;border:3px solid var(--ink)}h1,h2,h3,p{margin:0}.brand h1{font:900 24px/1 "Arial Black",Arial,sans-serif;letter-spacing:-.8px}.projector-btn,.rail-action,.primary-action,.score-choice,.steal-choice,.team-row,.level button{border:3px solid var(--ink);font-weight:900;box-shadow:3px 3px 0 var(--ink)}.projector-btn{min-height:45px;background:var(--pink);font-size:15px}.team-label{display:flex;justify-content:space-between;align-items:end;margin-top:2px}.team-label span:last-child{font-size:11px;font-weight:900}.team-list{display:grid;gap:7px}.team-row{width:100%;display:grid;grid-template-columns:42px minmax(0,1fr)auto;align-items:center;gap:8px;padding:7px 9px;background:#fff;text-align:left;box-shadow:2px 3px 0 var(--ink)}.team-row .emoji{font-size:28px;text-align:center}.team-row .team-name{font:900 15px/1.05 "Arial Black",Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.team-row .team-meta{margin-top:3px;font-size:11px;font-weight:900;color:var(--muted)}.team-row .team-score{font:900 27px/1 "Arial Black",Arial,sans-serif}.team-row.can-pick{background:var(--yellow);transform:rotate(-.2deg)}.team-row.can-pick:hover{background:var(--lime)}.team-row.selected{outline:4px solid var(--pink);outline-offset:2px;background:var(--pink)}.rail-note{margin-top:auto;background:#fff;padding:10px 11px;font-size:12px;font-weight:800;line-height:1.25}.rail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rail-action{padding:9px 6px;background:#fff;font-size:12px}.rail-action.reset{background:var(--yellow)}.teacher-main{min-width:0;padding:20px 26px;display:grid;grid-template-rows:auto 1fr;gap:16px;overflow:hidden}.teacher-head{display:flex;justify-content:space-between;align-items:center;gap:18px}.teacher-head h2{font:900 31px/1 "Arial Black",Arial,sans-serif}.round-badge{background:var(--pink);padding:10px 14px;font:900 16px/1 "Arial Black",Arial,sans-serif;white-space:nowrap}.mission-flow{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:18px}.mission-panel{min-height:0;background:#fff;padding:22px 24px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}.phase-strip{display:flex;gap:7px;margin-bottom:20px}.phase-chip{padding:6px 9px;border:2px solid var(--ink);font-size:11px;font-weight:900;background:#fff;opacity:.4}.phase-chip.active{opacity:1;background:var(--lime);box-shadow:2px 2px 0 var(--ink)}.mission-panel h3{font:900 clamp(25px,3vw,42px)/1 "Arial Black",Arial,sans-serif;letter-spacing:-1px;margin-bottom:18px}.teacher-kicker{margin-bottom:7px}.teacher-order,.teacher-say,.teacher-answer,.teacher-bonus{border:3px solid var(--ink);padding:17px 19px;font-size:clamp(20px,2.3vw,31px);font-weight:900;line-height:1.2}.teacher-order{background:var(--yellow)}.teacher-say{background:#fff0aa;border-left:8px solid var(--red)}.teacher-answer{background:var(--blue)}.teacher-bonus{background:#ffd9ed}.teacher-help{font-size:15px;font-weight:800;line-height:1.3;color:#353535;margin:12px 0 20px}.main-action{width:100%;min-height:66px;margin-top:18px;border:4px solid var(--ink);padding:13px 17px;font:900 clamp(18px,2vw,26px)/1 "Arial Black",Arial,sans-serif;box-shadow:5px 5px 0 var(--ink)}.main-action.primary{background:var(--lime)}.main-action.listen{background:var(--cyan)}.main-action[disabled]{cursor:default;opacity:.8}.timer-readout{display:inline-flex;align-items:center;justify-content:center;min-width:135px;min-height:90px;background:var(--yellow);border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font:900 62px/1 "Arial Black",Arial,sans-serif}.ready-readout{background:var(--lime);font-size:38px;padding:0 18px}.steal-readout{background:var(--red);color:#fff;font:900 28px/1 "Arial Black",Arial,sans-serif;padding:14px 16px;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}.score-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.score-choice,.steal-choice{padding:16px 10px;background:var(--lime);font:900 17px/1 "Arial Black",Arial,sans-serif}.score-choice.try{background:var(--yellow)}.steal-choice{background:var(--red);color:#fff;grid-column:1/-1}.answer-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:18px}.voice-action{border:3px solid var(--ink);background:var(--pink);font-weight:900;padding:10px;box-shadow:3px 3px 0 var(--ink)}.voice-action.done{background:#fff;box-shadow:none;cursor:default}.side-guide{display:flex;flex-direction:column;gap:13px;min-height:0}.level-card,.next-card{background:#fff;padding:15px}.level-card h3,.next-card h3{font:900 16px/1 "Arial Black",Arial,sans-serif;margin-bottom:10px}.level{display:grid;gap:7px}.level button{padding:9px 8px;background:#fff;text-align:left;font-size:13px}.level button.active{background:var(--lime)}.next-card{margin-top:auto;background:var(--yellow);font-size:13px;font-weight:800;line-height:1.3}.next-card b{display:block;font:900 18px/1 "Arial Black",Arial,sans-serif;margin-bottom:8px}.setup-overlay{position:fixed;inset:0;background:#141414d9;z-index:10;display:grid;place-items:center;padding:20px}.setup-card{width:min(800px,100%);background:var(--paper);padding:22px;max-height:calc(100vh - 40px);overflow:auto}.setup-card h2{font:900 31px/1 "Arial Black",Arial,sans-serif;margin-bottom:15px}.setup-teams{display:grid;grid-template-columns:1fr 1fr;gap:9px}.setup-team{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:center}.avatar-btn{width:42px;height:42px;border:3px solid var(--ink);background:var(--yellow);font-size:24px}.setup-team input{min-width:0;padding:9px;border:3px solid var(--ink);font-weight:900;background:#fff}.avatar-picker{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.avatar-picker button{width:47px;height:44px;border:3px solid var(--ink);background:#fff;font-size:25px}.avatar-picker button.chosen{background:var(--lime)}.setup-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.screen{height:100vh;min-height:620px;padding:24px 28px;display:grid;grid-template-rows:auto 1fr;gap:18px;overflow:hidden}.screen-head{display:flex;justify-content:space-between;align-items:center;border-bottom:5px solid var(--ink);padding-bottom:13px;gap:15px}.screen-brand{display:flex;align-items:center;gap:13px}.screen-brand .plate{font-size:43px}.screen-brand h1{font:900 clamp(30px,4vw,52px)/.95 "Arial Black",Arial,sans-serif;letter-spacing:-1px}.screen-brand p{font-size:15px;font-weight:900;margin-top:6px}.screen-round{background:var(--pink);padding:12px 15px;white-space:nowrap;font:900 16px/1 "Arial Black",Arial,sans-serif}.screen-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;min-height:0}.student-mission{min-height:0;background:#fff;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.student-kicker{font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase}.student-mission h2{font:900 clamp(40px,5.3vw,76px)/1 "Arial Black",Arial,sans-serif;letter-spacing:-2px;margin:15px 0 20px;max-width:900px}.student-order,.student-answer,.student-hint,.student-bonus{max-width:900px;width:100%;border:4px solid var(--ink);padding:20px;font:900 clamp(25px,3.3vw,48px)/1.15 "Arial Black",Arial,sans-serif}.student-order{background:var(--yellow)}.student-answer{background:var(--blue)}.student-hint{background:var(--lime);font-size:clamp(22px,2.5vw,36px)}.student-hint.support{background:var(--yellow)}.student-bonus{background:var(--pink)}.student-instruction{margin-top:17px;font-size:clamp(18px,2vw,26px);font-weight:900}.student-timer{display:inline-grid;place-items:center;min-width:180px;min-height:110px;margin-top:22px;padding:12px 22px;border:5px solid var(--ink);box-shadow:5px 5px 0 var(--ink);background:var(--yellow);font:900 clamp(48px,6vw,80px)/1 "Arial Black",Arial,sans-serif}.student-timer.ready{background:var(--lime);font-size:clamp(38px,4.8vw,64px)}.student-steal{margin-top:22px;background:var(--red);color:#fff;border:5px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:18px 22px;font:900 clamp(34px,4.5vw,62px)/1 "Arial Black",Arial,sans-serif;transform:rotate(-1deg)}.student-side{display:grid;grid-template-rows:1fr auto;gap:14px;min-height:0}.student-scores{display:grid;gap:9px;align-content:start}.student-team{display:grid;grid-template-columns:42px minmax(0,1fr)auto;align-items:center;gap:8px;background:#fff;padding:11px 12px}.student-team.leading{background:var(--yellow)}.student-team.selected{background:var(--pink)}.student-team .emoji{font-size:30px}.student-team .name{font:900 16px/1 "Arial Black",Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.student-team .points{font:900 31px/1 "Arial Black",Arial,sans-serif}.student-rule{background:var(--yellow);padding:13px;font:900 16px/1.2 "Arial Black",Arial,sans-serif}.student-rule span{display:block;font:700 13px/1.3 "Trebuchet MS",Arial,sans-serif;margin-top:6px}@media(max-width:1050px){.teacher{grid-template-columns:270px minmax(0,1fr)}.teacher-rail{padding:12px}.mission-flow{grid-template-columns:1fr 190px}.screen-body{grid-template-columns:1fr 245px}.teacher-main{padding:18px}.team-row .team-meta{display:none}}@media(max-width:780px){.teacher{height:auto;min-height:100vh;display:block;overflow:auto}.teacher-rail{border-right:0;border-bottom:4px solid var(--ink)}.teacher-main{height:auto;overflow:visible}.mission-flow{grid-template-columns:1fr}.side-guide{display:none}.screen{height:auto;min-height:100vh;overflow:visible;padding:16px}.screen-body{grid-template-columns:1fr}.student-side{grid-template-columns:1fr}.student-scores{grid-template-columns:1fr 1fr}.screen-brand p{display:none}}
+</style>
+<style>.hint-title{display:block;margin-bottom:9px;font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase}.score-choice.master{background:var(--pink)}.language-check{margin:12px 0;padding:10px 12px;border:3px dashed var(--red);background:#fff0aa;font-size:14px;font-weight:900;line-height:1.25}.language-check b{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}.confirm-overlay{position:fixed;inset:0;background:#141414b8;z-index:20;display:grid;place-items:center;padding:20px}.confirm-card{width:min(480px,100%);background:var(--paper);padding:24px;border:4px solid var(--ink);box-shadow:7px 7px 0 var(--ink);transform:rotate(-.5deg)}.confirm-card h2{font:900 25px/1 "Arial Black",Arial,sans-serif;margin-bottom:12px}.confirm-card p{font-size:16px;font-weight:800;line-height:1.35;margin-bottom:20px}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.confirm-actions button{border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:12px;font-weight:900}.confirm-cancel{background:#fff}.confirm-ok{background:var(--pink)}
+ .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:10px 0 18px}.podium-place{width:31%;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 6px;text-align:center;font-weight:900}.podium-place .podium-medal{font-size:25px;display:block}.podium-place .podium-avatar{font-size:32px;display:block}.podium-place .podium-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.podium-place .podium-points{display:block;font:900 23px/1 "Arial Black",Arial,sans-serif;margin-top:5px}.podium-place.first{background:var(--yellow);min-height:145px}.podium-place.second{background:#d9f8ff;min-height:118px}.podium-place.third{background:#ffd9ed;min-height:100px}
+.teacher,.screen{min-width:0}
+.mission-panel,.student-mission,.team-name,.student-team .name{overflow-wrap:anywhere}
+@media(max-width:780px){
+ .teacher:not(.hidden){display:flex;flex-direction:column}
+ .teacher-rail{display:contents}
+ .teacher-rail>.brand,.teacher-rail>.projector-btn,.teacher-rail>#projectionStatus{order:0;margin:.55rem .9rem 0}
+ .teacher-rail>.brand h1{font-size:1.45rem}
+ .teacher-rail>.brand br{display:none}
+ .teacher-main{order:1}
+ .teacher-rail>.team-label,.teacher-rail>.team-list,.teacher-rail>.rail-note,.teacher-rail>.rail-actions{order:2;margin:.35rem .9rem}
+ .teacher-rail>.team-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem}
+ .teacher-rail>.team-list button{min-height:44px}
+ .teacher-rail>.team-list .emoji{font-size:1.25rem}
+ .mission-flow{grid-template-columns:minmax(0,1fr)}
+ .side-guide{display:contents}
+ .level-card{grid-row:1}
+ .level{display:flex;flex-wrap:wrap}
+ .level button{min-height:40px}
+}
+@media(max-width:600px){
+ .mission-flow,.screen-body{min-width:0}
+ .phase-strip,.level,.screen-head{flex-wrap:wrap}
+ .setup-card,.confirm-card{max-height:calc(100dvh - 2rem);overflow:auto}
+ .podium-name{overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.undo-action{grid-column:1/-1;background:#fff}.undo-action:disabled{opacity:.45;box-shadow:none}.no-answer{grid-column:1/-1;background:#fff;color:var(--ink);border-style:dashed}.setup-team{grid-template-columns:42px minmax(0,1fr) 112px}.score-editor{display:grid;grid-template-columns:34px 38px 34px;align-items:center;text-align:center}.score-editor button{height:34px;border:2px solid var(--ink);background:var(--yellow);font-weight:900}.score-editor strong{font:900 18px/1 "Arial Black",Arial,sans-serif}.round-result-none{background:var(--yellow);border:3px dashed var(--ink);padding:10px 12px;font-size:14px;font-weight:900;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="teacherView" class="teacher hidden">
+  <aside class="teacher-rail">
+    <div class="brand"><div><div class="small">Teacher control</div><h1>Worst <br>Restaurant</h1></div></div>
+    <button id="openScreen" class="projector-btn">▣ OPEN PROJECTOR SCREEN</button><p id="projectionStatus" role="status" hidden></p>
+    <div class="team-label"><div class="small">Teams</div><span id="teamPrompt">Scoreboard</span></div>
+    <div id="teacherTeams" class="team-list"></div>
+    <div class="rail-note sketch" id="railNote">Use the big action in the center. Team buttons appear only when it is time to choose a hand.</div>
+    <div class="rail-actions"><button id="undoAction" class="rail-action undo-action" disabled>↶ UNDO LAST ACTION</button><button id="openSetup" class="rail-action">TEAMS + SCORES</button><button id="resetGame" class="rail-action reset">RESET</button></div>
+  </aside>
+  <main class="teacher-main">
+    <header class="teacher-head"><div><div class="small">Private teacher panel</div><h2 id="teacherPhaseTitle">Show the order</h2></div><div id="roundTag" class="round-badge sketch">ROUND 1 / 12</div></header>
+    <div class="mission-flow">
+      <section id="missionPanel" class="mission-panel sketch"></section>
+      <aside class="side-guide">
+        <section id="levelCard" class="level-card sketch"></section>
+        <section id="nextCard" class="next-card sketch"></section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div id="screenView" class="screen hidden">
+  <header class="screen-head">
+    <div class="screen-brand"><span class="plate">🍽️</span><div><h1>The Worst Restaurant</h1><p>Listen. Catch the mistake. Fix it.</p></div></div>
+    <div id="displayRound" class="screen-round sketch">ROUND 1</div>
+  </header>
+  <div class="screen-body">
+    <section id="studentMission" class="student-mission sketch"></section>
+    <aside class="student-side">
+      <div id="studentScores" class="student-scores"></div>
+      <div class="student-rule sketch">Every team thinks.<span>Use a different speaker each round.</span></div>
+    </aside>
+  </div>
+</div>
+
+<div id="setupOverlay" class="setup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+  <section class="setup-card sketch">
+    <h2 id="setupTitle">Teams and scores</h2>
+    <div id="setupTeams" class="setup-teams"></div>
+    <div id="avatarPicker" class="avatar-picker hidden"></div>
+    <div class="setup-footer"><button id="closeSetup" class="rail-action">DONE</button></div>
+  </section>
+</div>
+<div id="confirmOverlay" class="confirm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <section class="confirm-card">
+    <div class="small">Teacher control · check</div>
+    <h2 id="confirmTitle">Are you sure?</h2>
+    <p id="confirmMessage"></p>
+    <div class="confirm-actions"><button class="confirm-cancel" id="confirmCancel">CANCEL</button><button class="confirm-ok" id="confirmOk">CONTINUE</button></div>
+  </section>
+</div>
+
+<script type="module" src="./worst-restaurant.js"></script>
+</body>
+</html>

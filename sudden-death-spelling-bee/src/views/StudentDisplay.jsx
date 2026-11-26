@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStudentSync } from '../hooks/useSync';
+import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 
 const WheelOfNames = ({ activeStudents, isSpinning, currentStudent }) => {
@@ -49,7 +50,7 @@ const WheelOfNames = ({ activeStudents, isSpinning, currentStudent }) => {
           }}
         >
         </div>
-        <div style={{ position: 'absolute', fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)' }}>
+        <div style={{ position: 'absolute', maxWidth: '90%', overflowWrap: 'anywhere', textAlign: 'center', fontSize: '2rem', fontWeight: 900, color: 'var(--text-dark)' }}>
           {displayName}
         </div>
       </div>
@@ -79,11 +80,13 @@ const WheelOfNames = ({ activeStudents, isSpinning, currentStudent }) => {
 
 const VictoryScreen = ({ podium }) => {
   useEffect(() => {
-    const duration = 15 * 1000;
+    const duration = 3 * 1000;
+    let animationFrame;
     const end = Date.now() + duration;
 
     const frame = () => {
       confetti({
+        disableForReducedMotion: true,
         particleCount: 5,
         angle: 60,
         spread: 55,
@@ -91,6 +94,7 @@ const VictoryScreen = ({ podium }) => {
         colors: ['#8a2be2', '#ff3366', '#ffd700']
       });
       confetti({
+        disableForReducedMotion: true,
         particleCount: 5,
         angle: 120,
         spread: 55,
@@ -99,10 +103,11 @@ const VictoryScreen = ({ podium }) => {
       });
 
       if (Date.now() < end) {
-        requestAnimationFrame(frame);
+        animationFrame = requestAnimationFrame(frame);
       }
     };
     frame();
+    return () => { cancelAnimationFrame(animationFrame); confetti.reset(); };
   }, []);
 
   const first = podium.find(p => p.place === 1);
@@ -110,17 +115,17 @@ const VictoryScreen = ({ podium }) => {
   const third = podium.find(p => p.place === 3);
 
   return (
-    <div className="flex flex-col items-center justify-center text-center pop-in" style={{ minHeight: '100vh', width: '100%', position: 'relative', zIndex: 10 }}>
+    <div className="victory-screen flex flex-col items-center justify-center text-center" style={{ minHeight: '100vh', width: '100%', position: 'relative', zIndex: 10 }}>
       <h1 className="text-giant mb-4" style={{ color: 'var(--accent)', textShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
         VICTORY!
       </h1>
       
-      <div className="flex items-center justify-center mt-4" style={{ gap: '16px', height: '256px', alignItems: 'flex-end' }}>
+      <div className="victory-podium flex items-center justify-center mt-4" style={{ gap: '16px', height: '256px', alignItems: 'flex-end' }}>
         {/* 2nd Place */}
         {second && (
           <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.4s' }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px', color: 'white' }}>{second.name}</div>
-            <div className="flex items-center justify-center" style={{ width: '128px', height: '120px', background: '#ccc', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '2.5rem', fontWeight: 900, color: '#333' }}>
+            <div className="flex items-center justify-center" style={{ width: 'min(24vw,128px)', height: '120px', background: '#ccc', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '2.5rem', fontWeight: 900, color: '#333' }}>
               2
             </div>
           </div>
@@ -129,8 +134,8 @@ const VictoryScreen = ({ podium }) => {
         {/* 1st Place */}
         {first && (
           <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.8s' }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '8px', color: 'var(--accent)' }}>{first.name}</div>
-            <div className="flex items-center justify-center" style={{ width: '128px', height: '180px', background: 'var(--accent)', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '4rem', fontWeight: 900, color: '#554400', boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ fontSize: 'clamp(1rem, 5vw, 1.5rem)', fontWeight: 'bold', marginBottom: '8px', color: 'var(--accent)' }}>{first.name}</div>
+            <div className="flex items-center justify-center" style={{ width: 'min(24vw,128px)', height: '180px', background: 'var(--accent)', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '4rem', fontWeight: 900, color: '#554400', boxShadow: 'var(--shadow-lg)' }}>
               1
             </div>
           </div>
@@ -140,7 +145,7 @@ const VictoryScreen = ({ podium }) => {
         {third && (
           <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.2s' }}>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '8px', color: 'white' }}>{third.name}</div>
-            <div className="flex items-center justify-center" style={{ width: '128px', height: '80px', background: '#cd7f32', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '2rem', fontWeight: 900, color: '#3e2723' }}>
+            <div className="flex items-center justify-center" style={{ width: 'min(24vw,128px)', height: '80px', background: '#cd7f32', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontSize: '2rem', fontWeight: 900, color: '#3e2723' }}>
               3
             </div>
           </div>
@@ -151,7 +156,7 @@ const VictoryScreen = ({ podium }) => {
 };
 
 const StudentDisplay = () => {
-  const state = useStudentSync(null);
+  const state = useStudentSync(null, new URLSearchParams(useLocation().search).get('room'));
 
   if (!state || state.phase === 'setup') {
     return (
@@ -168,7 +173,7 @@ const StudentDisplay = () => {
   return (
     <div className="screen-container flex-col justify-between" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #192a56, #273c75)' }}>
       
-      <div className="flex mb-2" style={{ gap: '1.5rem', flex: 1, minHeight: 0 }}>
+      <div className="match-columns flex mb-2" style={{ gap: '1.5rem', flex: 1, minHeight: 0 }}>
         
         {/* Left/Center: Target Word & Timer */}
         <div className="flex flex-col" style={{ gap: '1.5rem', flex: 2, minHeight: 0 }}>
@@ -177,7 +182,7 @@ const StudentDisplay = () => {
             <h2 style={{ position: 'absolute', top: '16px', left: '24px', fontSize: '1.25rem', fontWeight: 'bold', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '2px', color: '#2d3436' }}>Current Word</h2>
             
             {state.wordVisible ? (
-              <div className="text-giant font-black pop-in" style={{ transform: 'scale(1.2)', color: 'var(--primary)' }}>
+              <div className="text-giant font-black pop-in" style={{ maxWidth: '100%', overflowWrap: 'anywhere', color: 'var(--primary)' }}>
                 {state.currentWord}
               </div>
             ) : (
@@ -201,7 +206,7 @@ const StudentDisplay = () => {
 
           <div className="glass-panel text-center flex items-center justify-center">
             <div className={`timer-text my-2 ${state.timer <= 10 ? 'danger-text' : ''}`} style={{ fontSize: '3rem', color: state.timer <= 10 ? 'var(--danger)' : 'var(--primary)', margin: 0 }}>
-              0:{state.timer.toString().padStart(2, '0')}
+              {Math.floor(state.timer / 60)}:{String(state.timer % 60).padStart(2, '0')}
             </div>
           </div>
         </div>

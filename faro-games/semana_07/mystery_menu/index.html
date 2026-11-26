@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111318">
+  <title>Mystery Menu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">m</span><div>MYSTERY <span>MENU</span></div></div>
+    <div id="clock"></div><div id="phase"></div>
+  </header>
+  <div id="teams"></div>
+  <div id="notice" role="status"></div>
+  <main id="app">
+    <section class="panel">
+      <h1>Mystery Menu</h1>
+      <p>Compra ingredientes y presenta un menú de tres platos en inglés.</p>
+      <div class="actions">
+        <a class="mode-link" href="?view=teacher">Competencia por equipos</a>
+        <a class="mode-link" href="?view=shop">Caja sin equipos</a>
+      </div>
+    </section>
+  </main>
+  <div id="transition" aria-live="polite"></div>
+  <script type="module">
+    const view = new URLSearchParams(location.search).get('view');
+    const module = ['teacher', 'helper', 'display'].includes(view) ? './app.js' :
+      ['shop', 'shop-display'].includes(view) ? './shop.js' : null;
+    if (module) import(module).catch(error => {
+      document.querySelector('#notice').textContent = error.message;
+    });
+  </script>
+</body>
+</html>

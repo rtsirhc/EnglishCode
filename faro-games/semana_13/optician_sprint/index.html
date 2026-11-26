@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Optician's 20/20 Bet &amp; Speak</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="badge">20/20</span>
+      <div>
+        <h1>Optician's 20/20 Bet &amp; Speak</h1>
+        <p class="subtitle">Everyone speaks · Team huddle + solo voice</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-review" class="btn btn-secondary" type="button">3-Min Vocab Flash</button>
+      <button id="btn-sound" class="btn btn-ghost" type="button" aria-pressed="true">Sound: ON</button>
+      <button id="btn-full" class="btn btn-ghost" type="button">Fullscreen</button>
+      <button id="btn-finish" class="btn btn-accent" type="button" hidden>Finish &amp; Podium</button>
+      <button id="btn-reset" class="btn btn-danger" type="button" hidden>New Game</button>
+    </div>
+  </header>
+
+  <main id="screen-setup" class="screen setup-screen">
+    <section class="panel setup-card">
+      <h2>Classroom Setup (No Student Phones Needed)</h2>
+      <p class="lead">Count off <strong>#1, #2, #3...</strong> inside each team. Every round rotates to the next speaker number so <strong>every student speaks English</strong>.</p>
+      <div class="setup-grid">
+        <label class="field">
+          <span>CEFR Level</span>
+          <select id="opt-level">
+            <option value="A1">A1 — Guided Frames (Visual support)</option>
+            <option value="A2" selected>A2 — Everyday Optician (Core)</option>
+            <option value="B1">B1 — Follow-up &amp; Reasons (Stretch)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Number of Teams</span>
+          <select id="opt-teams">
+            <option value="2">2 Teams</option>
+            <option value="3">3 Teams</option>
+            <option value="4">4 Teams</option>
+            <option value="5" selected>5 Teams</option>
+            <option value="6">6 Teams</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Speakers per Team (#1 to #N)</span>
+          <select id="opt-speakers">
+            <option value="3">3 Speakers (#1–#3)</option>
+            <option value="4">4 Speakers (#1–#4)</option>
+            <option value="5" selected>5 Speakers (#1–#5)</option>
+            <option value="6">6 Speakers (#1–#6)</option>
+            <option value="7">7 Speakers (#1–#7)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Huddle Timer (seconds)</span>
+          <select id="opt-timer">
+            <option value="15" selected>15s (Fast pace)</option>
+            <option value="20">20s (Standard)</option>
+            <option value="30">30s (Extra support)</option>
+          </select>
+        </label>
+      </div>
+      <div class="rules-strip">
+        <div><strong>1. Bet:</strong> Team picks stake before seeing the card.</div>
+        <div><strong>2. Huddle:</strong> Whole team coaches Speaker #X in English.</div>
+        <div><strong>3. Solo Voice:</strong> Only Speaker #X speaks aloud (+100% Clean, +50% Echo, -50% Miss).</div>
+      </div>
+      <div class="setup-cta">
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">Start Competition</button>
+        <button id="btn-resume" class="btn btn-secondary btn-xl" type="button" hidden>Resume Saved Match</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-play" class="screen play-screen" hidden>
+    <section class="scoreboard" id="scoreboard" aria-label="Team scores"></section>
+
+    <section class="stage-grid">
+      <div class="turn-banner">
+        <div class="turn-pill">
+          <span class="label">ACTIVE TEAM</span>
+          <strong id="active-team-name">Team 1</strong>
+        </div>
+        <div class="speaker-pill">
+          <span class="label">MUST SPEAK ALOUD</span>
+          <strong id="active-speaker-num">SPEAKER #1</strong>
+        </div>
+        <div class="round-pill">
+          <span class="label">ROUND</span>
+          <strong id="round-counter">1</strong>
+        </div>
+        <button id="btn-next-speaker" class="btn btn-ghost btn-sm" type="button" title="Manually advance speaker number">Switch #</button>
+      </div>
+
+      <section id="phase-bet" class="card-panel">
+        <div class="cat-tag" id="bet-category">EYE CHART CHALLENGE</div>
+        <h2 class="big-prompt" id="bet-teaser">How much will your team bet on Speaker #1?</h2>
+        <p class="hint-line">Remember: the whole team can coach Speaker #1 during the huddle, then <strong>only Speaker #1 speaks</strong>.</p>
+        <div class="bet-grid" id="bet-buttons">
+          <button class="btn-bet" data-bet="100" type="button"><strong>100</strong><span>Safe</span></button>
+          <button class="btn-bet" data-bet="200" type="button"><strong>200</strong><span>Solid</span></button>
+          <button class="btn-bet" data-bet="400" type="button"><strong>400</strong><span>Bold</span></button>
+          <button class="btn-bet btn-bet-all" data-bet="all" type="button"><strong>ALL IN</strong><span>Max stake</span></button>
+        </div>
+      </section>
+
+      <section id="phase-challenge" class="card-panel" hidden>
+        <div class="challenge-head">
+          <span class="cat-tag" id="ch-category">CATEGORY</span>
+          <span class="stake-tag" id="ch-stake">STAKE: 200 PTS</span>
+          <div class="timer-box">
+            <span id="timer-display">15s</span>
+            <button id="btn-timer-toggle" class="btn btn-ghost btn-sm" type="button">Start Huddle</button>
+          </div>
+        </div>
+
+        <div class="visual-slot" id="ch-visual" hidden></div>
+        <h2 class="big-prompt" id="ch-prompt"></h2>
+        <p class="support-frame" id="ch-frame" hidden></p>
+
+        <div class="answer-box" id="ch-answer-box" hidden>
+          <div class="answer-label">MODEL ANSWER / CORRECTION</div>
+          <p class="answer-text" id="ch-answer"></p>
+          <p class="answer-tip" id="ch-tip"></p>
+        </div>
+
+        <div class="judge-bar">
+          <button id="btn-reveal" class="btn btn-secondary" type="button">Reveal Model (R)</button>
+          <div class="verdict-group">
+            <button id="btn-clean" class="btn btn-success" type="button">Clean Solo (+100%) [1]</button>
+            <button id="btn-echo" class="btn btn-warn" type="button">Assisted Echo (+50%) [2]</button>
+            <button id="btn-miss" class="btn btn-danger" type="button">Missed / Explain (-50%) [3]</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <main id="screen-podium" class="screen podium-screen" hidden>
+    <section class="panel podium-card">
+      <h2>20/20 Optician's Championship Podium</h2>
+      <p id="podium-summary" class="lead"></p>
+      <ol id="podium-list" class="podium-list"></ol>
+      <div class="setup-cta">
+        <button id="btn-play-again" class="btn btn-primary btn-xl" type="button">Play Again</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="review-dialog" class="modal">
+    <div class="modal-head">
+      <h2>3-Minute Optician Vocab Flash</h2>
+      <button id="btn-close-review" class="btn btn-ghost" type="button">Close (Esc)</button>
+    </div>
+    <p class="hint-line">Use this before playing if the group missed Class 1 or needs a fast recall. Click any card to reveal the phrase.</p>
+    <div id="review-grid" class="review-grid"></div>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

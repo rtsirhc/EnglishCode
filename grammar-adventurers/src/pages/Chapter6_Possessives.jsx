@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import StoryPage from '../components/StoryPage';
-import leoImg from '../assets/leo.png';
-import miaImg from '../assets/mia.png';
-import ivyImg from '../assets/ivy.png';
-import samImg from '../assets/sam.png';
+import leoImg from '../assets/leo.webp';
+import miaImg from '../assets/mia.webp';
+import ivyImg from '../assets/ivy.webp';
+import samImg from '../assets/sam.webp';
 
 const Chapter6_Possessives = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [completed, setCompleted] = useState([]);
 
+    const [feedback, setFeedback] = useState('');
     const items = [
         { id: 'camera', emoji: '📷', name: 'Camera', owner: 'Mia' },
         { id: 'skateboard', emoji: '🛹', name: 'Skateboard', owner: 'Leo' },
@@ -24,6 +25,7 @@ const Chapter6_Possessives = () => {
     ];
 
     const handleItemClick = (item) => {
+        setFeedback('');
         if (!completed.includes(item.id)) setSelectedItem(item);
     };
 
@@ -31,8 +33,9 @@ const Chapter6_Possessives = () => {
         if (selectedItem && selectedItem.owner === person.name) {
             setCompleted([...completed, selectedItem.id]);
             setSelectedItem(null);
+            setFeedback('');
         } else if (selectedItem) {
-            alert(`That's not ${person.name}'s item! Try again.`);
+            setFeedback(`That's not ${person.name}'s item! Try again.`);
         }
     };
 
@@ -78,13 +81,14 @@ const Chapter6_Possessives = () => {
                                         : "Click an item to pick it up!"}
                             </p>
 
-                            <div className="flex justify-center gap-4 mb-4">
+                            <div className="flex flex-wrap justify-center gap-2 mb-4">
                                 {items.map(item => {
                                     if (completed.includes(item.id)) return null;
                                     const isSelected = selectedItem?.id === item.id;
                                     return (
                                         <button
                                             key={item.id}
+                                            aria-label={item.name}
                                             onClick={() => handleItemClick(item)}
                                             className={`text-4xl p-3 rounded-xl border-4 transition ${isSelected ? 'bg-yellow-200 border-yellow-400 rotate-12 scale-110' : 'bg-slate-50 border-slate-200 hover:scale-105'}`}
                                         >
@@ -93,6 +97,7 @@ const Chapter6_Possessives = () => {
                                     );
                                 })}
                             </div>
+                            <p role="status">{feedback}</p>
                         </div>
                     </div>
                 </div>
@@ -101,8 +106,8 @@ const Chapter6_Possessives = () => {
             CharacterArea={
                 <div className="grid grid-cols-2 gap-4 w-full h-full items-end p-4">
                     {people.map(person => (
-                        <div key={person.name} onClick={() => handlePersonClick(person)} className="relative cursor-pointer transition transform hover:scale-105 group flex flex-col items-center">
-                            <img src={person.image} alt={person.name} className="h-40 md:h-48 object-contain mx-auto drop-shadow-xl" />
+                        <button type="button" key={person.name} onClick={() => handlePersonClick(person)} className="relative cursor-pointer transition transform hover:scale-105 group flex flex-col items-center">
+                            <img src={person.image} alt="" className="h-40 md:h-48 object-contain mx-auto drop-shadow-xl" />
                             <span className="mt-1 bg-adventure-blue text-white px-2 py-1 rounded-full text-xs font-bold">{person.name}</span>
                             {/* Floating collected item */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4">
@@ -110,7 +115,7 @@ const Chapter6_Possessives = () => {
                                     <span key={i.id} className="text-3xl drop-shadow-md animate-bounce">{i.emoji}</span>
                                 ))}
                             </div>
-                        </div>
+                        </button>
                     ))}
                 </div>
             }

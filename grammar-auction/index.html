@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏛️ ESL Grammar Auction</title>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
+select { color:#e2e8f0; background:#1e293b; border:1px solid #64748b; border-radius:8px; padding:10px; margin:8px; }
+button.role-card { color:inherit; font:inherit; font-weight:700; }
+#joinLinkDisplay { display:block; overflow-wrap:anywhere; }
+#replay-btn { margin-top:1rem; }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
 body {
@@ -318,18 +321,17 @@ input:focus { border-color: #f59e0b; }
 <div id="roleSelect">
   <h1 class="gold glow-text">🏛️ ESL Grammar Auction</h1>
   <p class="subtitle">A real-time multiplayer classroom game</p>
+  <label for="host-mode">Connection</label>
+  <select id="host-mode">
+    <option value="local">Same browser · multiple tabs</option>
+    <option value="online">Separate devices · internet</option>
+  </select>
+  <label id="pack-choice" hidden><input id="use-pack" type="checkbox" checked> Play <span id="pack-title"></span></label>
   <div class="role-cards">
-    <div class="role-card card" onclick="initHost()">
-      <div class="icon">🖥️</div>
-      <h2>Host / Big Screen</h2>
-      <p>Project this on the classroom display. Controls questions, timer, and scoring.</p>
-    </div>
-    <div class="role-card card" onclick="showClientJoin()">
-      <div class="icon">📱</div>
-      <h2>Student / Mobile</h2>
-      <p>Join from your phone. Place bets on whether sentences are legal or illegal.</p>
-    </div>
+    <button class="role-card card" id="host-role" onclick="initHost()">🖥️ Host Game</button>
+    <button class="role-card card" onclick="showClientJoin()">📱 Join as Team</button>
   </div>
+  <p id="host-error" role="alert"></p>
 </div>
 
 <!-- HOST SCREEN -->
@@ -348,7 +350,7 @@ input:focus { border-color: #f59e0b; }
       <div class="card">
         <h3 class="gold" style="margin-bottom:10px;font-size:0.95rem;">📋 Game Setup</h3>
         <div class="team-count-selector">
-          <label>Teams:</label>
+          <label>Team limit</label>
           <div id="teamCountBtns"></div>
         </div>
       </div>
@@ -363,7 +365,7 @@ input:focus { border-color: #f59e0b; }
     <div class="card qr-section">
       <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">📲 Scan to Join</h3>
       <div id="qrCode"></div>
-      <div class="join-link" id="joinLinkDisplay"></div>
+      <a class="join-link" id="joinLinkDisplay" target="_blank" rel="noopener"></a>
       <button class="btn btn-blue btn-sm" onclick="copyJoinLink()">📋 Copy Student Link</button>
       <p id="copyMsg" style="color:#22c55e;font-size:0.75rem;margin-top:4px;" class="hidden">✓ Copied!</p>
     </div>
@@ -407,10 +409,10 @@ input:focus { border-color: #f59e0b; }
       <div class="fc-team" id="fcTeam"></div>
       <div class="fc-amount" id="fcAmount"></div>
       <div class="fc-input-group">
-        <input type="text" id="fcInput" placeholder="e.g. fourteen thousand five hundred" onkeydown="if(event.key==='Enter')checkSpelling()">
-        <button class="btn btn-gold" onclick="checkSpelling()">✓ Check</button>
+        <input type="text" id="fcInput" aria-label="Spell the balance" maxlength="160" autocomplete="off" placeholder="e.g. fourteen thousand five hundred" onkeydown="if(event.key==='Enter')checkSpelling()">
+        <button class="btn btn-gold" id="fcCheck" onclick="checkSpelling()">✓ Check</button>
       </div>
-      <div class="fc-feedback" id="fcFeedback"></div>
+      <div class="fc-feedback" id="fcFeedback" aria-live="polite"></div>
     </div>
 
     <!-- Winner (replaces everything) -->
@@ -420,6 +422,7 @@ input:focus { border-color: #f59e0b; }
       <div class="winner-name" id="winnerName"></div>
       <div class="winner-title" id="winnerTitle"></div>
       <div id="finalStandings" style="margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;"></div>
+      <button class="btn btn-gold" id="replay-btn" onclick="replay()">Play Again</button>
     </div>
   </div>
 </div>
@@ -429,15 +432,20 @@ input:focus { border-color: #f59e0b; }
   <div id="clientJoin" class="client-join">
     <h2 class="gold glow-text">📱 Join the Auction</h2>
     <div style="width:100%;max-width:280px;">
-      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Room Code</label>
-      <input type="text" id="clientRoomInput" maxlength="4" placeholder="0000" inputmode="numeric">
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;" for="clientRoomInput">Room code</label>
+      <input type="text" id="clientRoomInput" maxlength="8" placeholder="A1B2C3D4" autocomplete="off">
     </div>
     <div style="width:100%;max-width:280px;">
-      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Team Name</label>
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;" for="clientTeamInput">Team name</label>
       <input type="text" id="clientTeamInput" class="team-input" placeholder="e.g. The Tigers" maxlength="20">
     </div>
-    <button class="btn btn-gold btn-lg" onclick="connectToHost()">🔗 Join Game</button>
-    <p id="clientError" class="red" style="font-size:0.85rem;"></p>
+    <label for="client-mode">Connection</label>
+    <select id="client-mode">
+      <option value="local">Same browser · multiple tabs</option>
+      <option value="online">Separate devices · internet</option>
+    </select>
+    <button class="btn btn-gold btn-lg" id="join-btn" onclick="connectToHost()">🔗 Join Game</button>
+    <p id="clientError" role="status" class="red" style="font-size:0.85rem;"></p>
   </div>
 
   <div id="clientGame" class="hidden">
@@ -451,6 +459,7 @@ input:focus { border-color: #f59e0b; }
       <p class="dots" style="margin-top:8px;">Waiting</p>
     </div>
     <div id="clientBetting" class="betting-panel hidden">
+      <p id="client-sentence" style="margin-bottom:16px;overflow-wrap:anywhere"></p>
       <h3 style="margin-bottom:4px;">Is it LEGAL or ILLEGAL?</h3>
       <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:8px;">Read the sentence on the big screen!</p>
       <div class="choice-buttons">
@@ -460,7 +469,7 @@ input:focus { border-color: #f59e0b; }
       <div class="amount-section">
         <label>💰 Bet Amount</label>
         <div class="amount-input-row">
-          <input type="number" id="betAmountInput" min="100" step="100" value="100">
+          <input type="number" id="betAmountInput" aria-label="Bet amount" min="100" step="100" value="100">
         </div>
         <div class="quick-amounts">
           <button class="btn btn-sm btn-blue" onclick="adjustBet(100)">+$100</button>
@@ -478,781 +487,7 @@ input:focus { border-color: #f59e0b; }
   </div>
 </div>
 
-<script>
-// ===== SOUND EFFECTS (Web Audio API — no external files) =====
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
-function ensureAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
-
-function playStartSound() {
-  const ctx = ensureAudio();
-  [0, 0.15, 0.3].forEach((delay, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = [523, 659, 784][i];
-    gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
-    osc.start(ctx.currentTime + delay);
-    osc.stop(ctx.currentTime + delay + 0.3);
-  });
-}
-
-function playBuzzerSound() {
-  const ctx = ensureAudio();
-  const osc1 = ctx.createOscillator();
-  const osc2 = ctx.createOscillator();
-  const gain1 = ctx.createGain();
-  const gain2 = ctx.createGain();
-  osc1.connect(gain1); gain1.connect(ctx.destination);
-  osc2.connect(gain2); gain2.connect(ctx.destination);
-  osc1.type = 'sawtooth';
-  osc1.frequency.setValueAtTime(150, ctx.currentTime);
-  osc1.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.8);
-  gain1.gain.setValueAtTime(0.25, ctx.currentTime);
-  gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-  osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 0.8);
-
-  osc2.type = 'square';
-  osc2.frequency.setValueAtTime(440, ctx.currentTime);
-  osc2.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.5);
-  gain2.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-  osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 0.5);
-}
-
-function playCorrectSound() {
-  const ctx = ensureAudio();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain); gain.connect(ctx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(880, ctx.currentTime);
-  osc.frequency.setValueAtTime(1109, ctx.currentTime + 0.1);
-  gain.gain.setValueAtTime(0.2, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
-}
-
-function playWrongSound() {
-  const ctx = ensureAudio();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain); gain.connect(ctx.destination);
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(300, ctx.currentTime);
-  osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.4);
-  gain.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
-}
-
-// ===== QUESTIONS =====
-const QUESTIONS = [
-  // Simple Present, Daily Routines, & Wh- Questions
-  {id: 1, sentence: "He wakes up at seven o'clock every day.", status: "LEGAL", correction: "Correct simple present routine."},
-  {id: 2, sentence: "She brushs her teeth after breakfast.", status: "ILLEGAL", correction: "Spelling mistake ('brushes')."},
-  {id: 3, sentence: "They don't play soccer on the weekend.", status: "LEGAL", correction: "Correct negative statement."},
-  {id: 4, sentence: "My father dosn't drink coffee in the evening.", status: "ILLEGAL", correction: "Spelling mistake ('doesn't')."},
-  {id: 5, sentence: "Do you watch television after school?", status: "LEGAL", correction: "Correct simple present question."},
-  {id: 6, sentence: "Does your brother likes to play video games?", status: "ILLEGAL", correction: "Grammar mistake ('like' instead of 'likes' with Does)."},
-  {id: 7, sentence: "Where does your best friend live?", status: "LEGAL", correction: "Correct Wh- question."},
-  {id: 8, sentence: "We have our English class on Wendsday.", status: "ILLEGAL", correction: "Spelling mistake ('Wednesday')."},
-  {id: 9, sentence: "She works in a hospital downtown.", status: "LEGAL", correction: "Correct affirmative sentence."},
-  {id: 10, sentence: "What time do the supermarket close?", status: "ILLEGAL", correction: "Grammar mistake ('does' the supermarket)."},
-
-  // Adverbs of Frequency & Wh- Questions
-  {id: 11, sentence: "I usually eat a sandwich for lunch.", status: "LEGAL", correction: "Correct adverb placement."},
-  {id: 12, sentence: "He is allways late for his morning class.", status: "ILLEGAL", correction: "Spelling mistake ('always')."},
-  {id: 13, sentence: "They never go to the cinema on Mondays.", status: "LEGAL", correction: "Correct negative frequency."},
-  {id: 14, sentence: "How ofen do you go to the gym?", status: "ILLEGAL", correction: "Spelling mistake ('often')."},
-  {id: 15, sentence: "Do you often read books in bed?", status: "LEGAL", correction: "Correct question with adverb."},
-  {id: 16, sentence: "We don't usally travel during the winter.", status: "ILLEGAL", correction: "Spelling mistake ('usually')."},
-  {id: 17, sentence: "The teacher is rarely angry with the students.", status: "LEGAL", correction: "Correct adverb placement after 'to be'."},
-  {id: 18, sentence: "She always eat breakfast in the morning.", status: "ILLEGAL", correction: "Grammar mistake ('eats' for singular subject)."},
-  {id: 19, sentence: "Does she always finish her homework on time?", status: "LEGAL", correction: "Correct question."},
-  {id: 20, sentence: "They sometimes are noisy in the library.", status: "ILLEGAL", correction: "Adverb placement (should be 'are sometimes' after the verb to be)."},
-
-  // Describing Things/People, Have/Has, & Wh- Questions
-  {id: 21, sentence: "My best friend has short curly hair.", status: "LEGAL", correction: "Correct description with 'has'."},
-  {id: 22, sentence: "She have two older brothers and a sister.", status: "ILLEGAL", correction: "Grammar mistake ('has' for singular subject)."},
-  {id: 23, sentence: "This backpack is heavy because it is full of books.", status: "LEGAL", correction: "Correct descriptive statement."},
-  {id: 24, sentence: "The new student is very tall and handsom.", status: "ILLEGAL", correction: "Spelling mistake ('handsome')."},
-  {id: 25, sentence: "Do they have a big garden in their house?", status: "LEGAL", correction: "Correct question."},
-  {id: 26, sentence: "He doesn't has a car, so he takes the bus.", status: "ILLEGAL", correction: "Grammar mistake ('doesn't have')."},
-  {id: 27, sentence: "Who do you play tennis with on Saturdays?", status: "LEGAL", correction: "Correct Wh- question."},
-  {id: 28, sentence: "Mary has a beautifull dress for the party.", status: "ILLEGAL", correction: "Spelling mistake ('beautiful')."},
-  {id: 29, sentence: "Is your new English teacher friendly?", status: "LEGAL", correction: "Correct descriptive question."},
-  {id: 30, sentence: "The cat has white paws and a black tale.", status: "ILLEGAL", correction: "Spelling mistake/homophone ('tail')."},
-
-  // Prepositions of Place and Time & Wh- Questions
-  {id: 31, sentence: "The keys are on the kitchen table.", status: "LEGAL", correction: "Correct preposition of place."},
-  {id: 32, sentence: "My birthday is in the 15th of August.", status: "ILLEGAL", correction: "Preposition mistake ('on' for dates)."},
-  {id: 33, sentence: "When is your brother's birthday?", status: "LEGAL", correction: "Correct Wh- question."},
-  {id: 34, sentence: "Our flight leaves in night, so we can sleep.", status: "ILLEGAL", correction: "Preposition mistake ('at night')."},
-  {id: 35, sentence: "Is the library across from the supermarket?", status: "LEGAL", correction: "Correct question."},
-  {id: 36, sentence: "Why dose she wake up so early?", status: "ILLEGAL", correction: "Spelling mistake ('does')."},
-  {id: 37, sentence: "We don't have any exams in December.", status: "LEGAL", correction: "Correct preposition of time."},
-  {id: 38, sentence: "She leaves her shoes under of the bed.", status: "ILLEGAL", correction: "Grammar mistake (remove 'of', just 'under')."},
-  {id: 39, sentence: "Does the movie start at eight o'clock?", status: "LEGAL", correction: "Correct question."},
-  {id: 40, sentence: "There is a small park in front the school.", status: "ILLEGAL", correction: "Grammar mistake (missing 'of', 'in front of')."},
-
-  // There is/are (Questions & Answers), Time Expressions, & Misc
-  {id: 41, sentence: "Yes, there is a bank next to the school.", status: "LEGAL", correction: "Correct short answer and statement."},
-  {id: 42, sentence: "No, there isn't any apples in the basket.", status: "ILLEGAL", correction: "Grammar mistake ('aren't any' for plural)."},
-  {id: 43, sentence: "Are there any good restaurants near the hotel?", status: "LEGAL", correction: "Correct question."},
-  {id: 44, sentence: "There aren't no chairs in the empty room.", status: "ILLEGAL", correction: "Double negative ('aren't any' or 'are no')."},
-  {id: 45, sentence: "The museum is closed once a week on Tuesdays.", status: "LEGAL", correction: "Correct time expression."},
-  {id: 46, sentence: "Yes, there are a clock on the classroom wall.", status: "ILLEGAL", correction: "Grammar mistake ('is a clock' for singular)."},
-  {id: 47, sentence: "We practice playing the guitar every day.", status: "LEGAL", correction: "Correct statement."},
-  {id: 48, sentence: "Does she visit her grandparents every weak?", status: "ILLEGAL", correction: "Spelling mistake/homophone ('week')."},
-  {id: 49, sentence: "No, there aren't any eggs in the fridge.", status: "LEGAL", correction: "Correct negative answer."},
-  {id: 50, sentence: "He play basketball with his friends on Saturday.", status: "ILLEGAL", correction: "Grammar mistake (missing 's', 'plays')."}
-];
-
-// Helper: Shuffle Array (Fisher-Yates)
-function shuffleArray(arr) {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-// ===== NUMBER TO WORDS =====
-function numberToWords(num) {
-  if (num === 0) return 'zero';
-  const ones = ['','one','two','three','four','five','six','seven','eight','nine',
-    'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
-  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
-  function convert(n) {
-    if (n === 0) return '';
-    if (n < 20) return ones[n];
-    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
-    if (n < 1000) return ones[Math.floor(n/100)] + ' hundred' + (n%100 ? ' ' + convert(n%100) : '');
-    if (n < 1000000) return convert(Math.floor(n/1000)) + ' thousand' + (n%1000 ? ' ' + convert(n%1000) : '');
-    return convert(Math.floor(n/1000000)) + ' million' + (n%1000000 ? ' ' + convert(n%1000000) : '');
-  }
-  return convert(Math.abs(Math.floor(num))).trim();
-}
-function normalizeSpelling(str) {
-  return str.toLowerCase().replace(/dollars?/g,'').replace(/\band\b/g,'').replace(/[-,]/g,' ').replace(/\s+/g,' ').trim();
-}
-
-// ===== STATE =====
-let role = null, roomCode = '', peer = null, joinUrl = '';
-
-const hostState = {
-  teamCount: 4, teams: {}, currentQ: 0, bets: {},
-  shuffledQuestions: [],
-  timerInterval: null, timeLeft: 30, bettingOpen: false,
-  gameStarted: false, roundRevealed: false,
-  finalChallengeActive: false, fcTeamOrder: [], fcCurrentIndex: 0
-};
-
-const clientState = {
-  conn: null, teamName: '', balance: 1000,
-  selectedChoice: null, betSubmitted: false, peerId: null
-};
-
-// ===== AUTO-DETECT ROLE =====
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const r = params.get('role'), room = params.get('room');
-  if (r === 'host') initHost();
-  else if (r === 'client') {
-    showClientJoin();
-    if (room) document.getElementById('clientRoomInput').value = room;
-  }
-})();
-
-// ===== HOST =====
-function initHost() {
-  role = 'host';
-  roomCode = String(Math.floor(1000 + Math.random() * 9000));
-  document.getElementById('roleSelect').classList.add('hidden');
-  document.getElementById('hostScreen').classList.remove('hidden');
-  document.getElementById('hostRoomCode').textContent = roomCode;
-
-  joinUrl = `${window.location.origin}${window.location.pathname}?role=client&room=${roomCode}`;
-  document.getElementById('joinLinkDisplay').textContent = joinUrl;
-
-  new QRCode(document.getElementById('qrCode'), {
-    text: joinUrl, width: 180, height: 180,
-    colorDark: '#f59e0b', colorLight: '#0f172a', correctLevel: QRCode.CorrectLevel.M
-  });
-
-  const btnContainer = document.getElementById('teamCountBtns');
-  for (let i = 2; i <= 8; i++) {
-    const b = document.createElement('button');
-    b.className = 'team-count-btn' + (i === 4 ? ' active' : '');
-    b.textContent = i;
-    b.onclick = () => {
-      document.querySelectorAll('.team-count-btn').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      hostState.teamCount = i;
-      updateStartBtn();
-    };
-    btnContainer.appendChild(b);
-  }
-
-  const peerId = 'ESL-AUCTION-' + roomCode;
-  peer = new Peer(peerId, { debug: 0 });
-  peer.on('open', () => console.log('Host peer open:', peerId));
-  peer.on('error', (err) => {
-    if (err.type === 'unavailable-id') {
-      roomCode = String(Math.floor(1000 + Math.random() * 9000));
-      document.getElementById('hostRoomCode').textContent = roomCode;
-      joinUrl = `${window.location.origin}${window.location.pathname}?role=client&room=${roomCode}`;
-      document.getElementById('joinLinkDisplay').textContent = joinUrl;
-      peer.destroy();
-      peer = new Peer('ESL-AUCTION-' + roomCode, { debug: 0 });
-      setupHostListeners();
-    }
-  });
-  setupHostListeners();
-}
-
-function setupHostListeners() {
-  peer.on('connection', (conn) => {
-    conn.on('open', () => { conn.on('data', (data) => handleClientMessage(conn, data)); });
-    conn.on('close', () => {
-      if (hostState.teams[conn.peer]) { delete hostState.teams[conn.peer]; updateConnectedTeams(); updateStartBtn(); }
-    });
-  });
-}
-
-function handleClientMessage(conn, data) {
-  switch (data.type) {
-    case 'join':
-      hostState.teams[conn.peer] = { name: data.teamName, balance: 1000, conn };
-      conn.send({ type: 'joined', balance: 1000 });
-      updateConnectedTeams(); updateStartBtn();
-      if (hostState.gameStarted) { conn.send({ type: 'gameStarted' }); updateLeaderboard(); }
-      break;
-    case 'bet':
-      if (hostState.bettingOpen && !hostState.bets[conn.peer]) {
-        const team = hostState.teams[conn.peer];
-        if (team) {
-          const betAmount = Math.min(Math.max(100, data.amount), team.balance);
-          hostState.bets[conn.peer] = { choice: data.choice, amount: betAmount };
-          conn.send({ type: 'betConfirmed' });
-          updateBetsDisplay();
-        }
-      }
-      break;
-  }
-}
-
-function updateConnectedTeams() {
-  const container = document.getElementById('connectedTeams');
-  const teamEntries = Object.entries(hostState.teams);
-  document.getElementById('connectedCount').textContent = teamEntries.length;
-  if (teamEntries.length === 0) {
-    container.innerHTML = '<p style="color:#64748b;font-style:italic;font-size:0.85rem;">Waiting for students to join...</p>';
-    return;
-  }
-  container.innerHTML = teamEntries.map(([pid, t]) =>
-    `<div class="team-chip"><div class="dot"></div><div class="name">${escHtml(t.name)}</div><button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button></div>`
-  ).join('');
-}
-
-function kickTeam(peerId) {
-  const t = hostState.teams[peerId];
-  if (!t) return;
-  if (confirm(`Are you sure you want to remove team "${t.name}"?`)) {
-    if (t.conn) {
-      try { t.conn.send({type: 'KICK'}); } catch(e){}
-      setTimeout(() => { try { t.conn.close(); } catch(e){} }, 500);
-    }
-    delete hostState.teams[peerId];
-    if (hostState.bets) delete hostState.bets[peerId];
-    
-    // Remove from fcTeamOrder if it exists
-    if (hostState.fcTeamOrder) {
-      hostState.fcTeamOrder = hostState.fcTeamOrder.filter(([id]) => id !== peerId);
-    }
-
-    updateConnectedTeams();
-    updateStartBtn();
-    
-    if (hostState.gameStarted) {
-      if (typeof updateBetsUI === 'function') updateBetsUI();
-      if (hostState.bettingOpen && typeof checkAllBetsIn === 'function') checkAllBetsIn();
-    }
-  }
-}
-
-function updateStartBtn() {
-  const count = Object.keys(hostState.teams).length;
-  const btn = document.getElementById('startGameBtn');
-  btn.disabled = count < 2;
-  btn.textContent = count < 2 ? `🎮 Need at least 2 teams (${count} joined)` : `🎮 Start Game (${count} teams)`;
-}
-
-function copyJoinLink() {
-  navigator.clipboard.writeText(joinUrl).catch(() => {
-    const ta = document.createElement('textarea'); ta.value = joinUrl;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-  });
-  const msg = document.getElementById('copyMsg');
-  msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000);
-}
-
-// ===== GAME FLOW =====
-function startGame() {
-  hostState.gameStarted = true;
-  // Randomize questions list on game start
-  hostState.shuffledQuestions = shuffleArray(QUESTIONS);
-  hostState.currentQ = 0;
-
-  document.getElementById('hostSetup').classList.add('hidden');
-  document.getElementById('hostGame').classList.remove('hidden');
-  broadcastToAll({ type: 'gameStarted' });
-  updateLeaderboard();
-  updateBetsDisplay();
-}
-
-function nextQuestion() {
-  if (!hostState.shuffledQuestions || hostState.shuffledQuestions.length === 0) {
-    hostState.shuffledQuestions = shuffleArray(QUESTIONS);
-  }
-
-  if (hostState.currentQ >= hostState.shuffledQuestions.length) {
-    triggerFinalChallenge(); return;
-  }
-
-  const q = hostState.shuffledQuestions[hostState.currentQ];
-  hostState.currentQ++;
-  hostState.bets = {};
-  hostState.bettingOpen = true;
-  hostState.roundRevealed = false;
-  hostState.timeLeft = 30;
-
-  playStartSound();
-
-  document.getElementById('questionDisplay').classList.remove('hidden');
-  document.getElementById('qNumber').textContent = `Question ${hostState.currentQ} / ${hostState.shuffledQuestions.length}`;
-  document.getElementById('qSentence').textContent = `"${q.sentence}"`;
-  document.getElementById('qTimer').textContent = '30';
-  document.getElementById('qTimer').classList.remove('urgent');
-  document.getElementById('nextQuestionBtn').disabled = true;
-  document.getElementById('skipTimerBtn').disabled = false;
-
-  const ar = document.getElementById('answerReveal');
-  ar.classList.remove('show', 'legal-answer', 'illegal-answer');
-  ar.innerHTML = '';
-
-  updateBetsDisplay();
-  broadcastToAll({ type: 'openBetting', questionId: hostState.currentQ });
-
-  clearInterval(hostState.timerInterval);
-  hostState.timerInterval = setInterval(() => {
-    hostState.timeLeft--;
-    const timerEl = document.getElementById('qTimer');
-    timerEl.textContent = hostState.timeLeft;
-    if (hostState.timeLeft <= 5) timerEl.classList.add('urgent');
-    if (hostState.timeLeft <= 0) {
-      clearInterval(hostState.timerInterval);
-      timerEl.textContent = "⏱️ TIME'S UP!";
-      playBuzzerSound();
-      document.getElementById('skipTimerBtn').disabled = true;
-      setTimeout(() => revealAnswer(), 800);
-    }
-  }, 1000);
-}
-
-function skipTimer() {
-  if (!hostState.bettingOpen || hostState.roundRevealed) return;
-  clearInterval(hostState.timerInterval);
-  document.getElementById('qTimer').textContent = "⏱️ SKIPPED";
-  document.getElementById('skipTimerBtn').disabled = true;
-  playBuzzerSound();
-  revealAnswer();
-}
-
-function revealAnswer() {
-  if (hostState.roundRevealed) return;
-  clearInterval(hostState.timerInterval);
-  hostState.bettingOpen = false;
-  hostState.roundRevealed = true;
-  document.getElementById('skipTimerBtn').disabled = true;
-  broadcastToAll({ type: 'bettingClosed' });
-
-  const q = hostState.shuffledQuestions[hostState.currentQ - 1];
-
-  const ar = document.getElementById('answerReveal');
-  ar.className = `answer-reveal card show ${q.status === 'LEGAL' ? 'legal-answer' : 'illegal-answer'}`;
-  ar.innerHTML = `
-    <div class="verdict ${q.status === 'LEGAL' ? 'green' : 'red'}">${q.status === 'LEGAL' ? '✅ LEGAL' : '❌ ILLEGAL'}</div>
-    <div class="correction">${escHtml(q.correction)}</div>
-  `;
-
-  // Scoring Logic:
-  // 1. Correct teams earn their bet amount.
-  // 2. Incorrect teams lose their bet amount.
-  // 3. Teams that didn't answer lose a default penalty ($100 or minimum bet).
-  // 4. Any pool of lost money (from wrong bets + non-answers) is divided among correct teams!
-  // 5. If all teams are correct, correct teams simply earn their bet amount (without taking from anywhere).
-
-  let wrongPool = 0;
-  const correctTeams = [];
-  const incorrectTeams = [];
-  const nonBettingTeams = [];
-
-  for (const pid of Object.keys(hostState.teams)) {
-    const bet = hostState.bets[pid];
-    if (bet) {
-      if (bet.choice === q.status) correctTeams.push(pid);
-      else {
-        incorrectTeams.push(pid);
-        wrongPool += bet.amount;
-      }
-    } else {
-      // Didn't answer: penalty loss of $100 or remaining balance if < $100
-      nonBettingTeams.push(pid);
-      const team = hostState.teams[pid];
-      const penalty = Math.min(100, team.balance);
-      wrongPool += penalty;
-    }
-  }
-
-  // Bonus share from wrong pool if any correct teams exist
-  const bonusShare = correctTeams.length > 0 ? Math.floor(wrongPool / correctTeams.length) : 0;
-
-  const results = {};
-
-  for (const pid of correctTeams) {
-    const team = hostState.teams[pid];
-    const bet = hostState.bets[pid];
-    // Earn their bet amount + bonus share from wrong pool (if any)
-    const gain = bet.amount + bonusShare;
-    team.balance += gain;
-    results[pid] = { correct: true, delta: +gain };
-    team.conn.send({ type: 'result', correct: true, delta: +gain, newBalance: team.balance, answer: q.status, correction: q.correction });
-  }
-
-  for (const pid of incorrectTeams) {
-    const team = hostState.teams[pid];
-    const bet = hostState.bets[pid];
-    team.balance -= bet.amount;
-    if (team.balance < 0) team.balance = 0;
-    results[pid] = { correct: false, delta: -bet.amount };
-    team.conn.send({ type: 'result', correct: false, delta: -bet.amount, newBalance: team.balance, answer: q.status, correction: q.correction });
-  }
-
-  for (const pid of nonBettingTeams) {
-    const team = hostState.teams[pid];
-    const penalty = Math.min(100, team.balance);
-    team.balance -= penalty;
-    if (team.balance < 0) team.balance = 0;
-    results[pid] = { correct: false, delta: -penalty, noBet: true };
-    team.conn.send({ type: 'result', correct: false, delta: -penalty, newBalance: team.balance, answer: q.status, correction: q.correction });
-  }
-
-  updateBetsDisplayRevealed(results);
-  updateLeaderboard();
-  document.getElementById('nextQuestionBtn').disabled = false;
-
-  if (hostState.currentQ >= hostState.shuffledQuestions.length) {
-    document.getElementById('nextQuestionBtn').textContent = '🏁 Final Challenge';
-    document.getElementById('nextQuestionBtn').onclick = triggerFinalChallenge;
-  }
-}
-
-function updateBetsDisplay() {
-  const grid = document.getElementById('betsGrid');
-  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
-    const bet = hostState.bets[pid];
-    return `
-      <div class="bet-card ${bet ? 'submitted' : ''}">
-        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
-        <div class="team-name">${escHtml(team.name)}</div>
-        <div class="balance">\$${team.balance.toLocaleString()}</div>
-        ${bet
-          ? `<div class="bet-info"><span class="bet-amount">💰 \$${bet.amount.toLocaleString()}</span></div>`
-          : `<div class="bet-info" style="color:#64748b;">⏳ Waiting...</div>`}
-      </div>`;
-  }).join('');
-}
-
-function updateBetsDisplayRevealed(results) {
-  const grid = document.getElementById('betsGrid');
-  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
-    const bet = hostState.bets[pid];
-    const res = results[pid];
-    let cardClass = 'bet-card';
-    if (res) {
-      if (res.noBet) cardClass += ' no-bet-reveal';
-      else if (res.correct) cardClass += ' correct-reveal';
-      else cardClass += ' incorrect-reveal';
-    }
-    return `
-      <div class="${cardClass}">
-        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
-        <div class="team-name">${escHtml(team.name)}</div>
-        <div class="balance">\$${team.balance.toLocaleString()}</div>
-        ${bet ? `
-          <div class="bet-info">
-            <span class="bet-amount">\$${bet.amount.toLocaleString()}</span>
-            <span class="reveal-choice ${bet.choice.toLowerCase()}">${bet.choice}</span>
-          </div>
-          <div class="delta ${res.delta > 0 ? 'positive' : res.delta < 0 ? 'negative' : ''}">${
-            res.delta > 0 ? '+$' + res.delta.toLocaleString() :
-            res.delta < 0 ? '-$' + Math.abs(res.delta).toLocaleString() : '—'
-          }</div>
-        ` : `
-          <div class="bet-info" style="color:#ef4444;">❌ No bet</div>
-          <div class="delta negative">-\$${Math.abs(res.delta).toLocaleString()}</div>
-        `}
-      </div>`;
-  }).join('');
-}
-
-function updateLeaderboard() {
-  const sorted = Object.entries(hostState.teams)
-    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
-    .sort((a, b) => b.balance - a.balance);
-  document.getElementById('lbRows').innerHTML = sorted.map((t, i) => `
-    <div class="lb-row animate-in" style="animation-delay:${i*0.04}s;">
-      <div class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#'+(i+1)}</div>
-      <div class="lb-name">${escHtml(t.name)}</div>
-      <div class="lb-balance">\$${t.balance.toLocaleString()}</div>
-    </div>
-  `).join('');
-}
-
-// ===== FINAL CHALLENGE =====
-function triggerFinalChallenge() {
-  clearInterval(hostState.timerInterval);
-  hostState.bettingOpen = false;
-  hostState.finalChallengeActive = true;
-  document.getElementById('gameLayout').classList.add('hidden');
-  document.getElementById('finalChallenge').classList.remove('hidden');
-  broadcastToAll({ type: 'finalChallenge' });
-  showFcTeam();
-}
-
-function showFcTeam() {
-  hostState.fcTeamOrder = Object.entries(hostState.teams)
-    .map(([pid, t]) => ({ pid, name: t.name, balance: t.balance }))
-    .sort((a, b) => b.balance - a.balance);
-  const team = hostState.fcTeamOrder[0];
-  document.getElementById('fcTeam').textContent = team.name;
-  document.getElementById('fcAmount').textContent = `\$${team.balance.toLocaleString()}`;
-  document.getElementById('fcInput').value = '';
-  document.getElementById('fcFeedback').textContent = '';
-  document.getElementById('fcInput').focus();
-}
-
-function checkSpelling() {
-  const input = document.getElementById('fcInput').value;
-  const team = hostState.fcTeamOrder[0];
-  const correct = numberToWords(team.balance);
-  if (normalizeSpelling(input) === normalizeSpelling(correct)) {
-    showWinner(team);
-  } else {
-    playWrongSound();
-    const pid = team.pid;
-    hostState.teams[pid].balance = Math.max(0, hostState.teams[pid].balance - 1000);
-    for (const [op, ot] of Object.entries(hostState.teams)) {
-      if (op !== pid) ot.balance += 1000;
-    }
-    for (const [p, t] of Object.entries(hostState.teams)) {
-      t.conn.send({ type: 'balanceUpdate', newBalance: t.balance });
-    }
-    document.getElementById('fcFeedback').innerHTML = `
-      <span class="red">❌ INCORRECT!</span><br>
-      <span style="font-size:0.85rem;color:#94a3b8;">-\$1,000 to ${escHtml(team.name)}, +\$1,000 to everyone else!</span><br>
-      <span style="font-size:0.75rem;color:#64748b;">Expected: "${correct}"</span>`;
-    setTimeout(showFcTeam, 2500);
-  }
-}
-
-function showWinner(team) {
-  playCorrectSound();
-  document.getElementById('finalChallenge').classList.add('hidden');
-  document.getElementById('winnerScreen').classList.remove('hidden');
-  document.getElementById('winnerName').textContent = team.name;
-  const title = team.balance >= 1000000000 ? '🌟 BILLIONAIRE 🌟' :
-                team.balance >= 1000000 ? '💎 MILLIONAIRE 💎' : '🏆 CHAMPION 🏆';
-  document.getElementById('winnerTitle').textContent = title;
-  const sorted = Object.entries(hostState.teams)
-    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
-    .sort((a, b) => b.balance - a.balance);
-  document.getElementById('finalStandings').innerHTML = `
-    <h3 class="gold" style="margin-bottom:10px;">📊 Final Standings</h3>
-    ${sorted.map((t, i) => `
-      <div class="lb-row"><div class="lb-rank">${i===0?'👑':'#'+(i+1)}</div>
-      <div class="lb-name">${escHtml(t.name)}</div>
-      <div class="lb-balance">\$${t.balance.toLocaleString()}</div></div>
-    `).join('')}`;
-  broadcastToAll({ type: 'gameOver', winner: team.name });
-  spawnConfetti();
-}
-
-function spawnConfetti() {
-  const colors = ['#f59e0b','#22c55e','#ef4444','#3b82f6','#a855f7','#ec4899'];
-  for (let i = 0; i < 50; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.left = Math.random()*100+'vw'; p.style.top = (80+Math.random()*20)+'vh';
-    p.style.background = colors[Math.floor(Math.random()*colors.length)];
-    p.style.animationDuration = (2+Math.random()*2)+'s';
-    p.style.animationDelay = Math.random()*1.5+'s';
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 5000);
-  }
-}
-
-function broadcastToAll(msg) {
-  for (const t of Object.values(hostState.teams)) { try { t.conn.send(msg); } catch(e) {} }
-}
-
-// ===== CLIENT =====
-function showClientJoin() {
-  role = 'client';
-  document.getElementById('roleSelect').classList.add('hidden');
-  document.getElementById('clientScreen').classList.remove('hidden');
-}
-
-function connectToHost() {
-  const room = document.getElementById('clientRoomInput').value.trim();
-  const name = document.getElementById('clientTeamInput').value.trim();
-  const errEl = document.getElementById('clientError');
-  if (!room || room.length !== 4) { errEl.textContent = 'Enter a 4-digit room code.'; return; }
-  if (!name) { errEl.textContent = 'Enter your team name.'; return; }
-  errEl.textContent = 'Connecting...';
-  clientState.teamName = name;
-  peer = new Peer(undefined, { debug: 0 });
-  peer.on('open', (id) => {
-    clientState.peerId = id;
-    const conn = peer.connect('ESL-AUCTION-' + room, { reliable: true });
-    clientState.conn = conn;
-    conn.on('open', () => { conn.send({ type: 'join', teamName: name }); errEl.textContent = ''; });
-    conn.on('data', (data) => handleHostMessage(data));
-    conn.on('close', () => { document.getElementById('clientStatusText').textContent = '⚠️ Disconnected'; });
-    conn.on('error', () => { errEl.textContent = 'Connection failed. Check room code.'; });
-    setTimeout(() => { if (!conn.open) errEl.textContent = 'Could not connect. Check room code.'; }, 8000);
-  });
-  peer.on('error', () => { errEl.textContent = 'Connection error. Try again.'; });
-}
-
-function handleHostMessage(data) {
-  switch (data.type) {
-    case 'KICK':
-      document.getElementById('clientScreen').innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;text-align:center;padding:20px;"><h2>You have been removed from the game by the host.</h2></div>';
-      if (clientState.conn) clientState.conn.close();
-      break;
-    case 'joined':
-      clientState.balance = data.balance;
-      document.getElementById('clientJoin').classList.add('hidden');
-      document.getElementById('clientGame').classList.remove('hidden');
-      document.getElementById('clientTeamDisplay').textContent = clientState.teamName;
-      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
-      document.getElementById('clientStatusText').textContent = 'Connected! Waiting for game...';
-      break;
-    case 'gameStarted':
-      document.getElementById('clientStatusText').textContent = '🎮 Game is live!';
-      showClientWaiting(); break;
-    case 'openBetting':
-      clientState.betSubmitted = false; clientState.selectedChoice = null;
-      document.getElementById('clientStatusText').textContent = `❓ Q${data.questionId} — Place your bet!`;
-      showClientBetting(); break;
-    case 'bettingClosed':
-      if (!clientState.betSubmitted) {
-        document.getElementById('clientStatusText').textContent = "⏱️ Time's up! No bet placed.";
-        showClientWaiting();
-      } break;
-    case 'betConfirmed':
-      clientState.betSubmitted = true; showClientBetSubmitted(); break;
-    case 'result':
-      clientState.balance = data.newBalance;
-      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
-      showClientResult(data); break;
-    case 'balanceUpdate':
-      clientState.balance = data.newBalance;
-      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
-      break;
-    case 'finalChallenge':
-      document.getElementById('clientStatusText').textContent = '✍️ Final Challenge!';
-      showClientPanel('clientWaiting');
-      document.getElementById('clientWaiting').innerHTML = `
-        <div style="font-size:2rem;margin-bottom:10px;">✍️</div>
-        <p style="font-size:1.1rem;color:#f59e0b;font-weight:700;">FINAL CHALLENGE</p>
-        <p style="margin-top:8px;">Watch the big screen!</p>
-        <p style="margin-top:12px;font-size:1.3rem;font-weight:700;">Your balance: \$${clientState.balance.toLocaleString()}</p>`;
-      break;
-    case 'gameOver':
-      document.getElementById('clientStatusText').textContent = '🏆 Game Over!';
-      showClientPanel('clientWaiting');
-      document.getElementById('clientWaiting').innerHTML = `
-        <div style="font-size:2.5rem;margin-bottom:10px;">🏆</div>
-        <p style="font-size:1.2rem;color:#f59e0b;font-weight:700;">GAME OVER!</p>
-        <p style="margin-top:8px;">Winner: <strong class="gold">${escHtml(data.winner)}</strong></p>
-        <p style="margin-top:12px;font-size:1.8rem;font-weight:700;color:#22c55e;">\$${clientState.balance.toLocaleString()}</p>`;
-      break;
-  }
-}
-
-function showClientPanel(id) {
-  ['clientWaiting','clientBetting','clientBetSubmitted','clientResult'].forEach(p =>
-    document.getElementById(p).classList.toggle('hidden', p !== id));
-}
-function showClientWaiting() { showClientPanel('clientWaiting'); }
-function showClientBetting() {
-  showClientPanel('clientBetting');
-  document.getElementById('legalBtn').classList.remove('selected');
-  document.getElementById('illegalBtn').classList.remove('selected');
-  document.getElementById('betAmountInput').value = 100;
-  document.getElementById('submitBetBtn').disabled = true;
-  clientState.selectedChoice = null;
-}
-function showClientBetSubmitted() { showClientPanel('clientBetSubmitted'); }
-function showClientResult(data) {
-  showClientPanel('clientResult');
-  const el = document.getElementById('clientResult');
-  if (data.correct === null || (data.correct === false && data.delta < 0 && !clientState.selectedChoice)) {
-    el.innerHTML = `<div class="verdict red">⏱️ NO BET PENALTY</div>
-      <div class="change red">-\$${Math.abs(data.delta).toLocaleString()}</div>
-      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
-  } else if (data.correct) {
-    el.innerHTML = `<div class="verdict green">✅ CORRECT!</div>
-      <div class="change green">+\$${Math.abs(data.delta).toLocaleString()}</div>
-      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
-  } else {
-    el.innerHTML = `<div class="verdict red">❌ WRONG!</div>
-      <div class="change red">-\$${Math.abs(data.delta).toLocaleString()}</div>
-      <p style="color:#94a3b8;margin-top:8px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${data.answer}</strong></p>
-      <p style="color:#64748b;font-size:0.8rem;margin-top:4px;">${escHtml(data.correction)}</p>`;
-  }
-}
-
-function selectChoice(choice) {
-  clientState.selectedChoice = choice;
-  document.getElementById('legalBtn').classList.toggle('selected', choice === 'LEGAL');
-  document.getElementById('illegalBtn').classList.toggle('selected', choice === 'ILLEGAL');
-  document.getElementById('submitBetBtn').disabled = false;
-}
-function adjustBet(delta) {
-  const input = document.getElementById('betAmountInput');
-  let val = parseInt(input.value) || 0;
-  input.value = Math.max(100, Math.min(val + delta, clientState.balance));
-}
-function allIn() { document.getElementById('betAmountInput').value = clientState.balance; }
-function submitBet() {
-  if (!clientState.selectedChoice) return;
-  const amount = Math.min(Math.max(100, parseInt(document.getElementById('betAmountInput').value)||100), clientState.balance);
-  if (clientState.conn && clientState.conn.open) {
-    clientState.conn.send({ type: 'bet', choice: clientState.selectedChoice, amount });
-    document.getElementById('submitBetBtn').disabled = true;
-  }
-}
-function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
-</script>
+<script src="/qrcode.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

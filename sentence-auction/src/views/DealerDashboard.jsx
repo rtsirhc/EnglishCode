@@ -1,38 +1,18 @@
-import { useState, useEffect } from 'react';
-import { socket } from '../lib/socket';
-import { getRandomGameSet } from '../data/questions';
+import { useState } from 'react';
 
-export default function DealerDashboard({ roomId, gameState }) {
+export default function DealerDashboard({ gameState, updateState }) {
     const [manualAdjustment, setManualAdjustment] = useState('');
 
-    const bankroll = gameState?.bankroll || 1000;
+    const bankroll = gameState?.bankroll ?? 1000;
     const questionsList = gameState?.questions || [];
     const currentIndex = gameState?.currentQuestionIndex ?? 0;
     const currentQuestion = questionsList.length > 0 ? questionsList[currentIndex] : null;
-    const currentBid = gameState?.currentBid || 50;
+    const currentBid = gameState?.currentBid ?? 50;
     const streak = gameState?.streak || 0;
     const multiplier = streak >= 3 ? 3 : 1;
     const questionNumber = currentIndex + 1;
     const totalQuestions = questionsList.length;
-
-    const updateState = (newState) => {
-        socket.emit('update_state', { roomId, newState });
-    };
-
-    useEffect(() => {
-        if (!gameState?.questions) {
-            updateState({ questions: getRandomGameSet(), currentQuestionIndex: 0, isRevealed: true, streak: 0 });
-        }
-    }, [gameState?.questions, roomId]);
-
-    // Auto-reveal when question changes
-    useEffect(() => {
-        if (gameState?.questions && gameState?.currentQuestionIndex !== undefined) {
-            if (!gameState?.isRevealed) {
-                updateState({ isRevealed: true });
-            }
-        }
-    }, [gameState?.currentQuestionIndex]);
+    const settled = !!gameState.settledLots[currentIndex];
 
     const handleNext = () => {
         if (currentIndex < totalQuestions - 1) {
@@ -50,26 +30,26 @@ export default function DealerDashboard({ roomId, gameState }) {
         const bid = parseInt(currentBid, 10) || 0;
         const payout = bid * multiplier;
         const newStreak = streak + 1;
-        updateState({ bankroll: bankroll + payout, streak: newStreak });
+        updateState({ bankroll: bankroll + payout, streak: newStreak, verdict: true });
     };
 
     const handleIncorrect = () => {
         const bid = parseInt(currentBid, 10) || 0;
-        updateState({ bankroll: bankroll - bid, streak: 0 });
+        updateState({ bankroll: bankroll - bid, streak: 0, verdict: true });
     };
 
     const handleExplainCorrect = () => {
         const bid = parseInt(currentBid, 10) || 0;
         const payout = bid * multiplier * 2; // double for explaining
         const newStreak = streak + 1;
-        updateState({ bankroll: bankroll + payout, streak: newStreak });
+        updateState({ bankroll: bankroll + payout, streak: newStreak, verdict: true });
     };
 
     const handleExplainFail = () => {
         // They got the answer right but couldn't explain it — base payout only
         const bid = parseInt(currentBid, 10) || 0;
         const newStreak = streak + 1;
-        updateState({ bankroll: bankroll + bid, streak: newStreak });
+        updateState({ bankroll: bankroll + bid, streak: newStreak, verdict: true });
     };
 
     const handleManualAdjust = (amount) => {
@@ -90,7 +70,7 @@ export default function DealerDashboard({ roomId, gameState }) {
     };
 
     return (
-        <div className="flex w-full gap-6">
+        <div className="auction-dealer flex w-full gap-6">
             {/* Left side: Info Panel */}
             <div className="w-1/3 bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col h-[85vh] overflow-hidden">
                 {/* Bankroll */}
@@ -131,13 +111,14 @@ export default function DealerDashboard({ roomId, gameState }) {
                     )}
                 </div>
 
+                {settled && <p role="status" className="mb-3 text-green-300">{Object.keys(gameState.settledLots).length === totalQuestions ? 'Auction complete.' : 'Verdict recorded.'}</p>}
                 {/* Navigation */}
                 <div className="flex gap-2 mb-4">
                     <button onClick={handlePrev} disabled={currentIndex === 0}
                         className="flex-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-bold transition-colors">
                         ← Prev
                     </button>
-                    <button onClick={handleNext} disabled={currentIndex >= totalQuestions - 1}
+                    <button data-game-action="next" onClick={handleNext} disabled={currentIndex >= totalQuestions - 1}
                         className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-bold transition-colors">
                         Next →
                     </button>
@@ -225,21 +206,21 @@ export default function DealerDashboard({ roomId, gameState }) {
                                 {/* Verdict Buttons — 3 columns */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <button
-                                        onClick={handleCorrect}
+                                        disabled={settled || currentBid <= 0} data-game-action="answer1" onClick={handleCorrect}
                                         className="bg-green-600 hover:bg-green-500 text-white py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-green-900/20"
                                     >
                                         ✅ Correct
                                         <div className="text-xs opacity-80 mt-1">+${currentBid * multiplier}</div>
                                     </button>
                                     <button
-                                        onClick={handleExplainCorrect}
+                                        disabled={settled || currentBid <= 0} data-game-action="answer2" onClick={handleExplainCorrect}
                                         className="bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-amber-900/20 border-2 border-amber-400/30"
                                     >
                                         🧠 Explain It!
                                         <div className="text-xs opacity-80 mt-1">+${currentBid * multiplier * 2} (2x)</div>
                                     </button>
                                     <button
-                                        onClick={handleIncorrect}
+                                        disabled={settled || currentBid <= 0} data-game-action="answer3" onClick={handleIncorrect}
                                         className="bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-bold text-lg transition-colors shadow-lg shadow-red-900/20"
                                     >
                                         ❌ Incorrect
@@ -250,7 +231,7 @@ export default function DealerDashboard({ roomId, gameState }) {
                                 {/* Explain Fail (subtle) */}
                                 <div className="flex justify-center">
                                     <button
-                                        onClick={handleExplainFail}
+                                        disabled={settled || currentBid <= 0} onClick={handleExplainFail}
                                         className="text-slate-500 hover:text-slate-300 text-sm underline transition-colors"
                                     >
                                         Correct answer but couldn't explain → base payout only (+${currentBid})

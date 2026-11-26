@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Restaurant Mission — Sketch Edition</title>
+<style>
+:root{--paper:#fffef7;--ink:#171717;--cyan:#00cbea;--lime:#b9f227;--yellow:#ffe247;--pink:#ff63bf;--red:#e6342a;--muted:#ecebe5;--white:#fff;--shadow:5px 6px 0 var(--ink)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}
+body{font-family:"Trebuchet MS",Verdana,Arial,sans-serif;background-image:radial-gradient(#aaa 1.2px,transparent 1.2px);background-size:20px 20px}
+button{font:inherit;color:inherit;cursor:pointer}.sketch{border:3px solid var(--ink);border-radius:18px 5px 16px 7px/7px 17px 6px 18px}.shadow{box-shadow:var(--shadow)}
+.app{min-height:100vh;display:grid;grid-template-columns:215px 1fr}.rail{position:relative;background:var(--cyan);border-right:4px solid var(--ink);padding:22px 17px;display:flex;flex-direction:column;gap:17px;box-shadow:5px 0 0 var(--ink);z-index:2}.rail:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(172deg,transparent 0 23px,#0000000c 24px 25px)}
+.badge{position:relative;z-index:1;background:var(--paper);padding:12px 10px;transform:rotate(-1.5deg)}.logo{display:block;width:100%;height:auto;margin-bottom:10px;border:2px solid var(--ink);background:#fff}.badge-icon{width:58px;height:58px;display:grid;place-items:center;background:var(--pink);font-size:32px;border-radius:50%;margin-bottom:9px}.eyebrow{font:900 12px/1.2 Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase}.badge h2{font:900 24px/1 "Arial Black",Arial,sans-serif;margin:5px 0 8px}.marker{background:linear-gradient(transparent 42%,var(--lime) 42% 92%,transparent 92%);padding:0 3px}
+.rail-note{position:relative;z-index:1;background:var(--yellow);padding:14px;transform:rotate(1.5deg);font-size:14px;font-weight:900;line-height:1.35}.rail-note strong{display:block;font:900 18px/1.1 "Arial Black",Arial,sans-serif;margin-bottom:5px}.mission-actions button{border:3px solid var(--ink);background:var(--paper);padding:8px 11px;min-height:40px;font-weight:900;box-shadow:4px 4px 0 var(--ink);border-radius:12px 4px 10px 5px}.mission-actions button:hover,.mission-actions button:focus-visible{background:var(--lime)}.mission-actions button:active{transform:translate(4px,4px);box-shadow:none}
+.workspace{min-width:0;display:flex;flex-direction:column}.topbar{background:var(--paper);border-bottom:4px solid var(--ink);padding:12px 28px 10px;display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 5px 0 #00000018}.brand{display:flex;align-items:center;gap:14px}.brand h1{font:900 clamp(24px,2.6vw,40px)/1 "Arial Black",Arial,sans-serif;margin:0;transform:rotate(-1deg)}.brand p{margin:5px 0 0;font-size:14px;font-weight:900;color:#333}
+.mode-switch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.mode-switch .eyebrow{margin-right:4px}.mode-switch button{border:3px solid var(--ink);background:var(--white);padding:9px 13px;font-weight:900;border-radius:12px 4px 10px 5px;box-shadow:3px 3px 0 var(--ink)}.mode-switch button.active{background:var(--lime);transform:rotate(1deg)}.mode-switch button:active{transform:translate(3px,3px);box-shadow:none}
+.main{padding:24px 28px 28px;overflow:auto}.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;max-width:1280px;margin:0 auto 18px}.title-row h2{position:relative;display:inline-block;font:900 clamp(35px,4.3vw,62px)/.95 "Arial Black",Arial,sans-serif;margin:0;letter-spacing:-2px}.title-row h2:after{content:"";position:absolute;left:-5px;right:-8px;bottom:-7px;height:15px;background:var(--pink);z-index:-1;transform:rotate(-1deg);border:2px solid var(--ink)}.instruction{max-width:760px;margin:13px 0 0;font-size:clamp(16px,1.5vw,21px);font-weight:900}.success-stamp{max-width:360px;background:var(--yellow);padding:11px 15px;font-size:14px;font-weight:900;line-height:1.25;transform:rotate(1.5deg)}
+.board{max-width:1280px;margin:auto;display:grid;grid-template-columns:minmax(590px,1.65fr) minmax(300px,.75fr);gap:22px;align-items:start}.script-card{position:relative;background:var(--white);padding:19px 22px 18px}.pin{position:absolute;width:22px;height:22px;background:var(--red);border:3px solid var(--ink);border-radius:50%;top:-12px;left:50%;box-shadow:2px 2px 0 #777}.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:3px dashed var(--ink);padding-bottom:10px;margin-bottom:13px}.card-head h3{margin:0;background:var(--cyan);padding:5px 12px;font:900 20px/1.2 "Arial Black",Arial,sans-serif;transform:rotate(-1deg);border:3px solid var(--ink)}
+.audio-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.listen{border:3px solid var(--ink);background:var(--yellow);padding:8px 12px;font-weight:900;box-shadow:3px 3px 0 var(--ink);border-radius:10px 3px 9px 4px}.listen.playing{background:var(--pink)}.toggle-label{font:900 11px/1 Arial,sans-serif;text-transform:uppercase;letter-spacing:1px}.toggle{width:48px;height:27px;background:var(--muted);border:3px solid var(--ink);border-radius:20px;padding:2px;display:flex;align-items:center}.toggle-dot{width:17px;height:17px;border:2px solid var(--ink);border-radius:50%;background:var(--ink);transition:.18s}.toggle.on{background:var(--pink)}.toggle.on .toggle-dot{transform:translateX(20px);background:var(--white)}
+.dialogue{display:grid;gap:9px}.speech{display:flex;align-items:flex-start;gap:10px}.speech.customer{flex-direction:row-reverse}.avatar{width:39px;height:39px;flex:0 0 39px;border:3px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:var(--muted);font-size:20px;font-weight:900}.customer .avatar{background:var(--lime)}.bubble{border:3px solid var(--ink);background:var(--paper);padding:9px 13px;font-size:clamp(17px,1.65vw,24px);font-weight:800;line-height:1.22;border-radius:14px 6px 13px 4px;max-width:88%}.customer .bubble{background:#f0ffd0;text-align:right;border-radius:6px 14px 4px 13px}.bubble b{font-family:"Arial Black",Arial,sans-serif}.answer{background:linear-gradient(transparent 40%,var(--yellow) 40% 95%,transparent 95%);font-weight:900;padding:0 3px}.customer.hidden .bubble{filter:blur(9px);user-select:none;opacity:.48}.voice-status{margin:13px 0 0;text-align:center;font-size:13px;font-weight:900;min-height:17px;color:#3d3d3d}
+.side{display:grid;gap:18px}.timer-card{position:relative;background:var(--yellow);padding:14px 16px;text-align:center;transform:rotate(.6deg)}.tape{position:absolute;right:-10px;top:-8px;width:66px;height:21px;background:#ffffffb8;border:2px solid #777;transform:rotate(35deg)}.clock{font:900 clamp(42px,5vw,68px)/1 "Courier New",monospace;letter-spacing:-4px;margin:5px 0}.progress-shell{height:15px;background:var(--white);border:3px solid var(--ink);margin:8px 0 11px;padding:2px;text-align:left}.progress{display:block;width:100%;height:100%;background:var(--red);transition:width 1s linear}.timer-buttons{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.timer-buttons button{background:var(--white);border:2px solid var(--ink);padding:6px 9px;font-weight:900;box-shadow:2px 2px 0 var(--ink)}
+.menu-card{background:var(--white);padding:16px}.menu-card h3{font:900 27px/1 "Arial Black",Arial,sans-serif;margin:0 0 12px;display:inline-block;border-bottom:5px solid var(--cyan);transform:rotate(-1deg)}.menu{display:grid;gap:7px}.menu-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 9px;border:2px solid transparent;font-size:17px;font-weight:900}.menu-item:nth-child(odd){background:#e9fbff;transform:rotate(-.4deg)}.menu-item:nth-child(even){background:#efffce;transform:rotate(.4deg)}.price{font-family:"Arial Black",Arial,sans-serif}.challenge{background:var(--pink);padding:14px 15px;transform:rotate(-1deg)}.challenge h3{font:900 12px/1 Arial,sans-serif;text-transform:uppercase;letter-spacing:1.4px;margin:0 0 7px;border-bottom:3px dashed var(--ink);padding-bottom:5px}.challenge p{font-size:17px;font-weight:900;line-height:1.25;margin:0}.hidden-ui{display:none!important}button:focus-visible{outline:5px solid var(--pink);outline-offset:3px}
+@media(max-width:1050px){.app{grid-template-columns:1fr}.rail{display:none}.board{grid-template-columns:1.45fr .75fr}.topbar{padding-inline:18px}.main{padding:20px 18px}}
+@media(max-width:780px){.topbar,.title-row{align-items:flex-start;flex-direction:column}.mode-switch{justify-content:flex-start}.board{grid-template-columns:1fr}.success-stamp{max-width:none}.bubble{max-width:91%}}
+@media(max-height:820px) and (min-width:900px){.main{padding-top:14px}.title-row{margin-bottom:13px}.title-row h2{font-size:42px}.instruction{margin-top:7px}.dialogue{gap:5px}.bubble{padding:6px 10px;font-size:18px}.avatar{width:34px;height:34px;flex-basis:34px}.script-card{padding-block:15px}.side{gap:13px}.clock{font-size:46px}}
+@media(min-width:1051px) and (max-height:1050px){.main{padding-top:15px;padding-bottom:15px}.title-row{margin-bottom:12px}.title-row h2{font-size:52px}.instruction{margin-top:8px;font-size:18px}.success-stamp{padding:8px 12px}.board{gap:17px}.script-card{padding:14px 18px}.dialogue{gap:5px}.bubble{padding:7px 10px;font-size:20px}.avatar{width:34px;height:34px;flex-basis:34px}.side{gap:12px}.timer-card{padding:11px 13px}.clock{font-size:52px}.menu-card{padding:13px}.challenge{padding:11px 13px}}
+@media print{.rail,.topbar,.audio-actions,.timer-card{display:none}.app{display:block}.main{padding:8px}.board{grid-template-columns:1.5fr .8fr}.shadow{box-shadow:none}}
+.mission-controls,.mission-actions{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}
+.mission-controls{justify-content:flex-end}
+@media(max-width:780px){.mission-controls{justify-content:flex-start}}
+@media(max-width:560px){
+ .topbar,.mode-switch,.timer-buttons{flex-wrap:wrap}
+ .dialogue,.bubble{min-width:0;overflow-wrap:anywhere}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Mission identity and primary action">
+    <section class="badge sketch shadow"><div class="eyebrow">English Conversation</div><h2><span class="marker">Class Mode</span></h2><div class="eyebrow">Restaurant Mission</div></section>
+    <section class="rail-note sketch shadow"><strong>THE RULE</strong>Speak once.<br>Improve one thing.<br>Speak again.</section>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="brand"><span style="font-size:30px" aria-hidden="true">✦</span><div><h1>Mission Control</h1><p>PAIR SPEAKING · ENGLISH ONLY ZONE</p></div></div>
+      <div class="mission-controls"><div class="mode-switch" aria-label="Difficulty level"><span class="eyebrow">Choose level →</span><button data-level="support">A1 · Guided</button><button data-level="core" class="active">A2 · Everyday</button><button data-level="stretch">B1 · Challenge</button></div><div class="mission-actions"><button id="new">New mission</button><button id="fullscreen" aria-label="Full screen">⛶</button></div></div>
+    </header>
+    <main class="main">
+      <audio id="modelAudio" preload="none"></audio>
+      <section class="title-row"><div><h2>Le Petit Bistro</h2><p class="instruction" id="instruction">A = server · B = customer · Speak once, then switch roles.</p></div><div class="success-stamp sketch" id="success">✓ SUCCESS: both students speak, switch roles and use “I'd like…” correctly.</div></section>
+      <section class="board">
+        <article class="script-card sketch shadow">
+          <span class="pin" aria-hidden="true"></span>
+          <header class="card-head"><h3>DIALOG SCRIPT</h3><div class="audio-actions"><button class="listen" id="listen">🔊 LISTEN</button><span class="toggle-label" id="hideText">Hide lines</span><button class="toggle" id="hide" aria-label="Hide customer lines" aria-pressed="false"><span class="toggle-dot"></span></button></div></header>
+          <div class="dialogue" id="dialogue"></div>
+          <p class="voice-status" id="voiceStatus" role="status"></p>
+        </article>
+        <aside class="side">
+          <section class="timer-card sketch shadow"><span class="tape" aria-hidden="true"></span><div class="eyebrow">Speaking round</div><div class="clock" id="clock" role="timer">01:00</div><div class="progress-shell"><span class="progress" id="progress"></span></div><div class="timer-buttons"><button data-seconds="30">30s</button><button data-seconds="60">60s</button><button data-seconds="120">2m</button><button id="pause">START</button><button id="reset">RESET</button></div></section>
+          <section class="menu-card sketch shadow"><div class="eyebrow">Today's mini-menu</div><h3>Le Menu</h3><div class="menu" id="menu"></div></section>
+          <section class="challenge sketch shadow" id="challengeSection"><h3>⚡ Stretch challenge</h3><p id="challenge">The first choice is not available. Choose something else politely.</p></section>
+        </aside>
+      </section>
+    </main>
+  </div>
+</div>
+<script type="module" src="./restaurant-practice.js"></script>
+</body>
+</html>

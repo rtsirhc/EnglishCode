@@ -1,55 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import socket from '../socket';
+import { tone } from '../../../gallery/shared/sound.js';
 import Countdown from './Countdown';
 
 export default function Game2Student({ state }) {
   const { game2 } = state;
-  const [studentTimedOut, setStudentTimedOut] = useState(false);
+  const studentTimedOut = game2.studentTimedOut;
   const prevStatus = useRef(null);
   const [flashClass, setFlashClass] = useState('');
-
-  useEffect(() => {
-    const onStudentTimeout = () => setStudentTimedOut(true);
-    socket.on('game2_student_timeout', onStudentTimeout);
-    return () => socket.off('game2_student_timeout', onStudentTimeout);
-  }, []);
-
-  useEffect(() => {
-    if (game2.status === 'active') {
-      setStudentTimedOut(false);
-    }
-  }, [game2.status, game2.roundIndex]);
 
   useEffect(() => {
     if (game2.status === 'success' && prevStatus.current !== 'success') {
       setFlashClass('flash-green');
       setTimeout(() => setFlashClass(''), 800);
-      playSuccessSound();
+      tone('correct');
     } else if (game2.status === 'timeout' && prevStatus.current !== 'timeout') {
       setFlashClass('flash-red');
       setTimeout(() => setFlashClass(''), 800);
     }
     prevStatus.current = game2.status;
   }, [game2.status]);
-
-  const playSuccessSound = () => {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const notes = [523.25, 659.25, 783.99, 1046.5];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
-        osc.start(ctx.currentTime + i * 0.12);
-        osc.stop(ctx.currentTime + i * 0.12 + 0.3);
-      });
-    } catch {}
-  };
 
   const handleNextCard = () => socket.emit('student_next_card');
 
@@ -101,15 +71,15 @@ export default function Game2Student({ state }) {
           <p className="text-slate-800 text-2xl font-bold mb-1">{game2.current?.keyword}</p>
           <p className="text-slate-500 mb-2">+1 point</p>
           <p className="text-violet-600 font-semibold text-xl mb-8">Score: {score} / {round}</p>
-          {round < 15 && (
+
             <button
               id="student-next-card-after-success-btn"
               onClick={handleNextCard}
               className="btn-primary w-full py-6 text-xl bg-gradient-to-r from-violet-500 to-violet-400 hover:from-violet-400 hover:to-violet-300 rounded-3xl shadow-lg shadow-violet-200 gap-2"
             >
-              Next Card →
+              {round === 15 ? 'See final score' : 'Next Card →'}
             </button>
-          )}
+
         </div>
       </div>
     );
@@ -123,15 +93,15 @@ export default function Game2Student({ state }) {
           <h2 className="text-4xl font-black text-rose-500 mb-2">Time's Up!</h2>
           <p className="text-slate-500 mb-2">No point this round.</p>
           <p className="text-violet-600 font-semibold text-xl mb-8">Score: {score} / {round}</p>
-          {round < 15 && (
+
             <button
               id="student-next-card-after-timeout-btn"
               onClick={handleNextCard}
               className="btn-primary w-full py-6 text-xl bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-3xl gap-2"
             >
-              Next Card →
+              {round === 15 ? 'See final score' : 'Next Card →'}
             </button>
-          )}
+
         </div>
       </div>
     );

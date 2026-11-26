@@ -1,32 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import TeacherScreen from './components/TeacherScreen';
 import ProjectorScreen from './components/ProjectorScreen';
+import { projectorUrl } from './game';
+import { validatePack } from '../../gallery/shared/content.js';
+import { read } from '../../gallery/shared/storage.js';
 
 function App() {
-  const [role, setRole] = useState("setup");
+  const [room, setRoom] = useState(null);
   const [teamCount, setTeamCount] = useState(2);
-  const [teamRosters, setTeamRosters] = useState(["Tom, Mary, Alice", "John, Sarah, Mike"]);
+  const [teamRosters, setTeamRosters] = useState(['', '']);
   const [day, setDay] = useState(1);
+  const [pack] = useState(() => {
+    try { return validatePack(read('pack:classroom-feud', null), 'survey'); }
+    catch { return null; }
+  });
 
-  // Read URL params to check if this is the projector window
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('role') === 'projector') {
-      setRole('projector');
-    }
-  }, []);
-
-  const startGame = () => {
-    // Open projector in new window
-    window.open(window.location.origin + window.location.pathname + '?role=projector', '_blank');
-    setRole('teacher');
-  };
-
-  if (role === 'projector') return <ProjectorScreen />;
-  if (role === 'teacher') {
-    // Parse strings into arrays of students
-    const parsedRosters = teamRosters.map(r => r.split(',').map(s => s.trim()).filter(s => s.length > 0));
-    return <TeacherScreen initialTeamRosters={parsedRosters} day={day} />;
+  const params = new URLSearchParams(location.search);
+  if (params.get('role') === 'projector') return <ProjectorScreen room={params.get('room')} />;
+  if (room) {
+    const parsed = teamRosters.map((roster, index) => {
+      const nicknames = [...new Set(roster.split(',').map(name => name.trim().slice(0, 32)).filter(Boolean))];
+      for (let i = nicknames.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nicknames[i], nicknames[j]] = [nicknames[j], nicknames[i]];
+      }
+      return nicknames.length ? nicknames : [`Player ${index + 1}`];
+    });
+    return <TeacherScreen room={room} initialTeamRosters={parsed} day={day} pack={day === 0 ? pack : null}
+      onSetup={() => setRoom(null)} />;
+  }
+  function startGame() {
+    const id = crypto.randomUUID();
+    window.open(projectorUrl(id), '_blank', 'noopener');
+    setRoom(id);
   }
 
   const handleTeamCountChange = (e) => {
@@ -35,7 +41,7 @@ function App() {
     setTeamRosters(prev => {
       const newRosters = [...prev];
       while(newRosters.length < count) {
-        newRosters.push(`Student A, Student B`);
+        newRosters.push('');
       }
       return newRosters.slice(0, count);
     });
@@ -50,9 +56,9 @@ function App() {
 
         <div className="space-y-6">
             <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Number of Teams (2-5)</label>
+              <label htmlFor="team-count" className="block text-sm font-bold text-slate-700 mb-2">Number of Teams (2-5)</label>
               <select 
-                value={teamCount} 
+                id="team-count" value={teamCount}
                 onChange={handleTeamCountChange}
                 className="w-full bg-slate-50 border-2 border-slate-200 rounded-lg p-3 outline-none focus:border-indigo-500 font-bold text-slate-800 transition"
               >
@@ -64,12 +70,12 @@ function App() {
             </div>
 
             <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
-              <label className="block text-sm font-bold text-slate-700">Team Rosters (Comma separated students)</label>
+              <label className="block text-sm font-bold text-slate-700">Team nicknames (optional, separated by commas)</label>
               {teamRosters.map((roster, i) => (
                 <div key={i}>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">TEAM {i + 1}</label>
+                  <label htmlFor={`roster-${i}`} className="block text-xs font-bold text-slate-500 mb-1">Team {i + 1} nicknames</label>
                   <textarea 
-                    rows={2}
+                    rows={2} id={`roster-${i}`} maxLength={480}
                     value={roster}
                     onChange={(e) => {
                       const newRosters = [...teamRosters];
@@ -77,22 +83,23 @@ function App() {
                       setTeamRosters(newRosters);
                     }}
                     className="w-full bg-white border border-slate-300 rounded p-2 text-slate-800 font-bold focus:border-indigo-500 outline-none transition resize-y"
-                    placeholder={`e.g. Tom, Mary, John...`}
+                    placeholder="Player A, Player B"
                   ></textarea>
                 </div>
               ))}
             </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Select Theme</label>
+            <label htmlFor="theme" className="block text-sm font-bold text-slate-700 mb-2">Select Theme</label>
             <select 
-              value={day} 
+              id="theme" value={day}
               onChange={(e) => setDay(Number(e.target.value))}
               className="w-full border-2 border-slate-200 rounded-lg p-3 text-lg font-medium text-slate-800 focus:border-indigo-500 focus:outline-none"
             >
-              <option value={1}>Day 1: Sports & General A</option>
-              <option value={2}>Day 2: Cowboys & General B</option>
-              <option value={3}>Day 3: Heroes & General C</option>
+              {pack && <option value={0}>{pack.title}</option>}
+              <option value={1}>Sports & Everyday Topics</option>
+              <option value={2}>Cowboys & Animals</option>
+              <option value={3}>Heroes & Everyday Topics</option>
             </select>
           </div>
 

@@ -22,10 +22,10 @@ export default function ValidationModal({ validationData, myId, onValidate, vali
                     <div className="validator-view">
                         <p>Did the attacker say the sentence correctly?</p>
                         <div className="action-row" style={{ justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
-                            <button className="btn danger" onClick={() => onValidate(false)}>
+                            <button data-game-action="answer2" className="btn danger" onClick={() => onValidate(false)}>
                                 👎 Grammar Wrong (Dud)
                             </button>
-                            <button className="btn success" onClick={() => onValidate(true)}>
+                            <button data-game-action="answer1" className="btn success" onClick={() => onValidate(true)}>
                                 👍 Grammar Correct
                             </button>
                         </div>

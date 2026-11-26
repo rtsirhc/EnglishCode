@@ -13,6 +13,8 @@
         <h1>WH-Questions Game</h1>
         <h2>Select Number of Teams</h2>
         <div class="team-selection">
+            <button class="team-select-btn" data-teams="2">2 Teams</button>
+            <button class="team-select-btn" data-teams="3">3 Teams</button>
             <button class="team-select-btn" data-teams="4">4 Teams</button>
             <button class="team-select-btn" data-teams="5">5 Teams</button>
         </div>
@@ -21,9 +23,9 @@
     <div id="app" class="hidden">
         <header class="game-header">
             <div class="timer-container">
-                <button id="pause-btn" class="pause-btn">❚❚</button>
+                <button id="pause-btn" class="pause-btn" aria-label="Pause timer">❚❚</button>
                 <div id="timer-bar" class="timer-bar"></div>
-                <span id="timer-text">15</span>
+                <span id="timer-text" role="timer">15</span>
             </div>
             <h1>WH-Questions Challenge!</h1>
             <div class="current-turn" id="current-turn">
@@ -40,10 +42,11 @@
                 <div id="answer-slots" class="answer-slots"></div>
 
                 <div class="controls">
-                    <input type="text" id="answer-input" placeholder="Type answer here and hit Enter..."
+                    <input type="text" id="answer-input" aria-label="Answer" placeholder="Type your answer"
                         autocomplete="off">
 
                     <div class="secondary-controls">
+                        <button id="check-btn" class="secondary-btn">Check Answer</button>
                         <button id="clue-btn" class="secondary-btn">Reveal Letter (-2 pts)</button>
                         <button id="reveal-btn" class="reveal-btn">Reveal Answer (Teacher)</button>
                     </div>
@@ -58,18 +61,15 @@
     </div>
 
     <!-- Audio for sounds -->
-    <audio id="correct-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
-    <audio id="wrong-sound"
-        src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+
+
 
     <div id="feedback-message" class="feedback hidden">
         <div class="feedback-content"></div>
         <button id="overlay-next-btn" class="next-arrow-btn" style="margin-top: 2rem;"
-            onclick="proceedToNext()">➜</button>
+            aria-label="Next turn">➜</button>
     </div>
-
-    <script src="questions.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>

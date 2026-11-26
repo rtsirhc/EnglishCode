@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Guess the Patient</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Guess the Patient</h1>
+    <nav aria-label="Picture boards">
+      <button id="previous" aria-label="Previous board">←</button>
+      <span id="version" aria-live="polite"></span>
+      <button id="next" aria-label="Next board">→</button>
+      <button id="fullscreen" aria-label="Full screen">⛶</button>
+    </nav>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="Round controls">
+      <label>Mode <select id="mode"><option value="pairs">Pairs or class</option><option value="solo">Solo</option></select></label>
+      <button id="restart">New round</button>
+      <button id="guess" aria-pressed="false">Make a guess</button>
+      <label class="description-toggle"><input id="descriptions" type="checkbox"> Show picture descriptions</label>
+    </section>
+    <p id="instruction"></p>
+    <section id="questions" aria-label="Ask the game" hidden>
+      <form id="question-form">
+        <label for="question">Ask about the mystery patient</label>
+        <select id="question"></select>
+        <button class="primary" id="ask">Ask</button>
+      </form>
+      <ul id="answers" aria-label="Answers to your questions"></ul>
+    </section>
+    <p id="notice" role="status"></p>
+    <div id="board" aria-label="Twelve illustrated patients"></div>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

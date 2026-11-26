@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { useControls } from '../controls';
 import { Link } from 'react-router-dom';
-import blueprintImg from '../assets/bank_blueprint.png';
+import blueprintImg from '../assets/bank_blueprint.webp';
 
 const TheVault = () => {
     const [phase, setPhase] = useState(1);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [showFeedback, setShowFeedback] = useState(false);
-    const [feedbackType, setFeedbackType] = useState(''); // 'success' or 'tragic'
-    const [feedbackMessage, setFeedbackMessage] = useState('');
+    const [feedbackType, setFeedbackType] = useState('');
     const [gameComplete, setGameComplete] = useState(false);
 
     // Phase 1: Prepositions of Movement
@@ -16,32 +16,32 @@ const TheVault = () => {
             situation: "🎯 **SWAT TEAM IS AT THE ENTRANCE**\n\nOfficer, the team is standing outside the bank's glass doors. They're wearing night-vision goggles and waiting for your command. What do you tell them?",
             options: [
                 { text: "\"Move into the lobby.\"", correct: true },
-                { text: "\"Move onto the lobby.\"", correct: false, tragic: "The team tries to climb ON TOP of the lobby floor and trips over the reception desk. SWAT neutralized. Mission failed." },
-                { text: "\"Move at the lobby.\"", correct: false, tragic: "The team stands frozen AT the entrance staring at the lobby. The alarm triggers. SWAT neutralized. Mission failed." }
+                { text: "\"Move onto the lobby.\"", correct: false },
+                { text: "\"Move at the lobby.\"", correct: false }
             ]
         },
         {
             situation: "🏢 **OBSTACLE AHEAD: RECEPTION DESK**\n\nThe team is inside the lobby. A massive marble reception desk blocks the path to the hallway. It's too wide to go around. Your command?",
             options: [
                 { text: "\"Climb over the desk.\"", correct: true },
-                { text: "\"Climb through the desk.\"", correct: false, tragic: "The team attempts to phase THROUGH solid marble. They get stuck inside the desk drawers. SWAT neutralized. Mission failed." },
-                { text: "\"Climb in the desk.\"", correct: false, tragic: "The team crawls INTO the desk cabinets and gets trapped. SWAT neutralized. Mission failed." }
+                { text: "\"Climb through the desk.\"", correct: false },
+                { text: "\"Climb in the desk.\"", correct: false }
             ]
         },
         {
             situation: "🌉 **OBSTACLE AHEAD: DECORATIVE BALCONY**\n\nThe team reached the hallway! But there's a decorative balcony railing cutting across the corridor. They need to get to the other side. What's your order?",
             options: [
                 { text: "\"Move across the balcony.\"", correct: true },
-                { text: "\"Move along the balcony.\"", correct: false, tragic: "The team walks ALONG the railing (beside it) and misses the path. They wander into a vault security chamber. SWAT neutralized. Mission failed." },
-                { text: "\"Move into the balcony.\"", correct: false, tragic: "The team tries to merge INTO the metal railing. Physics says no. SWAT neutralized. Mission failed." }
+                { text: "\"Move along the balcony.\"", correct: false },
+                { text: "\"Move into the balcony.\"", correct: false }
             ]
         },
         {
             situation: "🔴 **FINAL OBSTACLE: LASER GRID**\n\nAlmost there! A red laser security grid is blocking the vault entrance. The team needs to pass through it without touching the beams. How do they proceed?",
             options: [
                 { text: "\"Crawl through the laser grid carefully.\"", correct: true },
-                { text: "\"Crawl over the laser grid.\"", correct: false, tragic: "The team tries to climb OVER invisible lasers in mid-air. They fall and trigger every beam. SWAT neutralized. Mission failed." },
-                { text: "\"Crawl along the laser grid.\"", correct: false, tragic: "The team crawls BESIDE the lasers, going the wrong direction. They hit a wall. SWAT neutralized. Mission failed." }
+                { text: "\"Crawl over the laser grid.\"", correct: false },
+                { text: "\"Crawl along the laser grid.\"", correct: false }
             ]
         }
     ];
@@ -52,24 +52,24 @@ const TheVault = () => {
             situation: "🎙️ **THE ROBBER SPEAKS**\n\n\"I didn't steal the money! The vault was empty when I got here!\"\n\nOfficer, you need to catch him in a lie. Which interrogation question establishes the correct timeline?",
             options: [
                 { text: "\"Had the guards already left before you arrived?\"", correct: true },
-                { text: "\"Did the guards leave when you had arrived?\"", correct: false, tragic: "Your grammatically confused question makes the robber laugh. He hangs up. Mission failed." },
-                { text: "\"Have the guards leave before you arrived?\"", correct: false, tragic: "Your broken English confuses everyone. The robber escapes during the chaos. Mission failed." }
+                { text: "\"Had the guards already leave before you arrived?\"", correct: false },
+                { text: "\"Have the guards leave before you arrived?\"", correct: false }
             ]
         },
         {
             situation: "🔍 **THE ROBBER'S ALIBI**\n\n\"I swear, someone else took the money before I entered the building!\"\n\nTime to press harder. Which question challenges his timeline correctly?",
             options: [
                 { text: "\"Had you seen anyone suspicious before you went inside?\"", correct: true },
-                { text: "\"Did you saw anyone suspicious before you had gone inside?\"", correct: false, tragic: "Your grammar mistake makes you sound unprofessional. The robber demands a better negotiator. Mission failed." },
-                { text: "\"Have you seen anyone suspicious before you went inside?\"", correct: false, tragic: "Wrong tense! The robber exploits your confusion and stalls for time. Backup criminals arrive. Mission failed." }
+                { text: "\"Did you saw anyone suspicious before you had gone inside?\"", correct: false },
+                { text: "\"Have you seen anyone suspicious before you went inside?\"", correct: false }
             ]
         },
         {
             situation: "⏰ **CHECKING THE EVIDENCE**\n\n\"Look, the security cameras were already broken when I arrived!\"\n\nThe tech team just sent you camera logs. Ask the right question to expose his lie:",
             options: [
                 { text: "\"Had someone disabled the cameras before 9 PM?\"", correct: true },
-                { text: "\"Did someone disabled the cameras before 9 PM?\"", correct: false, tragic: "Your grammar error makes the robber doubt your competence. He stops talking. Mission failed." },
-                { text: "\"Has someone disable the cameras before 9 PM?\"", correct: false, tragic: "The tense mismatch confuses your own team. Communication breaks down. Mission failed." }
+                { text: "\"Did someone disabled the cameras before 9 PM?\"", correct: false },
+                { text: "\"Has someone disable the cameras before 9 PM?\"", correct: false }
             ]
         }
     ];
@@ -80,16 +80,16 @@ const TheVault = () => {
             situation: "📰 **PRESS CONFERENCE - FINAL STATEMENT**\n\nThe crisis is over! You're addressing the media about how the operation ended. Choose the grammatically correct headline statement:",
             options: [
                 { text: "\"The suspect had surrendered before we breached the door.\"", correct: true },
-                { text: "\"The suspect surrenders before we had breached the door.\"", correct: false, tragic: "Your mixed-up tenses confuse the press. Headlines read: 'Lead Negotiator Can't Speak English.' Mission failed." },
-                { text: "\"The suspect has surrendered before we breach the door.\"", correct: false, tragic: "Your tense confusion creates legal chaos. The suspect's lawyer gets the case dismissed. Mission failed." }
+                { text: "\"The suspect surrenders before we had breached the door.\"", correct: false },
+                { text: "\"The suspect has surrendered before we breach the door.\"", correct: false }
             ]
         },
         {
             situation: "🏆 **FINAL QUESTION - OPERATION SUMMARY**\n\nA reporter asks: \"How did you ensure everyone's safety?\" Choose your professional response:",
             options: [
                 { text: "\"We had established a secure perimeter before entering the building.\"", correct: true },
-                { text: "\"We established a secure perimeter before we had entered the building.\"", correct: false, tragic: "Your awkward grammar makes the department look unprofessional. You're reassigned to desk duty. Mission failed." },
-                { text: "\"We have established a secure perimeter before entering the building.\"", correct: false, tragic: "Tense error! The mayor questions your competence. Mission failed." }
+                { text: "\"We had establish a secure perimeter before entering the building.\"", correct: false },
+                { text: "\"We have established a secure perimeter before entering the building.\"", correct: false }
             ]
         }
     ];
@@ -98,16 +98,13 @@ const TheVault = () => {
     const currentQuestions = allPhases[phase - 1];
     const currentQuestion = currentQuestions[questionIndex];
 
+    const offset = (questionIndex + phase) % currentQuestion.options.length;
+    const options = [...currentQuestion.options.slice(offset), ...currentQuestion.options.slice(0, offset)];
+    useControls(showFeedback || gameComplete, showFeedback || gameComplete ? 0 : options.length);
+
     const handleAnswer = (option) => {
-        if (option.correct) {
-            setFeedbackType('success');
-            setFeedbackMessage('✅ **CORRECT!** The team advances safely.');
-            setShowFeedback(true);
-        } else {
-            setFeedbackType('tragic');
-            setFeedbackMessage(`💀 **TRAGIC END**\n\n${option.tragic}`);
-            setShowFeedback(true);
-        }
+        setFeedbackType(option.correct ? 'success' : 'retry');
+        setShowFeedback(true);
     };
 
     const handleContinue = () => {
@@ -150,9 +147,9 @@ const TheVault = () => {
     if (gameComplete) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex flex-col items-center justify-center p-8 text-center">
-                <div className="bg-gradient-to-br from-green-400/20 to-emerald-500/20 backdrop-blur-xl p-12 rounded-3xl border-2 border-green-400/50 shadow-2xl max-w-3xl">
+                <div className="bg-gradient-to-br from-green-400/20 to-emerald-500/20 backdrop-blur-xl p-5 sm:p-12 rounded-3xl border-2 border-green-400/50 shadow-2xl max-w-3xl">
                     <div className="text-9xl mb-6 animate-bounce">🏆</div>
-                    <h1 className="text-6xl font-bold text-green-400 mb-4 drop-shadow-lg">MISSION ACCOMPLISHED!</h1>
+                    <h1 className="text-3xl sm:text-6xl font-bold text-green-400 mb-4 drop-shadow-lg">MISSION ACCOMPLISHED!</h1>
                     <p className="text-2xl text-green-200 mb-8">
                         Officer, you've successfully completed "The Vault" operation. Your grammar skills saved the day!
                     </p>
@@ -167,7 +164,7 @@ const TheVault = () => {
                     </div>
 
                     <Link
-                        to="/index"
+                        to="/index" data-adventure-next
                         className="inline-block px-10 py-4 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-full text-2xl shadow-xl transition transform hover:scale-110 border-2 border-green-300"
                     >
                         Return to Base 🏠
@@ -226,7 +223,7 @@ const TheVault = () => {
                 <div className="bg-slate-800/80 backdrop-blur-lg p-8 rounded-2xl border-2 border-slate-600/50 shadow-2xl">
                     <div className="prose prose-invert max-w-none mb-6">
                         <p className="text-xl text-slate-200 whitespace-pre-line leading-relaxed">
-                            {currentQuestion.situation}
+                            {currentQuestion.situation.replaceAll("**", "")}
                         </p>
                     </div>
 
@@ -238,9 +235,11 @@ const TheVault = () => {
 
                     {/* Options */}
                     <div className="space-y-4">
-                        {currentQuestion.options.map((option, idx) => (
+                        {options.map((option, idx) => (
                             <button
                                 key={idx}
+                                data-adventure-answer={idx + 1}
+                                disabled={showFeedback}
                                 onClick={() => handleAnswer(option)}
                                 className="w-full p-5 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-blue-600 hover:to-blue-500 text-white font-semibold rounded-xl text-lg transition transform hover:scale-105 hover:shadow-xl border-2 border-slate-500 hover:border-blue-400 text-left"
                             >
@@ -252,20 +251,20 @@ const TheVault = () => {
                 </div>
             </div>
 
-            {/* Feedback Overlay */}
+            {/* Round feedback */}
             {showFeedback && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-                    <div className={`max-w-2xl w-full p-10 rounded-3xl border-4 shadow-2xl ${feedbackType === 'success'
+                <div className="w-full max-w-4xl mb-6 flex justify-center">
+                    <div className={`max-w-2xl w-full p-5 sm:p-10 rounded-3xl border-4 shadow-2xl ${feedbackType === 'success'
                             ? 'bg-gradient-to-br from-green-900/90 to-emerald-900/90 border-green-500'
                             : 'bg-gradient-to-br from-red-900/90 to-orange-900/90 border-red-500'
                         }`}>
-                        <p className={`text-3xl font-bold mb-6 whitespace-pre-line ${feedbackType === 'success' ? 'text-green-300' : 'text-red-300'
+                        <p role="status" className={`text-xl sm:text-3xl font-bold mb-6 whitespace-pre-line ${feedbackType === 'success' ? 'text-green-300' : 'text-red-300'
                             }`}>
-                            {feedbackMessage}
+                            {feedbackType === 'success' ? 'Correct! The mission advances.' : phase === 1 ? 'Try again. Choose the preposition that describes the intended movement.' : 'Try again. Use had + past participle for the earlier past event.'}
                         </p>
 
                         <button
-                            onClick={handleContinue}
+                            autoFocus data-adventure-next onClick={handleContinue}
                             className={`w-full px-8 py-4 font-bold rounded-full text-xl transition transform hover:scale-105 shadow-lg ${feedbackType === 'success'
                                     ? 'bg-green-500 hover:bg-green-400 text-slate-900'
                                     : 'bg-red-500 hover:bg-red-400 text-white'

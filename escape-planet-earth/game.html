@@ -2,16 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escape Planet Earth</title>
   <link rel="stylesheet" href="css/shared.css">
   <link rel="stylesheet" href="css/student.css">
-  <!-- Supabase -->
-  <script src="js/supabase.js"></script>
 </head>
 <body>
   <!-- Sound Toggle -->
-  <div id="sound-toggle" class="sound-toggle" onclick="toggleSound()">🔊</div>
+  <button id="sound-toggle" class="sound-toggle" type="button" aria-label="Sound" aria-pressed="true">🔊</button>
 
   <!-- Timer Bar (Fixed Top) -->
   <div id="timer-bar" class="timer-bar hidden">
@@ -27,10 +25,9 @@
     <!-- Content injected via JS -->
   </div>
 
+  <p id="connection-status" class="text-center" role="status"></p>
+
   <!-- Scripts -->
-  <script src="js/sound.js"></script>
-  <script src="js/game-data.js"></script>
-  <script src="js/supabase-config.js"></script>
-  <script src="js/student.js"></script>
+  <script type="module" src="js/student.js"></script>
 </body>
 </html>

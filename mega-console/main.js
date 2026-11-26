@@ -1,7 +1,22 @@
+import { gameRuntime } from '/gallery/shared/runtime.js';
+import { read, write } from '/gallery/shared/storage.js';
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Word list loaded from words.js (window.gameLevels)
 
 class MegaConsole {
     constructor() {
+        const options = Object.fromEntries(Array.from({ length: 3 }, (_, index) => [
+            'answer' + (index + 1), () => {
+                if (!this.optionsContainer.classList.contains('hidden')) this.optionsContainer.querySelectorAll('button')[index]?.click();
+            }
+        ]));
+        this.runtime = gameRuntime('mega-console', 'words', {
+            ...options,
+            confirm: () => this.checkInput(),
+            hint: () => { if (!this.hintBtn.classList.contains('hidden')) this.useHint(); },
+            next: () => { if (!this.wordInput.classList.contains('hidden')) this.wordInput.focus(); }
+        });
+        if (this.runtime.pack) window.gameLevels = [{ level: 1, title: this.runtime.pack.title, words: this.runtime.pack.items.map(item => ({ ...item, word: item.word.toUpperCase() })) }];
         this.totalLevels = window.gameLevels.length;
         this.currentLevelIndex = 0;
 
@@ -26,6 +41,7 @@ class MegaConsole {
         this.wordInput = document.getElementById('word-input');
         this.wordMask = document.getElementById('word-mask');
         this.hintBtn = document.getElementById('hint-btn');
+        this.submitBtn = document.getElementById('submit-btn');
         this.feedbackMessage = document.getElementById('feedback-message');
         this.progressBar = document.getElementById('progress-bar');
         this.progressText = document.getElementById('progress-text');
@@ -40,7 +56,6 @@ class MegaConsole {
         this.playerNameInput = document.getElementById('player-name');
         this.saveScoreBtn = document.getElementById('save-score-btn');
         this.scoreList = document.getElementById('score-list');
-        this.highScoresDiv = document.getElementById('high-scores');
         this.highScoresDiv = document.getElementById('high-scores');
         this.inputNameContainer = document.querySelector('.input-name-container');
         this.optionsContainer = document.getElementById('options-container');
@@ -71,7 +86,7 @@ class MegaConsole {
                 this.checkInput();
             }
             // Add Control key shortcut for hint
-            if (e.key === 'Control' || e.key === 'Tab') {
+            if (e.key === 'F2') {
                 e.preventDefault(); // Stop tab from moving focus
                 this.useHint();
             }
@@ -84,6 +99,7 @@ class MegaConsole {
         this.hintBtn.addEventListener('click', () => {
             this.useHint();
         });
+        this.submitBtn.addEventListener('click', () => this.checkInput());
 
         this.restartBtn.addEventListener('click', () => {
             // Reset UI for next game
@@ -97,13 +113,6 @@ class MegaConsole {
             this.saveScore();
         });
 
-        document.addEventListener('click', (e) => {
-            // Don't auto focus if we are typing name or clicking hint
-            // Use closest to detect if click originated from button or its children
-            if (e.target.closest('#hint-btn') || e.target === this.playerNameInput || e.target === this.saveScoreBtn) return;
-            if (!this.victoryScreen.classList.contains('hidden')) return;
-            this.wordInput.focus();
-        });
     }
 
     startLevel(levelIndex) {
@@ -158,6 +167,7 @@ class MegaConsole {
             this.wordInput.classList.add('hidden');
             this.wordMask.classList.add('hidden');
             this.hintBtn.classList.add('hidden');
+            this.submitBtn.classList.add('hidden');
             this.optionsContainer.classList.remove('hidden');
             this.optionsContainer.innerHTML = '';
 
@@ -177,6 +187,7 @@ class MegaConsole {
             this.wordInput.classList.remove('hidden');
             this.wordMask.classList.remove('hidden');
             this.hintBtn.classList.remove('hidden');
+            this.submitBtn.classList.remove('hidden');
             this.optionsContainer.classList.add('hidden');
             this.hintBtn.disabled = false;
 
@@ -291,9 +302,10 @@ class MegaConsole {
     }
 
     checkInput() {
-        if (this.isLocked) return;
+        if (this.isLocked || this.wordInput.classList.contains('hidden')) return;
 
         const input = this.wordInput.value.trim().toUpperCase();
+        if (!input) return;
         const target = this.currentLevelWords[this.currentWordIndex].word.toUpperCase();
 
         if (input === target) {
@@ -386,7 +398,7 @@ class MegaConsole {
         certDisplay.innerHTML = `
             <div class="cert-header">OFFICIAL CERTIFICATION</div>
             <div class="cert-body">
-                This certifies that <strong>${name}</strong> has successfully overridden the MEGA-CONSOLE.
+                This certifies that <strong>${escapeHTML(name)}</strong> has successfully overridden the MEGA-CONSOLE.
                 <br><br>
                 Final Score: <strong>${score}</strong>
                 <br>
@@ -407,7 +419,10 @@ class MegaConsole {
 
         // Save to LocalStorage
         const newScore = { name: name, score: this.score, date: new Date().toISOString() };
-        let highScores = JSON.parse(localStorage.getItem('megaConsoleScores') || '[]');
+        let highScores = read('mega-console:scores', []);
+        highScores = Array.isArray(highScores) ? highScores.filter(entry =>
+            typeof entry?.name === 'string' && Number.isFinite(entry.score)
+        ) : [];
         highScores.push(newScore);
 
         // Sort by score desc
@@ -415,7 +430,7 @@ class MegaConsole {
 
         // Keep top 5 (storage) but display top 3
         highScores = highScores.slice(0, 5); // Keep a few more in storage
-        localStorage.setItem('megaConsoleScores', JSON.stringify(highScores));
+        write('mega-console:scores', highScores);
 
         // Show Leaderboard
         this.showLeaderboard(highScores);
@@ -431,7 +446,7 @@ class MegaConsole {
         scores.slice(0, 3).forEach((s, index) => {
             const li = document.createElement('li');
             li.innerHTML = `
-                <span>${index + 1}. ${s.name}</span>
+                <span>${index + 1}. ${escapeHTML(s.name)}</span>
                 <span>${s.score}</span>
             `;
             this.scoreList.appendChild(li);
@@ -439,10 +454,13 @@ class MegaConsole {
     }
 
     scrambleText(element, finalText) {
+        if (element.dataset.interval) clearInterval(parseInt(element.dataset.interval));
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            element.textContent = finalText;
+            return;
+        }
         let iterations = 0;
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
-
-        if (element.dataset.interval) clearInterval(parseInt(element.dataset.interval));
 
         const interval = setInterval(() => {
             element.textContent = finalText

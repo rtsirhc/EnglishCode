@@ -228,3 +228,11 @@
   .code-input { font-size: 1.3rem; letter-spacing: 6px; }
   .celebration-screen h1 { font-size: 1.8rem; }
 }
+
+.options-list .option-item {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.code-input { max-width: 100%; }

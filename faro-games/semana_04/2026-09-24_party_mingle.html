@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Party Invite</title>
+  <style>
+    :root{font-family:Arial,Helvetica,sans-serif;color:#101a2d;background:#f9fafb}
+    *{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}
+    .app{height:100dvh;min-height:480px;display:flex;flex-direction:column;padding:clamp(12px,2vw,24px) clamp(16px,3vw,40px);gap:14px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #172746;padding-bottom:12px;min-height:64px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}.brand img{width:48px;height:48px;object-fit:contain}.brand b{font-size:22px}.brand small{display:block;color:#435574;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .head-actions,.controls{display:flex;align-items:center;gap:9px}.icon{border:2px solid #172746;background:#fff;color:#172746;border-radius:8px;padding:9px 13px;font-weight:800}.icon:hover,.icon:focus-visible{background:#e6efff}
+    .progress{font-weight:800;color:#405274;white-space:nowrap}.stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(12px,2vh,24px);overflow:hidden}
+    .topline{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.round{background:#1d3970;color:white;padding:9px 13px;font-size:clamp(16px,2vw,24px);font-weight:900;letter-spacing:.04em}.instruction{font-size:clamp(19px,2.3vw,31px);font-weight:800;color:#203b68}
+    h1{font-size:clamp(42px,6.1vw,90px);line-height:1;letter-spacing:-.045em;margin:0;max-width:95%}h2{font-size:clamp(24px,3vw,42px);line-height:1.1;margin:0}
+    .panel{border:3px solid #1c2c4b;background:white;box-shadow:7px 7px 0 #dce5f2;padding:clamp(18px,2.5vw,34px);flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vh,28px)}
+    .panel p{margin:0}.big{font-size:clamp(23px,3.2vw,46px);line-height:1.2;font-weight:800}.medium{font-size:clamp(19px,2.3vw,32px);line-height:1.25;font-weight:700}.muted{color:#344866}.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,28px)}.card{border-left:10px solid #e81d5b;background:#fff5f7;padding:clamp(14px,2vw,25px)}.card.alt{border-color:#1c68b4;background:#eef6ff}.card.green{border-color:#159568;background:#edfff7}.label{text-transform:uppercase;letter-spacing:.07em;color:#9e1640;font-weight:900;font-size:clamp(16px,1.5vw,22px);margin-bottom:9px}.alt .label{color:#16538e}.green .label{color:#0a7550}.card p{font-size:clamp(22px,2.7vw,37px);line-height:1.2;font-weight:800}
+    .script{display:grid;gap:8px;font-size:clamp(19px,2.2vw,31px);line-height:1.2}.script span{display:block;padding:6px 12px;background:#f0f4fa}.script b{color:#bc164b}
+    .notice{font-size:clamp(18px,2vw,28px);font-weight:800;color:#123d6c}.clock{font-size:clamp(32px,4.4vw,59px);font-weight:900;min-width:115px;text-align:center;letter-spacing:.02em}.clock.done{color:#be1544}.primary{border:2px solid #132444;border-radius:8px;background:#ffda36;color:#111b2d;padding:11px 20px;font-size:clamp(17px,1.7vw,23px);font-weight:900}.primary:hover,.primary:focus-visible{background:#ffca00}.controls{justify-content:space-between;border-top:3px solid #172746;padding-top:12px}.control-side{display:flex;align-items:center;gap:8px}.foot{font-size:14px;color:#52617b;white-space:nowrap}
+    .screen-reader{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+    button:disabled{opacity:.5;cursor:default}
+    @media(max-width:760px){.app{min-height:100dvh;height:auto}.stage{min-height:auto;overflow:visible}.two{grid-template-columns:1fr}.panel{justify-content:flex-start;overflow:auto}.controls{gap:10px;flex-wrap:wrap}.control-side{gap:5px}.icon,.primary{padding:8px 10px}}
+    @media(max-height:650px) and (min-width:761px){.app{gap:8px}.panel{padding:14px;gap:10px}.big{font-size:clamp(21px,2.7vw,36px)}.medium{font-size:clamp(17px,2vw,28px)}h1{font-size:clamp(35px,4.5vw,60px)}.script{font-size:clamp(17px,2vw,27px)}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><b>The Party Invite</b></div>
+    <div class="head-actions"><span class="progress" id="progress">1 / 7</span><button class="icon" id="fullscreen" aria-label="Full screen">⛶</button></div>
+  </header>
+  <main class="stage" id="stage"></main>
+  <nav class="controls" aria-label="Activity controls">
+    <div class="control-side"><button class="icon" id="prev" aria-label="Previous screen">←</button><button class="primary" id="next">Next →</button></div>
+    <div class="control-side"><span class="clock" id="clock" role="timer" aria-label="Time remaining">00:00</span><button class="icon" id="timer">Start</button><button class="icon" id="reset" aria-label="Reset timer">↺</button></div>
+  </nav>
+  <p class="screen-reader" id="timer-status" role="status"></p>
+</div>
+<script type="module" src="party-mingle.js"></script>
+</body>
+</html>

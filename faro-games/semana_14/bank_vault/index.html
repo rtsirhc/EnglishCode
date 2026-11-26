@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bank Vault Auction &amp; Relay</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="badge">$</span>
+      <div>
+        <h1>Bank Vault Auction &amp; Relay</h1>
+        <p class="subtitle">At the bank · Every speaker unlocks a vault lock</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-review" class="btn btn-secondary" type="button">3-Min Bank Flash</button>
+      <button id="btn-sound" class="btn btn-ghost" type="button" aria-pressed="true">Sound: ON</button>
+      <button id="btn-full" class="btn btn-ghost" type="button">Fullscreen</button>
+      <button id="btn-finish" class="btn btn-gold" type="button" hidden>Finish &amp; Podium</button>
+      <button id="btn-reset" class="btn btn-danger" type="button" hidden>New Game</button>
+    </div>
+  </header>
+
+  <main id="screen-setup" class="screen">
+    <section class="panel">
+      <h2>Bank Vault Setup (Zero Student Phones)</h2>
+      <p class="lead">Each student on a team owns one vault lock (<strong>#1, #2, #3...</strong>). When <strong>all locks</strong> on a team open, they crack the <strong>+$1,000 Vault Jackpot</strong>!</p>
+      <div class="setup-grid">
+        <label class="field">
+          <span>CEFR Level</span>
+          <select id="opt-level">
+            <option value="A1">A1 — Guided Bank Frames</option>
+            <option value="A2" selected>A2 — Everyday Banking (Core)</option>
+            <option value="B1">B1 — Bank Problems &amp; Negotiation</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Teams</span>
+          <select id="opt-teams">
+            <option value="2">2 Teams</option>
+            <option value="3">3 Teams</option>
+            <option value="4">4 Teams</option>
+            <option value="5" selected>5 Teams</option>
+            <option value="6">6 Teams</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Vault Locks per Team (#1–#N)</span>
+          <select id="opt-speakers">
+            <option value="3">3 Speakers</option>
+            <option value="4">4 Speakers</option>
+            <option value="5" selected>5 Speakers</option>
+            <option value="6">6 Speakers</option>
+            <option value="7">7 Speakers</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Team Huddle Timer</span>
+          <select id="opt-timer">
+            <option value="15" selected>15s</option>
+            <option value="20">20s</option>
+            <option value="30">30s</option>
+          </select>
+        </label>
+      </div>
+      <div class="setup-cta">
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">Open the Bank</button>
+        <button id="btn-resume" class="btn btn-secondary btn-xl" type="button" hidden>Resume Saved Match</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-play" class="screen" hidden>
+    <section id="scoreboard" class="scoreboard"></section>
+
+    <div class="turn-banner">
+      <div class="pill"><span class="label">ACTIVE TEAM</span><strong id="active-team">Team 1</strong></div>
+      <div class="pill"><span class="label">VAULT KEY HOLDER</span><strong id="active-speaker" class="gold-txt">SPEAKER #1</strong></div>
+      <div class="pill pill-grow"><span class="label">ROUND</span><strong id="round-num">1</strong></div>
+      <button id="btn-switch-speaker" class="btn btn-ghost btn-sm" type="button">Switch #</button>
+    </div>
+
+    <section id="phase-bid" class="card-panel">
+      <div class="tag-row">
+        <span class="cat-tag" id="bid-cat">VAULT CATEGORY</span>
+      </div>
+      <h2 class="big-prompt" id="bid-title">Choose your vault bid for Speaker #1!</h2>
+      <p class="hint">Team coaches Speaker #1 during the huddle; <strong>only Speaker #1 speaks aloud</strong> to unlock Lock #<span id="bid-lock-num">1</span>.</p>
+      <div class="bid-grid" id="bid-buttons">
+        <button class="btn-bid" data-bid="200" type="button"><strong>$200</strong><span>Bronze Safe</span></button>
+        <button class="btn-bid" data-bid="400" type="button"><strong>$400</strong><span>Silver Vault</span></button>
+        <button class="btn-bid" data-bid="600" type="button"><strong>$600</strong><span>Gold Vault</span></button>
+        <button class="btn-bid btn-bid-max" data-bid="all" type="button"><strong>DOUBLE VAULT</strong><span>Bet 50% of balance</span></button>
+      </div>
+    </section>
+
+    <section id="phase-play" class="card-panel" hidden>
+      <div class="challenge-head">
+        <span class="cat-tag" id="ch-cat">CATEGORY</span>
+        <span class="money-tag" id="ch-stake">$400</span>
+        <div class="timer-box">
+          <span id="timer-display">15s</span>
+          <button id="btn-timer" class="btn btn-ghost btn-sm" type="button">Start Huddle</button>
+        </div>
+      </div>
+
+      <h2 class="big-prompt" id="ch-prompt"></h2>
+      <p class="frame-box" id="ch-frame" hidden></p>
+
+      <div class="answer-box" id="ch-answer-box" hidden>
+        <div class="answer-label">MODEL BANKING LINE</div>
+        <p class="answer-text" id="ch-answer"></p>
+        <p class="answer-tip" id="ch-tip"></p>
+      </div>
+
+      <div class="judge-bar">
+        <button id="btn-reveal" class="btn btn-secondary" type="button">Reveal Model (R)</button>
+        <div class="verdict-group">
+          <button id="btn-clean" class="btn btn-success" type="button">Unlocked Solo (+100%) [1]</button>
+          <button id="btn-echo" class="btn btn-warn" type="button">Assisted Echo (+50%) [2]</button>
+          <button id="btn-miss" class="btn btn-danger" type="button">Locked / Explain (-50%) [3]</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-podium" class="screen" hidden>
+    <section class="panel">
+      <h2>Bank Vault Championship Standings</h2>
+      <p id="podium-summary" class="lead"></p>
+      <ol id="podium-list" class="podium-list"></ol>
+      <button id="btn-again" class="btn btn-primary btn-xl" type="button">Play Again</button>
+    </section>
+  </main>
+
+  <dialog id="review-dialog" class="modal">
+    <div class="modal-head">
+      <h2>3-Minute Bank Vocab Flash</h2>
+      <button id="btn-close-review" class="btn btn-ghost" type="button">Close</button>
+    </div>
+    <p class="hint">Tap any card to reveal a useful bank sentence.</p>
+    <div id="review-grid" class="review-grid"></div>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#efe5d3"/>
+  <rect x="0" y="0" width="640" height="18" fill="#c42329"/>
+  <rect x="0" y="342" width="640" height="18" fill="#1b499b"/>
+  <rect x="24" y="32" width="592" height="296" rx="10" fill="#fffdf8" stroke="#131c2e" stroke-width="5"/>
+  <rect x="44" y="155" width="552" height="58" rx="8" fill="#273142" stroke="#131c2e" stroke-width="4"/>
+  <line x1="60" y1="184" x2="565" y2="184" stroke="#facc15" stroke-width="4" stroke-dasharray="20 14"/>
+  <g transform="translate(360,136)">
+    <rect x="0" y="8" width="94" height="56" rx="8" fill="#c42329" stroke="#131c2e" stroke-width="4"/>
+    <path d="M94 22 H126 L144 42 V64 H94 Z" fill="#fff" stroke="#131c2e" stroke-width="4"/>
+    <path d="M100 28 H122 L134 42 H100 Z" fill="#38bdf8"/>
+    <circle cx="30" cy="66" r="14" fill="#131c2e" stroke="#fff" stroke-width="3"/>
+    <circle cx="118" cy="66" r="14" fill="#131c2e" stroke="#fff" stroke-width="3"/>
+    <text x="47" y="44" fill="#fff" font-family="monospace" font-size="18" font-weight="900" text-anchor="middle">MAIL</text>
+  </g>
+  <rect x="52" y="56" width="150" height="34" rx="4" fill="#fff5f5" stroke="#c42329" stroke-width="3" transform="rotate(-2 127 73)"/>
+  <text x="127" y="79" fill="#c42329" font-family="monospace" font-size="16" font-weight="900" text-anchor="middle" transform="rotate(-2 127 73)">AIR EXPRESS</text>
+  <text x="52" y="132" fill="#131c2e" font-family="Georgia,serif" font-size="38" font-weight="900">Express Parcel Relay</text>
+  <text x="52" y="286" fill="#1b499b" font-family="monospace" font-size="19" font-weight="900" letter-spacing="1.5">AT THE POST OFFICE · EVERY DRIVER SPEAKS</text>
+</svg>

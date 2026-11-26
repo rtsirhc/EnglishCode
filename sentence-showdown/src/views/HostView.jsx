@@ -34,24 +34,28 @@ function TimerDisplay({ startTime, seconds }) {
 
 export default function HostView() {
     const [roomCode, setRoomCode] = useState(null);
-    const [localIP, setLocalIP] = useState('');
+    const [mode, setMode] = useState('local');
+    const [custom, setCustom] = useState(Boolean(socket.pack));
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
     const [gameState, setGameState] = useState(null);
 
     useEffect(() => {
         socket.on('game_state', (state) => {
             setGameState(state);
         });
-        return () => { socket.off('game_state'); };
+        return () => { socket.off('game_state'); socket.close(); };
     }, []);
 
     const createRoom = useCallback(() => {
-        socket.emit('create_room', (res) => {
-            if (res.success) {
-                setRoomCode(res.roomCode);
-                setLocalIP(res.localIP);
-            }
+        setBusy(true);
+        setError('');
+        socket.emit('create_room', { mode, custom }, (res) => {
+            setBusy(false);
+            if (res.success) setRoomCode(res.roomCode);
+            else setError(res.error);
         });
-    }, []);
+    }, [mode, custom]);
 
     const startGame = () => {
         socket.emit('start_game', { roomCode }, (res) => {
@@ -111,7 +115,17 @@ export default function HostView() {
                     <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px' }}>🎓</span>
                     <h1 style={styles.title}>Teacher Control Panel</h1>
                     <p style={styles.sub}>Create a room for your students to join</p>
-                    <button className="btn btn-gold btn-lg" onClick={createRoom} style={{ marginTop: '24px' }}>
+                    <label style={{ display: 'block', marginTop: '16px' }}>Connection
+                        <select className="input-field" value={mode} disabled={busy} onChange={e => setMode(e.target.value)}>
+                            <option value="local">Same browser · three tabs</option>
+                            <option value="online">Separate devices · internet</option>
+                        </select>
+                    </label>
+                    {socket.pack && <label style={{ display: 'block', marginTop: '12px' }}>
+                        <input type="checkbox" checked={custom} disabled={busy} onChange={e => setCustom(e.target.checked)} /> Play {socket.pack.title}
+                    </label>}
+                    {error && <p role="alert">{error}</p>}
+                    <button disabled={busy} className="btn btn-gold btn-lg" onClick={createRoom} style={{ marginTop: '24px' }}>
                         Create Room
                     </button>
                 </div>
@@ -126,7 +140,8 @@ export default function HostView() {
 
     // ─── LOBBY ───
     if (phase === 'lobby') {
-        const joinUrl = `http://${localIP}:${window.location.port}/play?code=${roomCode}`;
+        const joinUrl = new URL(location.pathname, location.origin);
+        joinUrl.hash = '/play?' + new URLSearchParams({ code: roomCode, mode });
         return (
             <div style={styles.fullCenter}>
                 <div style={{ textAlign: 'center', maxWidth: '600px', width: '100%' }} className="animate-slide-up">
@@ -144,10 +159,10 @@ export default function HostView() {
 
                     <div className="glass" style={{ padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
-                            📱 Join Link (same WiFi)
+                            Player link
                         </p>
                         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--accent-cyan)', wordBreak: 'break-all' }}>
-                            {joinUrl}
+                            <a href={joinUrl.href} target="_blank" rel="noopener">{joinUrl.href}</a>
                         </p>
                     </div>
 
@@ -280,8 +295,8 @@ export default function HostView() {
                         {playerName('p1')} bet {formatMoney(gs.bets.p1)} · {playerName('p2')} bet {formatMoney(gs.bets.p2)}
                     </p>
                     <button
-                        className="btn btn-red btn-lg animate-pulse-scale"
-                        onClick={releaseBuzzer}
+                        className="btn btn-red btn-lg animate-pulse-glow"
+                        id="showdown-confirm" onClick={releaseBuzzer}
                         style={{ fontSize: '1.3rem', padding: '20px 48px' }}
                     >
                         🔴 RELEASE BUZZER
@@ -438,7 +453,8 @@ export default function HostView() {
                         {isSkipped ? 'Question Skipped' : 'Round Complete!'}
                     </h2>
 
-                    {!isSkipped && (
+                    {r?.allCorrect && <p style={{ marginBottom: 24 }}>Both players earned their wagers.</p>}
+                    {!isSkipped && !r?.allCorrect && (
                         <div className="glass" style={{ padding: '28px', marginBottom: '24px', textAlign: 'center', width: '100%', maxWidth: '500px' }}>
                             <p style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
                                 <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>{playerName(r?.winner)}</span> wins{' '}
@@ -446,9 +462,7 @@ export default function HostView() {
                                     {formatMoney(r?.amount || 0)}
                                 </span>
                             </p>
-                            <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                                from {playerName(r?.loser)}
-                            </p>
+
                             {r?.override && (
                                 <p style={{ color: 'var(--accent-cyan)', fontSize: '0.8rem', marginTop: '8px' }}>
                                     (Host Override)
@@ -461,7 +475,7 @@ export default function HostView() {
                         <p style={{ color: 'var(--text-dim)', marginBottom: '24px' }}>No money was transferred.</p>
                     )}
 
-                    <button className="btn btn-gold btn-lg" onClick={nextRound}>
+                    <button className="btn btn-gold btn-lg" id="showdown-next" onClick={nextRound}>
                         Next Round →
                     </button>
                 </div>
@@ -497,7 +511,7 @@ export default function HostView() {
                             </div>
                         </div>
                     </div>
-                    <button className="btn btn-gold btn-lg" onClick={newGame} style={{ marginTop: '16px' }}>
+                    <button className="btn btn-gold btn-lg" id="showdown-next" onClick={newGame} style={{ marginTop: '16px' }}>
                         🔄 New Game
                     </button>
                 </div>

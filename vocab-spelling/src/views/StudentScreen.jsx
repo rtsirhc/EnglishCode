@@ -73,7 +73,7 @@ export default function StudentScreen({ roomId, gameState }) {
   return (
     <div className={`w-full max-w-[1100px] mx-auto fade-in ${flashClass}`}>
       {/* Two-column layout */}
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-5 items-stretch md:items-start">
         {/* LEFT — Main game area */}
         <div className="flex-1 min-w-0">
           {/* Balance & Status */}
@@ -120,13 +120,13 @@ export default function StudentScreen({ roomId, gameState }) {
               </p>
               <div className="flex gap-3 justify-center">
                 <button
-                  onClick={() => handleDoubleResponse(true)}
+                  id="double-accept" onClick={() => handleDoubleResponse(true)}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-900 font-extrabold py-3 px-6 rounded-xl transition-all shadow-lg cursor-pointer"
                 >
                   🎯 Accept Double!
                 </button>
                 <button
-                  onClick={() => handleDoubleResponse(false)}
+                  id="double-decline" onClick={() => handleDoubleResponse(false)}
                   className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold py-3 px-6 rounded-xl transition-all cursor-pointer"
                 >
                   ✋ Decline
@@ -155,7 +155,7 @@ export default function StudentScreen({ roomId, gameState }) {
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-400 text-2xl font-bold">$</span>
                   <input
-                    type="number"
+                    type="number" aria-label="Bet amount"
                     value={betInput}
                     onChange={(e) => setBetInput(e.target.value)}
                     min={1}
@@ -166,7 +166,7 @@ export default function StudentScreen({ roomId, gameState }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[0.1, 0.25, 0.5, 1].map((pct) => (
                     <button
                       key={pct}
@@ -180,7 +180,7 @@ export default function StudentScreen({ roomId, gameState }) {
                 </div>
 
                 <button
-                  type="submit"
+                  type="submit" id="spelling-confirm"
                   disabled={!betInput || parseInt(betInput) <= 0}
                   className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl text-lg transition-all shadow-lg shadow-indigo-900/30 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >

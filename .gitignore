@@ -27,3 +27,7 @@ futbol_game/
 # Python
 __pycache__/
 *.pyc
+
+# Local QA reports & temp sessions
+browser-control-reports/
+:memory:.ses

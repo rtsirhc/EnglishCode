@@ -1,0 +1,38 @@
+{
+  "name": "englishcode-gallery",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "check": "node scripts/check-catalog.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "vite": "8.0.10",
+    "@vitejs/plugin-react": "6.0.1",
+    "@tailwindcss/vite": "4.2.4",
+    "tailwindcss": "4.2.4",
+    "tailwindcss3": "npm:tailwindcss@3.4.17",
+    "autoprefixer": "10.4.27"
+  },
+  "dependencies": {
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "react-router-dom": "7.14.1",
+    "lucide-react": "1.11.0",
+    "canvas-confetti": "1.9.4",
+    "clsx": "2.1.1",
+    "framer-motion": "12.34.0",
+    "tailwind-merge": "3.4.1",
+    "use-sound": "5.0.0",
+    "zustand": "5.0.11",
+    "phaser": "3.90.0",
+    "socket.io-client": "4.8.3",
+    "peerjs": "1.5.5"
+  }
+}

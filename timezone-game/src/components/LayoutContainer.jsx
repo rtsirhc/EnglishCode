@@ -8,7 +8,7 @@ export default function LayoutContainer({ children, className }) {
     return (
         <div
             className={cn(
-                'w-screen h-screen overflow-hidden relative',
+                'timezone-layout w-full min-h-dvh relative',
                 'bg-background font-sans',
                 className
             )}

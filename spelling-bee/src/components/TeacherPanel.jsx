@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { bindGameControls } from '../../../gallery/shared/runtime.js';
 import NameWheel from './NameWheel';
 
 export default function TeacherPanel({
   state,
+  displayId,
   onSpin,
   onRevealWord,
   onLiveUpdate,
@@ -20,19 +22,19 @@ export default function TeacherPanel({
   const [spinTarget, setSpinTarget]   = useState(null);
   const [isSpinning, setIsSpinning]   = useState(false);
   const answerRef = useRef(null);
-  const prevSpinTargetRef = useRef(undefined);
+
 
   // Detect when state._lastSpinTarget changes to trigger the wheel animation
   useEffect(() => {
     const target = state._lastSpinTarget;
-    if (target !== undefined && target !== null && target !== prevSpinTargetRef.current) {
-      prevSpinTargetRef.current = target;
+    if (target !== undefined && target !== null) {
+
       setSpinTarget(target);
       setSpinTrigger((t) => t + 1);
       setIsSpinning(true);
       setInputText('');
     }
-  }, [state._lastSpinTarget, state.currentStudent]);
+  }, [state.spinNumber]);
 
   useEffect(() => {
     if (state.phase === 'playing' && !state.liveText) setInputText('');
@@ -93,18 +95,29 @@ export default function TeacherPanel({
     if (window.confirm('Reset the game?')) { onReset(); setInputText(''); }
   };
 
-  const studentUrl = `${window.location.origin}/`;
+  const studentUrl = `${window.location.origin}${import.meta.env.BASE_URL}index.html#/student?room=${displayId}`;
   const queueLeft  = state.spinQueue?.length ?? 0;
   const canReveal  = state.phase === 'playing' && state.currentStudent && !isSpinning;
   const canCheck   = state.phase === 'playing' && state.currentWord && !isSpinning;
   const activeCount = state.students?.length ?? 0;
+
+  useEffect(() => {
+    const controls = {};
+    if (state.phase === 'result') controls.next = handleNext;
+    else if (!isSpinning) {
+      if (!state.currentStudent && activeCount) controls.confirm = handleSpin;
+      else if (canReveal && !state.currentWord) controls.confirm = handleRevealWord;
+      else if (canCheck && inputText.trim()) controls.confirm = handleCheck;
+    }
+    return bindGameControls('spelling-bee', controls);
+  });
 
   return (
     <div className="teacher-page">
       <div className="teacher-header">
         <div className="teacher-title"><span>👩‍🏫</span><span>Teacher Panel</span></div>
         <div className="teacher-header-right">
-          <span className="student-url-chip">🔗 {studentUrl}</span>
+          <a className="student-url-chip" href={studentUrl} target="_blank" rel="noopener">Open classroom display (same browser)</a>
           <span className="active-count-chip">👤 {activeCount} left</span>
           <button className="reset-btn" onClick={handleReset}>↺ Reset</button>
         </div>
@@ -124,7 +137,7 @@ export default function TeacherPanel({
           <button
             className="spin-btn"
             onClick={handleSpin}
-            disabled={isSpinning || state.phase !== 'playing' || activeCount < 2}
+            disabled={isSpinning || state.phase !== 'playing' || !activeCount || !!state.currentStudent}
           >
             {isSpinning ? '🌀 Spinning…' : '🎡 Spin Wheel'}
           </button>
@@ -152,7 +165,7 @@ export default function TeacherPanel({
               </button>
             )}
             {state.currentWord && (
-              <div className="word-revealed-notice">✅ Word revealed to student</div>
+              <div className="word-revealed-notice">Dictate this word: <strong>{state.currentWord}</strong></div>
             )}
 
             {canCheck && (
@@ -191,12 +204,12 @@ export default function TeacherPanel({
         {state.phase === 'result' && state.lastResult && (
           <>
             <div className={`phase-status ${state.lastResult.correct ? 'correct-status' : 'incorrect-status'}`}>
-              {state.lastResult.correct
+              {state.lastResult.practiceRetry ? "Try the spelling again." : state.lastResult.correct
                 ? `✅ Correct! "${state.lastResult.word}"`
                 : `❌ ${state.lastResult.eliminatedName} eliminated — ${state.lastResult.remaining} player${state.lastResult.remaining !== 1 ? 's' : ''} left`}
             </div>
             <button className="next-btn" onClick={handleNext}>
-              {state.lastResult.remaining <= 1 ? '🏆 See Champion' : 'Next Round →'}
+              {state.lastResult.practiceRetry ? 'Try Again' : state.lastResult.remaining <= 1 ? '🏆 See Champion' : 'Next Round →'}
             </button>
           </>
         )}
@@ -236,7 +249,7 @@ export default function TeacherPanel({
             {state.students?.map((name) => (
               <div key={name} className={`name-chip ${name === state.currentStudent ? 'name-chip-active' : ''}`}>
                 <span>{name}</span>
-                <button className="name-chip-remove" onClick={() => onStudentRemove(name)}>×</button>
+                <button className="name-chip-remove" disabled={activeCount <= 1 || !!state.currentStudent || isSpinning || state.phase !== 'playing'} aria-label={'Remove ' + name} onClick={() => onStudentRemove(name)}>×</button>
               </div>
             ))}
           </div>

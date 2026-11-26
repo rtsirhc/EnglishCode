@@ -1,10 +1,11 @@
 // Simple Web Audio API Synthesizer for game sounds
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
+export const audioCtx = AudioContext ? new AudioContext() : null;
 
 const playTone = (frequency, type, duration, vol=0.1) => {
+    if (!audioCtx) return;
     if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch(() => {});
     }
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -22,7 +23,7 @@ const playTone = (frequency, type, duration, vol=0.1) => {
     oscillator.stop(audioCtx.currentTime + duration);
 };
 
-const sounds = {
+export const sounds = {
     muted: false,
     
     tick: () => {

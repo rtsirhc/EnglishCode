@@ -35,13 +35,10 @@ export default function TeacherLobby() {
     socket.emit('teacher_start_game2');
   };
 
-  const questionsPerTense = selectedTenses.length > 0
-    ? `~${Math.ceil(20 / selectedTenses.length)}–${Math.floor(20 / selectedTenses.length) + 1}`
-    : '—';
-
   return (
     <div className="flex items-start justify-center min-h-[70vh] p-6">
       <div className="w-full max-w-xl animate-fade-in">
+        {socket.pack && <button className="btn-primary w-full p-4 mb-4 bg-violet-600 text-white" onClick={() => socket.emit('teacher_start_game1', { custom: true })}>Play sentence pack · {socket.pack.title} ({Math.min(socket.pack.items.length, 20)} cards)</button>}
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🎮</div>
           <h2 className="text-3xl font-black text-slate-800">Choose a Game</h2>

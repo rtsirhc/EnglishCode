@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import leoImg from '../assets/leo.png';
-import miaImg from '../assets/mia.png';
-import ivyImg from '../assets/ivy.png';
-import samImg from '../assets/sam.png';
+import leoImg from '../assets/leo.webp';
+import miaImg from '../assets/mia.webp';
+import ivyImg from '../assets/ivy.webp';
+import samImg from '../assets/sam.webp';
 
 const Welcome = () => {
     return (

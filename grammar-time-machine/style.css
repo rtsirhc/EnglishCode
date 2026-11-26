@@ -1,0 +1,4 @@
+@import "tailwindcss" source(none);
+@config "./theme.js";
+@source "./index.html";
+@source "./game.js";

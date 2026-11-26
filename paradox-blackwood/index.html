@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Paradox at Blackwood Manor</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Roboto+Mono:wght@300;400;700&display=swap"
-        rel="stylesheet">
+
 </head>
 
 <body>
@@ -16,7 +15,7 @@
             <h1>The Paradox at Blackwood Manor</h1>
             <div class="status-bar">
                 <span id="case-status">Status: Active Investigation</span>
-                <span id="timer">Time Remaining: 60:00</span>
+                <span>Teacher-paced investigation</span>
                 <button id="view-evidence-btn" class="nav-btn">📂 View Case File</button>
             </div>
         </header>
@@ -38,13 +37,13 @@
 
                 <!-- Dynamic Input Areas -->
                 <div id="input-container">
-                    <textarea id="text-input" class="hidden" placeholder="Type your report here..."></textarea>
+                    <textarea aria-label="Investigation report" id="text-input" class="hidden" placeholder="Type your report here..."></textarea>
                     <div id="options-container" class="hidden"></div>
                     <button id="submit-btn" class="action-btn">Submit Findings</button>
                     <button id="next-btn" class="action-btn hidden">Proceed to Next Phase</button>
                 </div>
 
-                <div id="feedback" class="feedback-msg hidden"></div>
+                <div role="status" id="feedback" class="feedback-msg hidden"></div>
             </section>
         </main>
 
@@ -58,9 +57,9 @@
             </ul>
         </aside>
     </div>
-    <div id="evidence-modal" class="modal hidden">
+    <div id="evidence-modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Collected evidence">
         <div class="modal-content">
-            <span id="close-modal" class="close">&times;</span>
+            <button id="close-modal" class="close" aria-label="Close evidence">&times;</button>
             <h2>📂 Collected Evidence</h2>
             <div id="evidence-collection">
                 <!-- Dynamic Evidence Items -->
@@ -79,7 +78,7 @@
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>

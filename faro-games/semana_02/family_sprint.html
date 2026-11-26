@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family · Practica en tu cuaderno</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#25332b;background:#fff;font-synthesis:none;--green:#377c19;--line:#e1e6de}*{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer;border:1px solid var(--line);border-bottom:3px solid #cbd2c7;border-radius:8px;background:white;padding:13px 21px;font-weight:700;color:inherit;transition:transform .12s,background .12s}button:hover{background:#f3f7ef}button:active{transform:translateY(2px);border-bottom-width:1px}button:focus-visible{outline:3px solid #428329;outline-offset:4px}button:disabled{opacity:.35;cursor:default}.primary{background:#91d23c;border-color:#76b72c;color:#203b12}.primary:hover{background:#a1dd51}.app{max-width:1080px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 34px}header{display:flex;align-items:center;gap:26px;height:88px;flex-shrink:0}.brand{font-size:25px;font-weight:900;letter-spacing:-1px;color:var(--green)}.track{height:10px;background:#edf0e9;border-radius:5px;flex:1;overflow:hidden}.track span{display:block;height:100%;background:#91d23c;transition:width .3s}#count{font-size:15px;font-weight:700;color:#677363;white-space:nowrap}.icon{padding:8px 12px;font-size:20px}main{flex:1;padding:26px 0 36px;display:flex;flex-direction:column;justify-content:center}.intro{text-align:center;max-width:640px;margin:auto}.mascot{width:100px;height:110px;flex-shrink:0}.intro .mascot{width:160px;height:176px}h1{font-size:clamp(28px,3.4vw,42px);letter-spacing:-1px;margin:0 0 10px;line-height:1.15}.intro h1{font-size:clamp(40px,6vw,64px);margin-top:24px}.intro p{font-size:20px;line-height:1.6;color:#63715f;margin:20px 0 30px}.intro button{margin:5px}.exercise-head{display:flex;align-items:center;gap:24px;margin-bottom:26px}.instruction{font-size:19px;color:#697361;margin:0;line-height:1.45}.prompt{font-size:clamp(27px,3.7vw,45px);font-weight:700;line-height:1.3;margin:8px 0 27px;letter-spacing:-.5px}.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}.choice{border:2px solid var(--line);border-bottom-width:4px;border-radius:9px;min-height:76px;padding:18px;display:flex;align-items:center;gap:18px;font-size:25px}.letter{font-size:15px;color:#6f7869;border-right:1px solid var(--line);padding-right:16px}.correct{background:#eef9e5;border-color:#93cb64;color:#326118}.words{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}.word{border:1px solid #d7dfd1;border-bottom:3px solid #d7dfd1;padding:13px 18px;border-radius:7px;font-size:25px}.notebook{height:38px;border-bottom:2px dashed #cbd4c3;margin-bottom:12px}.feedback{margin-top:24px;padding:19px 22px;border-left:4px solid #83be49;background:#f2f9ec;animation:appear .2s ease-out}.feedback strong{font-size:clamp(23px,2.7vw,32px);display:block;line-height:1.35}.feedback p{margin:8px 0 0;line-height:1.5;color:#526344;font-size:18px}.hint{margin-top:20px;color:#765818;background:#fff9e7;padding:14px 18px;font-size:19px;line-height:1.5}.extra{margin-top:16px;padding:17px 20px;background:#f1f5fa;border-left:3px solid #688fb4;font-size:19px;line-height:1.5}.extra b{display:block;margin-bottom:5px}.extra button{margin-top:12px;padding:8px 13px;font-size:16px}footer{border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;padding:22px 0 26px;flex-wrap:wrap}.spacer{flex:1}.hidden{display:none!important}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(max-width:600px){.app{padding:0 20px}header{height:70px;gap:13px}.brand{font-size:22px}.icon{padding:7px}main{padding:22px 0}.exercise-head{gap:14px;margin-bottom:20px}.mascot{width:64px;height:74px}h1{font-size:28px}.instruction{font-size:17px}.choices{grid-template-columns:1fr}.choice{min-height:60px;padding:12px 16px;font-size:23px}.prompt{font-size:29px}.word{font-size:21px;padding:10px 13px}footer{gap:8px;padding:18px 0}footer button{padding:12px 14px}.intro p{font-size:18px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* One workspace: help replaces the exercise instead of stacking below it. */
+html,body{height:100%;overflow:hidden}.app{height:100dvh;min-height:0}header{height:70px}main{min-height:0;padding:10px 0;overflow:hidden;align-items:stretch}.screen{width:100%;margin:auto 0;flex-shrink:0}.exercise-head{margin-bottom:18px}.mascot{width:72px;height:80px}.prompt{font-size:clamp(25px,3.2vw,40px);margin:8px 0 20px}.choice{min-height:62px;padding:13px 17px;font-size:clamp(20px,2.3vw,28px)}footer{flex-shrink:0;padding:15px 0 18px}.return{display:block;margin-bottom:22px;padding:9px 13px}.context{font-size:clamp(19px,2.2vw,27px);color:#63715f;line-height:1.4;margin:16px 0}.feedback,.hint,.extra{margin:18px 0;font-size:clamp(23px,2.7vw,32px);line-height:1.4}.feedback strong,.extra strong,.hint strong{font-size:inherit}.small-action{align-self:flex-start}.levels{display:flex;gap:12px;justify-content:center;margin-top:24px}button[aria-pressed="true"]{background:#eef9e5;border-color:#83be49}.brand{border:0;background:none;padding:0;letter-spacing:-1px}.intro p{margin:16px 0 22px}.intro .mascot{height:120px;width:110px}.intro h1{margin-top:10px}
+@media(max-width:600px){header{height:58px}.app{padding:0 16px}.choices{grid-template-columns:1fr;gap:9px}.choice{min-height:46px;padding:9px 12px;font-size:21px}.exercise-head{gap:12px}.mascot{height:60px;width:52px}.instruction{font-size:16px}h1{font-size:26px}.prompt{font-size:26px;margin-bottom:16px}.levels{flex-wrap:wrap;gap:8px}.intro h1{font-size:38px}.intro p{font-size:17px}footer{gap:7px;padding:10px 0 14px}footer button{padding:11px 12px;font-size:14px}.word{font-size:20px;padding:8px 11px}.context{font-size:19px}.feedback,.hint,.extra{font-size:23px;padding:15px 17px}.feedback p{font-size:17px}.return{margin-bottom:18px}}
+@media(max-width:600px){
+ html,body{height:auto;overflow:visible}
+ .app{height:auto;min-height:100dvh}
+ main{overflow:visible}
+ .screen,.intro{margin:0 auto}
+}
+.screen{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="app">
+<header><button class="brand" id="home" aria-label="Elegir nivel">family.</button><div class="track" role="progressbar" aria-label="Avance" aria-valuemin="0" aria-valuemax="24" id="progress"><span id="bar"></span></div><span id="count"></span><button class="icon" id="fullscreen" aria-label="Pantalla completa">⛶</button></header>
+<main id="main"></main>
+<footer id="footer" class="hidden"><button id="back" aria-label="Ejercicio anterior">←</button><button id="hint">Pista</button><button id="extra">Reto +</button><span class="spacer"></span><button id="check" class="primary">Comprobar</button></footer>
+</div>
+<script type="module">
+import { gameRuntime } from '/gallery/shared/runtime.js';
+import { clipKey } from '/gallery/shared/lesson-audio.js';
+
+const runtime=gameRuntime('family-sprint','words',{
+ confirm:()=>{if(!$('footer').classList.contains('hidden'))$('check').click();else ($('resume')||$('start')||$('again'))?.click();},
+ next:()=>{if(revealed&&!$('footer').classList.contains('hidden'))$('check').click();},
+ hint:()=>{if(!$('footer').classList.contains('hidden'))$('hint').click();},
+ buzzer:()=>{if(!$('footer').classList.contains('hidden'))$('check').click();},
+ answer1:()=>{if($('basic'))selectLevel('basic');},
+ answer2:()=>{if($('advanced'))selectLevel('advanced');},
+ answer3:()=>{if($('custom'))selectLevel('custom');}
+});
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const customQuestions=runtime.pack?.items.map(({word,clue,translation})=>[
+ 'write','Encuentra la palabra',esc(clue),null,esc(word),translation?'Traducción: '+esc(translation):'Escribe la palabra y comprueba la ortografía.',
+ translation?esc(translation):'Piensa en la palabra que encaja con la pista.',
+ 'Escribe una frase con '+esc(word)+'.','Usa la palabra en una situación distinta a la de la pista.'
+]);
+const customKey=runtime.pack?'family-notebook-pack:'+clipKey(JSON.stringify(runtime.pack)):null;
+const basicQuestions=[
+['choose','Elige la traducción','Mamá',['mother','sister','aunt','daughter'],'mother','Mother significa mamá o madre.','Piensa en mom.','Escribe una frase con mother.','My mother is kind.'],
+['choose','Elige la traducción','Papá',['uncle','brother','father','son'],'father','Dad también significa papá.','Piensa en dad.','Escribe una frase con father.','My father likes music.'],
+['choose','Completa la frase','My mother and my father are my…',['cousins','parents','siblings','children'],'parents','Parents = padres. No significa parientes.','Es la palabra que reúne a mamá y papá.','Traduce: Mis padres son amables.','My parents are kind.'],
+['choose','Elige la palabra','Your brothers and sisters are your…',['parents','uncles','cousins','siblings'],'siblings','Siblings incluye hermanos y hermanas.','No importa si son hombres o mujeres.','Pregunta si alguien tiene hermanos.','Do you have any siblings?'],
+['choose','Elige la traducción','Abuela',['grandpa','grandma','aunt','cousin'],'grandma','Grandma y grandmother significan abuela.','Es la mamá de tu mamá o de tu papá.','Escribe la otra forma de decir grandma.','Grandmother.'],
+['choose','Elige la traducción','Abuelo',['uncle','father','grandpa','brother'],'grandpa','Grandpa y grandfather significan abuelo.','Grandma es abuela. ¿Cuál es abuelo?','Escribe una frase con grandfather.','My grandfather is funny.'],
+['choose','Resuelve el acertijo','My mother’s brother is my…',['uncle','cousin','nephew','grandpa'],'uncle','El hermano de tu mamá es tu tío.','No es tu hermano: es el de tu mamá.','¿Y el hermano de tu papá?','He is my uncle, too.'],
+['choose','Resuelve el acertijo','My father’s sister is my…',['mother','niece','grandma','aunt'],'aunt','La hermana de tu papá es tu tía.','Uncle es tío. Busca tía.','Traduce: Mi tía tiene dos hijos.','My aunt has two children.'],
+['choose','Resuelve el acertijo','My aunt’s son is my…',['brother','cousin','uncle','father'],'cousin','Cousin sirve para primo y prima.','Es el hijo de tu tía.','Escribe una frase sobre dos primos.','I have two cousins.'],
+['choose','Elige la respuesta','Do you have any siblings?',['She is my aunt.','We play football.','Yes, I have a sister.','He is a teacher.'],'Yes, I have a sister.','La pregunta es si tienes hermanos o hermanas.','Busca una respuesta sobre tus hermanos.','Contesta que no tienes hermanos.','No, I don’t. I am an only child.'],
+['order','Ordena las palabras','siblings / two / have / I',null,'I have two siblings.','I have = yo tengo.','Empieza con I.','Añade sus nombres a la frase.','I have two siblings. Their names are Ana and Luis.'],
+['order','Ordena las palabras','family / people / four / in / There / my / are',null,'There are four people in my family.','There are se usa para hablar de varias personas.','Empieza con There are.','Cambia la frase para una familia de seis.','There are six people in my family.'],
+['order','Ordena la pregunta','any / you / siblings / have / Do',null,'Do you have any siblings?','Do you have…? = ¿Tienes…?','Empieza con Do you.','Escribe una respuesta completa.','Yes, I have one brother.'],
+['write','Traduce al inglés','Tengo una hermana.',null,'I have a sister.','También: I have one sister.','Tengo = I have.','Añade que tu hermana tiene quince años.','I have a sister. She is fifteen years old.'],
+['write','Traduce al inglés','Hay cinco personas en mi familia.',null,'There are five people in my family.','Five people es plural: usamos are.','Hay = There are, cuando son varias personas.','Añade quiénes son.','They are my parents, my two brothers and me.'],
+['write','Traduce al inglés','Mi tío es cocinero.',null,'My uncle is a cook.','Usa a antes de cook.','Mi tío = My uncle.','Escribe una frase con otra profesión.','My aunt is a teacher.'],
+['write','Corrige un error','I have two brother.',null,'I have two brothers.','Con two, el sustantivo va en plural: brothers.','Revisa la palabra después de two.','Escribe una frase con three y cousin.','I have three cousins.'],
+['write','Corrige un error','There is four people in my family.',null,'There are four people in my family.','Para varias personas usamos there are.','Four people es plural.','Cambia la frase para siete personas.','There are seven people in my family.'],
+['write','Corrige un error','My mother is nurse.',null,'My mother is a nurse.','Falta a antes de la profesión.','Es una enfermera: a nurse.','Cambia nurse por doctor.','My mother is a doctor.'],
+['choose','Elige la respuesta','What do you do together?',['He is my uncle.','We play games.','I have two sisters.','She is thirty.'],'We play games.','La pregunta es qué hacen juntos.','Busca una actividad.','Escribe otra actividad que pueden hacer juntos.','We cook together.'],
+['choose','Completa la frase','I am 13. My sister is 18. She is my… sister.',['younger','little','older','only'],'older','Older = mayor. Younger = menor.','Tu hermana tiene más años que tú.','Escribe la frase si tu hermana tiene diez años.','She is my younger sister.'],
+['order','Ordena las palabras','together / games / play / We',null,'We play games together.','Together = juntos.','Empieza con We.','Añade cuándo juegan.','We play games together on Sundays.'],
+['choose','Elige la frase','No tengo hermanos ni hermanas.',['I am an only child.','I have one child.','I have siblings.','I am a cousin.'],'I am an only child.','An only child = hijo único o hija única.','Only significa único en esta expresión.','Escribe otra forma de decirlo.','I don’t have any siblings.'],
+['write','Tu turno: escribe tres frases','¿Cuántas personas hay en tu familia? ¿Quiénes son? ¿Qué hacen juntos?',null,'There are three people in my family. They are my mother, my brother and me. We watch movies together.','Es un ejemplo. Tus respuestas pueden ser diferentes; revisa las tres ideas.','Empieza con There are… Después, They are… y We…','Añade una descripción de alguien de tu familia.','My brother is funny. He has short, black hair.']
+];
+const advancedQuestions=[
+['choose','Resuelve el parentesco','My sister has a daughter. She is my…',['niece','nephew','aunt','cousin'],'niece','Niece = sobrina.','Es una niña de la siguiente generación.','Cambia daughter por son.','He is my nephew.'],
+['choose','Resuelve el parentesco','My brother has a son. He is my…',['uncle','nephew','grandson','cousin'],'nephew','Nephew = sobrino.','Es el hijo de tu hermano.','Escribe una frase con niece.','My niece is my sister’s daughter.'],
+['choose','Resuelve el parentesco','My daughter has a son. He is my…',['nephew','brother','grandson','uncle'],'grandson','Grandson = nieto.','Está dos generaciones después de ti.','¿Y si tu hija tiene una hija?','She is my granddaughter.'],
+['choose','Resuelve el parentesco','My mother’s sister has a daughter. She is my…',['niece','sister','aunt','cousin'],'cousin','La hija de tu tía es tu prima.','Primero identifica a la hermana de tu mamá.','Explica el parentesco en inglés.','She is my cousin because she is my aunt’s daughter.'],
+['write','Traduce al inglés','Mi hermana mayor tiene dos hijos.',null,'My older sister has two children.','Children es el plural de child.','Usa older, has y children.','Añade que uno de ellos tiene seis años.','One of her children is six years old.'],
+['write','Corrige dos errores','My brother have three childs.',null,'My brother has three children.','He has; el plural de child es children.','Revisa el verbo y el plural.','Convierte la frase corregida en pregunta.','Does my brother have three children?'],
+['choose','Elige el posesivo','This is my aunt. … name is Laura.',['His','Their','Her','Our'],'Her','Her indica que algo pertenece a ella.','La persona mencionada es tu tía.','Habla ahora de tu tío Luis.','This is my uncle. His name is Luis.'],
+['choose','Elige el posesivo','My cousins live nearby. … house is small.',['Our','Their','Her','His'],'Their','Their = su, de ellos o ellas.','Cousins es plural.','Une las dos ideas con and.','My cousins live nearby, and their house is small.'],
+['order','Ordena la pregunta','your / live / grandparents / Where / do',null,'Where do your grandparents live?','Where pregunta por un lugar.','Empieza con Where do.','Responde sin dar una dirección.','They live in a small town.'],
+['write','Traduce al inglés','¿Tu hermana toca la guitarra?',null,'Does your sister play the guitar?','Después de does, play no lleva s.','Empieza con Does your sister.','Contesta que sí y añade cuándo.','Yes, she does. She plays on Saturdays.'],
+['write','Corrige la pregunta','Does your father works at home?',null,'Does your father work at home?','Does ya marca la tercera persona: usa work.','Mira la terminación de works.','Responde que no y añade dónde trabaja.','No, he doesn’t. He works in an office.'],
+['write','Escribe la frase negativa','My cousin likes football.',null,'My cousin doesn’t like football.','Usa doesn’t + like, sin s.','La negación empieza My cousin doesn’t…','Añade una actividad que sí le guste.','My cousin doesn’t like football, but she likes swimming.'],
+['order','Ordena las palabras','usually / dinner / together / We / have',null,'We usually have dinner together.','Usually suele ir antes del verbo principal.','Empieza con We usually.','Cambia usually por never.','We never have dinner together.'],
+['choose','Completa la comparación','My brother is 16. I am 13. He is … than me.',['oldest','older','youngest','young'],'older','Older than = mayor que.','Comparas a dos personas.','Di la misma idea desde tu perspectiva.','I am younger than my brother.'],
+['write','Traduce al inglés','Mi prima es más alta que mi hermano.',null,'My cousin is taller than my brother.','Tall → taller; than introduce la comparación.','Más alta que = taller than.','Escribe la comparación al revés con shorter.','My brother is shorter than my cousin.'],
+['choose','Completa la frase','Ana is 12, Leo is 15 and Eva is 19. Eva is the…',['older','youngest','oldest','younger'],'oldest','The oldest = la mayor del grupo.','Es la persona con más años de las tres.','Escribe una frase sobre Ana.','Ana is the youngest.'],
+['write','Une las ideas con because','I enjoy visiting my aunt. She tells funny stories.',null,'I enjoy visiting my aunt because she tells funny stories.','Because conecta una idea con su razón.','Escribe primero lo que disfrutas; después, la razón.','Cambia la razón por otra posible.','I enjoy visiting my aunt because we cook together.'],
+['write','Une las ideas con but','My brother likes football. I prefer basketball.',null,'My brother likes football, but I prefer basketball.','But conecta ideas que contrastan.','But = pero.','Añade algo que ambos disfruten.','We both enjoy swimming.'],
+['choose','Completa la descripción','My grandmother … curly hair and … very kind.',['is / has','has / is','have / are','has / has'],'has / is','Has para el cabello; is para una característica.','Tiene cabello; es amable.','Escribe una descripción con glasses.','My grandfather wears glasses and is very friendly.'],
+['write','Corrige dos errores','My aunt is long hair and have green eyes.',null,'My aunt has long hair and has green eyes.','También: My aunt has long hair and green eyes.','Para cabello y ojos usa has.','Añade un rasgo de personalidad.','My aunt has long hair and green eyes. She is cheerful.'],
+['order','Ordena las palabras','wearing / blue / is / a / My father / shirt',null,'My father is wearing a blue shirt.','Is wearing describe lo que lleva puesto ahora.','Empieza con My father is.','Cambia la persona y el color.','My sister is wearing a red shirt.'],
+['choose','Lee y responde','Mia has two brothers. Each brother has one sister. How many children are there?',['Three','Four','Five','Six'],'Three','Los dos hermanos tienen la misma hermana: Mia.','No cuentes a Mia dos veces.','Explica tu respuesta con because.','There are three children because Mia is the sister of both boys.'],
+['write','Responde con una frase','Leo lives with his parents and his grandmother. How many people live in his home?',null,'There are four people in his home.','Leo + dos padres + una abuela = cuatro.','Cuenta también a Leo.','Enumera a esas personas en inglés.','They are Leo, his mother, his father and his grandmother.'],
+['choose','Elige la pregunta','“She is friendly and patient.”',['What does she look like?','How old is she?','What is she like?','Where does she live?'],'What is she like?','What is she like? pregunta por personalidad.','Friendly y patient describen cómo es una persona.','Responde: What does she look like?','She has short, brown hair.'],
+['write','Traduce al inglés','El domingo pasado visitamos a nuestros abuelos.',null,'Last Sunday, we visited our grandparents.','Visited marca una acción terminada en el pasado.','El domingo pasado = Last Sunday.','Añade una segunda acción en pasado.','We visited our grandparents and played cards.'],
+['write','Corrige el verbo','Yesterday, my sister go to the park.',null,'Yesterday, my sister went to the park.','El pasado de go es went.','Yesterday indica pasado.','Convierte la frase corregida en negativa.','Yesterday, my sister didn’t go to the park.'],
+['order','Ordena la pregunta','last weekend / do / your family / What / did',null,'What did your family do last weekend?','Usa did para preguntar sobre el pasado.','Empieza con What did.','Responde con dos acciones.','We cooked together and watched a movie.'],
+['write','Traduce al inglés','Vamos a visitar a nuestros primos mañana.',null,'We are going to visit our cousins tomorrow.','Are going to + verbo expresa un plan.','Mañana = tomorrow.','Añade una razón con because.','We are going to visit our cousins because it is their birthday.'],
+['write','Escribe una invitación','Invita a tu prima a cenar contigo el sábado.',null,'Would you like to have dinner with me on Saturday?','Una respuesta posible: Would you like to…? es una invitación.','Empieza con Would you like to.','Escribe una respuesta aceptando.','Yes, I’d love to. Thank you!'],
+['write','Escribe cuatro frases','Describe a un familiar, compáralo contigo, cuenta algo que hicieron y menciona un plan.',null,'My cousin is funny. She is taller than me. We played cards yesterday. We are going to swim tomorrow.','Es un modelo: incluye descripción, comparación, pasado y plan.','Puedes empezar con My…, …than me, Yesterday… y We are going to…','Une dos de tus frases con because o but.','My cousin is taller than me, but we both enjoy basketball.']
+];
+let questions=basicQuestions,level='basic';
+const $=id=>document.getElementById(id);
+let key='family-notebook-v2';
+const mascot='<svg class="mascot" viewBox="0 0 100 110" aria-hidden="true"><path d="M15 48 50 15 85 48v48H15Z" fill="#91d23c"/><path d="M6 47 50 7 94 47" fill="none" stroke="#397920" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="36" cy="63" rx="5" ry="7" fill="#253b1e"/><ellipse cx="64" cy="63" rx="5" ry="7" fill="#253b1e"/><path d="M37 79q13 13 26 0" fill="none" stroke="#253b1e" stroke-width="5" stroke-linecap="round"/><path d="M25 99h14m22 0h14" stroke="#397920" stroke-width="8" stroke-linecap="round"/></svg>';
+let index=0,revealed=false,saved=null,panel='question';
+function save(finished=false){try{localStorage.setItem(key,JSON.stringify({index,finished}));}catch{}}
+function progress(n){$('count').textContent=n+' / '+questions.length;$('bar').style.width=n/questions.length*100+'%';$('progress').setAttribute('aria-valuenow',n);$('progress').setAttribute('aria-valuemax',questions.length);}
+function selectLevel(value){
+ level=value;
+ questions=level==='basic'?basicQuestions:level==='advanced'?advancedQuestions:customQuestions;
+ key=level==='basic'?'family-notebook-v2':level==='advanced'?'family-notebook-advanced-v1':customKey;
+ runtime.save({level});
+ index=0;
+ saved=null;
+ try{
+  saved=JSON.parse(localStorage.getItem(key));
+  if(Number.isInteger(saved?.index)&&saved.index>=0&&saved.index<questions.length&&!saved.finished)index=saved.index;
+ }catch{}
+ intro();
+}
+function intro(){
+ progress(0);
+ $('footer').classList.add('hidden');
+ const title=level==='custom'?esc(runtime.pack.title):'Meet the family.';
+ const descriptions={basic:'Familia y frases básicas.',advanced:'Parentescos, comparaciones, descripciones, pasado y planes.',custom:'Encuentra las palabras del docente a partir de sus pistas.'};
+ $('main').innerHTML=`<div class="intro">${mascot}<h1>${title}</h1><div class="levels">
+  <button id="basic" aria-pressed="${level==='basic'}">A1 · ${basicQuestions.length} retos</button>
+  <button id="advanced" aria-pressed="${level==='advanced'}">A2 · ${advancedQuestions.length} retos</button>
+  ${customQuestions?`<button id="custom" aria-pressed="${level==='custom'}">${runtime.pack.level} · Mis palabras</button>`:''}
+  </div><p>${descriptions[level]} Escribe tus respuestas en un cuaderno o dilas en voz alta. Puedes usar una familia ficticia.</p>
+  <button class="primary" id="start">Empezar</button>${saved&&!saved.finished&&index>0?'<button id="resume">Continuar desde el reto '+(index+1)+'</button>':''}</div>`;
+ $('basic').onclick=()=>selectLevel('basic');
+ $('advanced').onclick=()=>selectLevel('advanced');
+ if($('custom'))$('custom').onclick=()=>selectLevel('custom');
+ $('start').onclick=()=>{index=0;render();};
+ if($('resume'))$('resume').onclick=render;
+ fit();
+}
+function render(){revealed=false;panel='question';save();progress(index+1);$('footer').classList.remove('hidden');$('back').disabled=index===0;$('hint').disabled=false;$('extra').disabled=false;$('check').textContent='Comprobar';draw();}
+function draw(){const q=questions[index];let content='';
+if(panel==='question'){
+ content='<div class="exercise-head">'+mascot+'<div><h1>'+q[1]+'</h1><p class="instruction">'+(q[0]==='choose'?'Escribe la letra y la respuesta.':'Escribe la frase completa en tu cuaderno.')+'</p></div></div>'+(q[0]==='order'?'<div class="words">'+q[2].split(' / ').map(w=>'<span class="word">'+w+'</span>').join('')+'</div>':'<div class="prompt">'+q[2]+'</div>')+(q[3]?'<div class="choices">'+q[3].map((w,i)=>'<div class="choice'+(revealed&&w===q[4]?' correct':'')+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+w+'</span></div>').join('')+'</div>':'<div class="notebook"></div>');
+}else{
+ const label=panel==='hint'?'Pista':panel==='challenge'?'Reto +':panel==='example'?'Ejemplo del reto':'Respuesta';
+ content='<button class="return" id="return">← Ver ejercicio</button><h1>'+label+'</h1><p class="context">'+q[2]+'</p><div class="'+(panel==='hint'?'hint':panel==='answer'?'feedback':'extra')+'"><strong>'+(panel==='hint'?q[6]:panel==='challenge'?q[7]:panel==='example'?q[8]:q[4])+'</strong>'+(panel==='answer'?'<p>'+q[5]+'</p>':'')+'</div>'+(panel==='challenge'?'<button id="example" class="small-action">Ver ejemplo</button>':panel==='example'?'<button id="challengeBack" class="small-action">Volver al reto</button>':'');
+}
+$('main').innerHTML='<section class="screen" aria-live="polite">'+content+'</section>';
+if($('return'))$('return').onclick=()=>{panel='question';draw()};
+if($('example'))$('example').onclick=()=>{panel='example';draw()};
+if($('challengeBack'))$('challengeBack').onclick=()=>{panel='challenge';draw()};
+$('hint').setAttribute('aria-pressed',panel==='hint');$('extra').setAttribute('aria-pressed',['challenge','example'].includes(panel));fit();
+}
+function fit(){if(matchMedia('(max-width:600px)').matches){const el=$('main').firstElementChild;if(el)el.style.zoom=1;return;}requestAnimationFrame(()=>{const el=$('main').firstElementChild;if(!el)return;el.style.zoom=1;const available=$('main').clientHeight-20;if(el.scrollHeight>available)el.style.zoom=Math.min(1,available/el.scrollHeight);});}
+function reveal(){revealed=true;panel='answer';$('check').textContent=index===questions.length-1?'Terminar':'Continuar';draw();}
+function finish(){save(true);progress(questions.length);$('footer').classList.add('hidden');$('main').innerHTML='<div class="intro">'+mascot+'<h1>Great work!</h1><p>'+questions.length+' retos completados.<br>Di tres frases de tu cuaderno sin mirar.</p><button class="primary" id="again">Practicar otra vez</button><button id="levels">Elegir nivel</button></div>';$('again').onclick=()=>{index=0;render()};$('levels').onclick=()=>selectLevel(level);fit();}
+$('check').onclick=()=>{if(!revealed)reveal();else if(index===questions.length-1)finish();else{index++;render()}};
+$('back').onclick=()=>{if(index>0){index--;render()}};
+$('hint').onclick=()=>{panel=panel==='hint'?'question':'hint';draw()};
+$('extra').onclick=()=>{panel=['challenge','example'].includes(panel)?'question':'challenge';draw()};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('fullscreen').title='Usa F11 para pantalla completa';}};
+window.addEventListener('resize',fit);
+$('home').onclick=()=>selectLevel(level);
+const restoredLevel=runtime.load(null)?.level;
+selectLevel(restoredLevel==='advanced'||(restoredLevel==='custom'&&customQuestions)?restoredLevel:'basic');
+</script>
+</body>
+</html>

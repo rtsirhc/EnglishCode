@@ -1,0 +1,579 @@
+{
+  "detective-case-files": {
+    "source": "/detective-case-files/index.html",
+    "privacy": "Authored fictional case files and suspects. The draft report and case progress stay in local browser storage.",
+    "browser": "All 11 cases and 55 answers completed via common controls. Evidence selected with Enter; report draft survived reload. Retry with one wrong answer and one hint produced 4 correct answers and a 25-point hint deduction. No exceptions or HTTP failures.",
+    "contentAdapter": "Fixed authored stories and questions.",
+    "offline": "Explicit download, server stopped and fresh player launch passed at 390 × 844.",
+    "notes": [
+      "Normalizes older or malformed saved state. Mobile header no longer covers case cards after reload; stamp animation is contained. Reviewed detective-mobile.png."
+    ]
+  },
+  "bio-master": {
+    "source": "/bio-master/index.html",
+    "privacy": "Science question bank with no built-in participant list. Teacher quiz packs are loaded from browser storage.",
+    "browser": "Mobile viewport custom quiz round completed offline; full built-in round pending.",
+    "contentAdapter": "Validated quiz pack in bio-master/game.jsx",
+    "offline": "Verified download and new navigation to /play.html from about:blank after terminating the preview server in Chromium (390 × 844).",
+    "notes": [
+      "One-item teacher pack played with the source server stopped. Reached the round completion screen."
+    ]
+  },
+  "classroom-feud": {
+    "source": "/classroom-feud/index.html",
+    "privacy": "Generic nickname defaults. Optional roster stays in teacher memory. The projector receives active nicknames, scores and revealed answers for its own room.",
+    "browser": "Two Chromium screens at 390 px completed a custom survey. Checked hidden answers, mapped reveals and strikes, timer pause and expiration, reopened projector, winner, replay, room closure and an authored theme launch and reveal.",
+    "contentAdapter": "The setup supports validated survey packs alongside three authored themes.",
+    "offline": "Teacher and projector loaded after the download and HTTP shutdown. No external requests or page errors.",
+    "notes": [
+      "Uses a room-scoped BroadcastChannel in the same browser. Physical projector and mapped controllers pending."
+    ]
+  },
+  "compliance-cipher": {
+    "source": "/compliance-cipher/index.html",
+    "privacy": "Authored fictional mission and editable team label. The browser room sends the team label and mission actions. Optional distinct-device play uses PeerJS signalling.",
+    "browser": "Authored four-stage mission, incorrect key, two hint penalties, stage reload, solo replay, gallery pack import, QR canvas, teacher progress, team reload/name preservation, completion and host departure passed in Chromium Headless Shell.",
+    "contentAdapter": "Validated word/clue pack feeds the actual mission. Authored sustainability mission retained with clarified clues.",
+    "offline": "Production download, server stopped, full authored solo mission and custom classroom mission passed at 390 × 844.",
+    "notes": [
+      "Public PeerJS classroom test passed with two page clients in one Chromium context: teacher QR, team join, custom content, re-entry, completion and departure. Physical separate devices remain untested. The scenario printed PASS before its process ended with signal 143 during cleanup; server ports were inspected and confirmed closed."
+    ]
+  },
+  "escape-planet-earth": {
+    "source": "/escape-planet-earth/index.html",
+    "privacy": "The host browser holds room state. Team names are rendered as text. The former database configuration, client and diagnostics were removed from the worktree.",
+    "browser": "Three Chromium screens at 390 px exercised QR generation, two team joins, team-specific hints, a failed code and room retry, all five word locks, the final escape and room closure.",
+    "contentAdapter": "Fixed authored sustainability questions, letter rewards and final code. Each answer bank is tied to its room word lock.",
+    "offline": "Downloaded both player entry pages and the local QR script, stopped the HTTP server, reopened three screens and completed the escape without external requests.",
+    "notes": [
+      "The fifth door reports 99% until the final escape code is accepted.",
+      "PeerJS passed the same match between distinct loopback origins in one Chromium context.",
+      "Physical devices remain pending."
+    ]
+  },
+  "flags-and-nationalities": {
+    "source": "/flags-and-nationalities/index.html",
+    "privacy": "Country, demonym and population facts from cited datasets. The game requests its local catalogue and contains no participant roster.",
+    "browser": "20 distinct question turns, unique options, local flag image loaded for every question. Confirm revealed and Next advanced using the player controls. No exceptions or HTTP failures.",
+    "contentAdapter": "Fixed flag/country activity; authored data bundled locally.",
+    "offline": "Chromium, 390 × 844: explicit download, server stopped, 20-question full round and replay passed.",
+    "notes": [
+      "Legacy REST Countries endpoint returned a deprecation response. Replaced runtime request with a licensed local country/demonym dataset, local flag-icons images and 2023 population ordering data. Credits and database license are included in the download."
+    ]
+  },
+  "geo-master-primary-edition": {
+    "source": "/geo-master-primary-edition/index.html",
+    "privacy": "Authored geography questions with no bundled participant roster. Teacher packs come from browser-local settings.",
+    "browser": "Mobile viewport custom quiz round completed offline; full built-in round pending.",
+    "contentAdapter": "Validated quiz pack in geo-master-primary-edition/game.jsx",
+    "offline": "Verified download and new navigation to /play.html from about:blank after terminating the preview server in Chromium (390 × 844).",
+    "notes": [
+      "One-item teacher pack played with the source server stopped. Reached the round completion screen."
+    ]
+  },
+  "grammar-adventurers": {
+    "source": "/grammar-adventurers/index.html",
+    "privacy": "Fictional story characters. Optional nicknames and scores are saved only in local browser storage. The offline browser run observed no external requests.",
+    "browser": "Chromium at 390 px completed seven chapters, four verb matches including both Are cards, four ownership matches, the time machine, the original 20-question exam, replay, a six-option custom quiz and all nine Vault questions.",
+    "contentAdapter": "Validated quiz packs replace the final mock test. The seven authored chapters and Vault retain their story content.",
+    "offline": "Downloaded and launched through the PWA after stopping the HTTP server. Completed the story chapters, both quizzes and the Vault.",
+    "notes": [
+      "Six images use local WebP assets totaling 304,454 bytes.",
+      "The original 20-question exam includes five short reading passages. Saved a score after recovering malformed local history and verified the record after reload.",
+      "Physical gamepad testing pending."
+    ]
+  },
+  "grammar-auction": {
+    "source": "/grammar-auction/index.html",
+    "privacy": "Teacher room state lives in browser memory. Team nickname and teacher pack are never saved to a database. PeerJS signalling is optional.",
+    "browser": "Three Chromium pages at 390 px completed a two-team quiz pack, opposed wagers, two no-bet penalties on early finish, a miss in the balance-spelling challenge, new winner, replay and host closure.",
+    "contentAdapter": "Validated sentence packs feed the original legal/illegal verdicts and corrections. The original 50-item sentence bank remains available.",
+    "offline": "Both team tabs joined after shutting down the static server. One opened the legacy grammar-auction.html alias. QR was generated locally.",
+    "notes": [
+      "Only the teacher can settle the active round or initiate the balance-spelling challenge.",
+      "The same full match passed through PeerJS between distinct loopback origins in one Chromium context.",
+      "Physical devices remain pending."
+    ]
+  },
+  "grammar-battleship": {
+    "source": "/grammar-battleship/index.html",
+    "privacy": "Optional player alias starts blank and is sent only to the classroom room. Fleet data is kept in the game session. Same-browser and optional PeerJS modes are available.",
+    "browser": "Full PeerJS match passed with two clients in pages of one browser context: custom axes, fleet setup, hidden opponent ships, wrong-grammar retry, water miss, 17 hits, winner, host departure and mobile width. Isolated contexts and physical devices remain untested.",
+    "contentAdapter": "Validated axes pack provides subjects and participles to the real 10 × 10 board. Native lists remain editable.",
+    "offline": "Explicit production download, preview server stopped, full two-tab match completed at 390 × 844.",
+    "notes": [
+      "Unified Vite static build succeeded; this does not verify gameplay or server replacement.",
+      "Production socket adapter hosts the original GameManager in the browser. No persistent Socket.IO backend is required by this game. Domain regressions cover invalid fleet data, self/outsider validation, hidden fleets and victory. Cross-context launch attempts hit Chrome/Chromium pthread/EAGAIN resource failures; an earlier connection attempt exceeded its five-second assertion and needs rechecking with the longer observed-state diagnostic.",
+      "Later public PeerJS two-page client run completed successfully using single-process Chromium Headless Shell. It exercises the online transport and uses one shared browser context."
+    ]
+  },
+  "grammar-time-machine": {
+    "source": "/grammar-time-machine/index.html",
+    "privacy": "Fixed fictional story and grammar examples. No participant roster or remote service.",
+    "browser": "Chromium 390 × 844 completed seven chapters, ten matching pairs, six Do/Does questions, four preposition questions, wrong-answer retry, time-machine toggle and navigation away during pending feedback.",
+    "contentAdapter": "Fixed authored seven-chapter grammar story.",
+    "offline": "Production download opened from a blank page after stopping preview server. All chapters and interactions passed.",
+    "notes": []
+  },
+  "human-sentence-scramble": {
+    "source": "/human-sentence-scramble/index.html",
+    "privacy": "Initial roster uses Player 1–5. Teacher-entered labels and scores remain in browser storage.",
+    "browser": "Chromium 390 × 844 passed custom shuffled sentence, scoring, reload persistence, original 48-prompt deck and mapped Next.",
+    "contentAdapter": "Sentence packs supply shuffled word tags. Incorrect examples use their corrected sentence.",
+    "offline": "Downloaded production bundle and opened player after preview server shutdown.",
+    "notes": []
+  },
+  "library-kiosk-buzzer": {
+    "source": "/library-kiosk-buzzer/index.html",
+    "privacy": "Fictional public-library case. No roster, storage or remote dependencies.",
+    "browser": "Chromium at 390 px tested the timed reading expiry, covered passage, team buzzer, wrong-answer handoff, all 15 questions, first-attempt score, replay and solo early finish.",
+    "contentAdapter": "fixed authored content",
+    "offline": "Downloaded and played from the gallery after stopping HTTP. No page errors or external requests.",
+    "notes": [
+      "The classroom facilitator decides which team holds the floor. Physical buzzers remain pending."
+    ]
+  },
+  "mega-console": {
+    "source": "/mega-console/index.html",
+    "privacy": "Local nickname and score table. Authored clues have no player roster. The result button describes local saving.",
+    "browser": "Chromium at 390 × 844 solved all 60 clues across six authored levels. Verified typed and multiple-choice stages, incorrect retry, mapped option and hint, local nickname score, certificate and replay.",
+    "contentAdapter": "Validated words packs replace the clue deck when supplied. Earlier one-item cold offline pack reached the round completion screen.",
+    "offline": "Downloaded the production player and verified the complete six-level game after shutting down HTTP.",
+    "notes": [
+      "One-item teacher pack played with the source server stopped. Reached the round completion screen."
+    ]
+  },
+  "mission-30-stage-override": {
+    "source": "/mission-30-stage-override/index.html",
+    "privacy": "No rosters; original public vocabulary preserved.",
+    "browser": "Passed custom 2-word pack: incorrect answer, case/space normalization, correct progression, reload resume, victory (3 attempts).",
+    "contentAdapter": "Validated words pack consumed directly; built-in content retained.",
+    "offline": "Verified download and new navigation to /play.html from about:blank after terminating the preview server in Chromium (390 × 844).",
+    "notes": [
+      "Converted Python/Tk game to responsive browser game, retaining 30 clues and sequential answer validation.",
+      "Progress is tied to content fingerprint so a changed pack starts a fresh mission.",
+      "One-item teacher pack played with the source server stopped. Reached the round completion screen."
+    ]
+  },
+  "negotiation-tactics": {
+    "source": "/negotiation-tactics/index.html",
+    "privacy": "Reviewed authored mission. No participant roster, browser storage of names or network service.",
+    "browser": "Chromium at 390 × 844 completed all 55 tasks across four phases, retry, three-strike reset, mission success, replay and timeout during open feedback.",
+    "contentAdapter": "Fixed authored mission. Navigation images, timeline answers, science bank and correction tasks are bundled locally.",
+    "offline": "Downloaded through the service worker, then launched from a blank page after shutting down the preview server. Complete mission passed.",
+    "notes": [
+      "Native buttons and labeled sentence inputs support keyboard/touch. Common Confirm and available numbered choices are announced per phase.",
+      "Sentence checks normalize case, repeated spaces and final sentence punctuation. Grammar targets still require authored answers.",
+      "Expiry clears the pending callback and closes feedback before ending the mission. No callback can reopen a phase after expiry.",
+      "Corrected one past-perfect target, replaced the changing moon-count question with largest-planet identification and removed insulting feedback.",
+      "Physical gamepad and other browsers remain pending."
+    ]
+  },
+  "paradox-blackwood": {
+    "source": "/paradox-blackwood/index.html",
+    "privacy": "Reviewed fixed fictional cast and authored evidence. Reports stay in the textarea. No external service or real roster.",
+    "browser": "Chromium at 390 × 844 completed the route report, suspect timeline, three grammar questions, 100-word indictment, evidence file, case closure and replay.",
+    "contentAdapter": "Fixed authored mystery. Reports use structural checks followed by explicit teacher approval.",
+    "offline": "Passed complete cold player navigation after stopping the preview server, including all story images and modules.",
+    "notes": [
+      "Whole-word prepositions replace substring checks. Route reports require 3–5 sentences. Final report requires 100 words and a past-perfect form in three separate sentences, followed by teacher review.",
+      "Corrected a false grammar premise: the nephew alibi now contradicts a stated death time. The earlier use of simple past after before was valid grammar.",
+      "Editing a report invalidates pending approval. Trivia buttons lock during feedback and pending transition timers clear on phase exit.",
+      "Added common controls, native evidence close button, Escape/Tab modal handling, readable heading colors and mobile layout. Removed an inert 60-minute timer label and external fonts.",
+      "Physical controllers and browser engines other than Chromium remain pending."
+    ]
+  },
+  "sentence-auction": {
+    "source": "/sentence-auction/index.html",
+    "privacy": "Team labels and bids originate in the classroom session. Browser rooms can be local or use PeerJS for separate devices.",
+    "browser": "Two Chromium contexts connected through public PeerJS signalling and completed custom 2-lot auction. Physical devices pending.",
+    "contentAdapter": "Validated teacher sentence pack feeds dealer-owned question deck.",
+    "offline": "Two tabs opened after server shutdown. Full 2-lot auction completed with balance sync and disconnect.",
+    "notes": [
+      "Unified Vite static build succeeded; this does not verify gameplay or server replacement.",
+      "Final regression passed with common player buttons 1 and Next. Repeated separate-browser-context auction also passed. Keyboard/gamepad physical devices remain untested."
+    ]
+  },
+  "sentence-showdown": {
+    "source": "/sentence-showdown/index.html",
+    "privacy": "Room state and nicknames live in the teacher tab. Player state hides the listening prompt until grading is complete and omits the other wager.",
+    "browser": "Chromium at 390 px. Teacher and two students completed listening, a wrong-answer turn switch, speaking with denied and approved steals, and an all-in timeout victory. Replay and host departure passed.",
+    "contentAdapter": "Teacher can choose a validated sentence pack for listening and speaking. Incorrect items contribute their corrected sentence. The original banks remain available.",
+    "offline": "All three screens launched after download and server shutdown and completed a match.",
+    "notes": [
+      "The first timeout that would overdraw a player transfers only their available balance.",
+      "The same three-round match passed over PeerJS with two loopback origins in one Chromium context.",
+      "Physical gamepads and classroom devices pending."
+    ]
+  },
+  "spelling-bee": {
+    "source": "/spelling-bee/index.html",
+    "privacy": "Names start blank and the setup asks for distinct nicknames. The presenter and display exchange state in the same browser.",
+    "browser": "Chromium at 390 px. Solo retry and two-player elimination through podium and replay.",
+    "contentAdapter": "Validated gallery words pack loaded into setup and used during both rounds.",
+    "offline": "Passed cold teacher and projector navigation after stopping preview server.",
+    "notes": [
+      "Optional same-browser projector subscribes to a per-teacher channel and requests the current state on arrival. Generic nicknames, duplicate-name validation, solo practice retry and classroom elimination."
+    ]
+  },
+  "sudden-death-spelling-bee": {
+    "source": "/sudden-death-spelling-bee/index.html",
+    "privacy": "Generic participant fields. Selected vocabulary stays in the teacher tab until explicitly revealed to the projector.",
+    "browser": "Passed Chromium at 390 × 844 with three players, duplicate-name rejection, auto-check, manual verdicts, timed pause/resume/expiry, final podium and replay.",
+    "contentAdapter": "Validated words pack consumed by the actual turn queue.",
+    "offline": "Passed download then new player and late classroom-display navigation after stopping preview server.",
+    "notes": [
+      "Same-browser classroom display uses a distinct per-teacher channel and requests current state on arrival.",
+      "Each turn accepts one verdict. Finished games show the teacher standings and student podium. Pending spin and timer effects dispose on unmount.",
+      "Mobile columns stack and the final animation stays inside the viewport. Teacher dictation uses visible text and optional browser speech voices. Physical projector and gamepad remain untested."
+    ]
+  },
+  "tense-master-sudden-death": {
+    "source": "/tense-master-sudden-death/index.html",
+    "privacy": "Authored grammar examples and browser-local content packs. No participant roster in the activity.",
+    "browser": "Chromium 390 × 844: two full authored 30-question rounds with all four types passed. Final run selected error words with keyboard Enter. Custom quiz, malformed old storage and offline checks passed.",
+    "contentAdapter": "Validated teacher quiz bank replaces the authored challenge bank.",
+    "offline": "Fresh offline player launch and one-question custom round passed.",
+    "notes": [
+      "Fixed invalid import in classic script and compiled original game as a self-contained React app. Added mapped answers 1–8 and Confirm for typed answers."
+    ]
+  },
+  "timezone-game": {
+    "source": "/timezone-game/index.html",
+    "privacy": "Authored geography, time and placement questions. No default class roster.",
+    "browser": "Three-item teacher pack: timer timeout and turn change, pause/resume, answer reveal pause, incorrect verdict and retry, 1/5-point awards, tied winners, replay and mobile width passed. Full authored offline 30-question round passed with progress counts and 40-point tied winners.",
+    "contentAdapter": "Teacher word/clue pack feeds the spoken question deck, with the authored 30-question bank as fallback.",
+    "offline": "Explicit production download, preview server stopped and fresh player launch passed in Chromium at 390 × 844.",
+    "notes": [
+      "Unified Vite static build succeeded; this does not verify gameplay or server replacement.",
+      "Fixed intro/content mismatch, inaccessible mobile slide arrows, missing root sound requests, timer cleanup and duplicate grading guard. Retained original world-map presentation. Full authored 30-question offline round passed; Teams 1 and 2 tied at 40 points."
+    ]
+  },
+  "transformation-taboo": {
+    "source": "/transformation-taboo/index.html",
+    "privacy": "No roster or account. Room state lives in teacher memory. Public signalling is used only in separate-device mode.",
+    "browser": "Chromium at 390 px. Teacher and student completed the custom correction drill with recycling, 15 Taboo cards, an incorrect guess, final score, reset and host departure in both connection modes.",
+    "contentAdapter": "Validated sentence packs add an optional correction drill. Built-in tense transformations and B1 Taboo cards remain available.",
+    "offline": "Downloaded bundle, stopped HTTP server, reopened both players and finished the session through the PWA.",
+    "notes": [
+      "PeerJS test used separate localhost and loopback origins within one Chromium context. Physical devices still pending. A cold offline browser run also completed the 20-question built-in drill with all tenses selected.",
+      "Engine tests verify 20 distinct built-in questions, role-scoped answer keys, deadline handling, repeated grading and the final-card transition."
+    ]
+  },
+  "vocab-spelling": {
+    "source": "/vocab-spelling/index.html",
+    "privacy": "No accounts or rosters. Session state is hosted in the teacher browser. Scores are stored only in that browser. The student receives the current word after grading.",
+    "browser": "Chromium at 390 px completed a custom 15-word game with double stakes, a wrong answer, the automatic all-in round, a 93% score, saved results, replay and teacher departure.",
+    "contentAdapter": "Teacher selects a validated word pack with optional display of its clues, or the original 115-word bank in the lobby.",
+    "offline": "Both player tabs reopened and completed the game after the static server stopped.",
+    "notes": [
+      "Engine tests completed the 115-word bank and verified turn and role guards, the grade override, duplicate missed words and the time penalty.",
+      "The scoreboard groups local sessions by word count.",
+      "The same 15-word session passed over PeerJS between two loopback origins in one Chromium context. Physical devices remain pending."
+    ]
+  },
+  "webrtc-betting-game": {
+    "source": "/webrtc-betting-game/index.html",
+    "privacy": "Room state and temporary team nicknames stay in teacher browser memory. No account, database or external client script. Separate-device mode uses PeerJS signalling.",
+    "browser": "Chromium at 390 px completed three custom rounds with two teams, a six-option question, keyboard selection, an incorrect wager, a timed no-vote penalty, recovery wagers in debt, a shared winner and replay.",
+    "contentAdapter": "Teacher can select a validated quiz pack with two to six options and optional answer explanations. The original 60-question bank is available.",
+    "offline": "The teacher and both team tabs reopened from the downloaded game after HTTP shutdown and completed all three rounds.",
+    "notes": [
+      "PeerJS passed between distinct loopback origins in one Chromium context. Physical devices pending.",
+      "The scoring engine preserves a flat 1,000-point no-vote penalty and permits a 10-point stake at zero or negative balance.",
+      "Balances cap at 1 trillion points to prevent precision loss after repeated all-in rounds."
+    ]
+  },
+  "wh-questions-game": {
+    "source": "/wh-questions-game/index.html",
+    "privacy": "Numbered team labels are generated at setup. Authored questions and teacher packs have no participant roster.",
+    "browser": "Chromium at 390 × 844 checked 12 different authored questions, accepted answer variants, two-team rotation, mapped clue and pause, a wrong answer retry, timer expiry, penalties, correct scoring and teacher reveal.",
+    "contentAdapter": "Validated words packs provide the prompt and accepted text. Earlier cold offline pack tested mapped turn continuation and scoring.",
+    "offline": "Downloaded the player and exercised the authored team game after shutting down HTTP.",
+    "notes": [
+      "One-item teacher pack played with the source server stopped. Letter hint deducted 2, correct answer added 5 and Next passed play to Team 2."
+    ]
+  },
+  "world-history-quiz": {
+    "source": "/world-history-quiz/index.html",
+    "privacy": "History question bank and browser-local leaderboard with times and scores. The leaderboard takes no name.",
+    "browser": "Passed imported 1-question/6-option quiz in common player: all six options visible, normal victory 1/1, typed final boss victory 1/1. Screenshot reviewed. Mobile/incorrect path/2-option/offline tests pending.",
+    "contentAdapter": "Implemented; browser verification pending.",
+    "offline": "Verified download and new navigation to /play.html from about:blank after terminating the preview server in Chromium (390 × 844).",
+    "notes": [
+      "Preserved quiz/three-strike/final-boss mechanics; short content packs adjust round lengths and 2–6 choices are supported. Shared player and dynamic content title added.",
+      "One-item teacher pack played with the source server stopped. Reached the round completion screen."
+    ]
+  },
+  "world_cup": {
+    "source": "/world_cup/index.html",
+    "privacy": "Optional nicknames stay in memory. The published build excludes the original school logo and unreferenced source media.",
+    "browser": "Chromium at 390 px launched offline, loaded a two-option custom bank, completed a penalty minigame and reached a five-goal championship in a second match. Other randomized minigames and physical controllers remain pending.",
+    "contentAdapter": "Validated quiz packs use two to four choices per question. The gallery editor and AI prompt honor the four-button layout.",
+    "offline": "Reopened after the HTTP server stopped, with downloaded fonts and stadium media. A separate cold Chromium run returned HTTP 206 with the expected 64 bytes for quiz, penalty and championship clips.",
+    "notes": [
+      "Native nickname and answer buttons supplement the two local keyboard sets and controller support. Direction buttons and movement keys provide alternatives for stick minigames.",
+      "The static distribution is about 13 MB. Original source videos were retained. The gameplay and byte-range checks passed in separate Chromium sessions."
+    ]
+  },
+  "restaurant-mission": {
+    "source": "/faro-games/semana_01/restaurant_practice.html",
+    "privacy": "Removed the school logo and grade references. The restaurant and reservation examples are fictional. Only track, dialogue, line visibility and clock state stay in the browser.",
+    "browser": "Chromium at 390 × 844 verified all 15 dialogues against the authored lines and played each recording. It tested the three tracks, menu and challenge, mapped line concealment, reload, pause, expiry and reset. No horizontal overflow at 320 px.",
+    "contentAdapter": "Fixed authored role-play scripts and menus paired to the recorded dialogue.",
+    "offline": "Full production download and fresh PWA launch after HTTP shutdown. All 15 two-voice audio recordings played.",
+    "notes": [
+      "A1 guided ordering, A2 everyday service and B1 polite requests and problem-solving. Native new-mission, level and fullscreen buttons are available at mobile widths."
+    ]
+  },
+  "worst-restaurant": {
+    "source": "/faro-games/semana_01/worst_restaurant_game.html",
+    "privacy": "Removed the school logo and grade labels. Team labels are fictional defaults or teacher-entered nicknames. State is browser-local. The projection publishes neither the waiter prompt nor the model correction or grammar bonus before answer reveal.",
+    "browser": "Chromium at 390 × 844 with a 1180 × 750 projector completed a 12-round authored match. It exercised all three CEFR selections, wrong answer and steal, 1/2-point scoring, undo, timer recovery after reload, podium and replay. A one-round custom pack imported and exported offline; mapped bonus gave three points and reached the podium.",
+    "contentAdapter": "Validated dialogues packs add a separate CEFR deck with an order, mistaken waiter reply, polite model correction and optional grammar bonus.",
+    "offline": "Explicit download, HTTP shutdown and cold player launch. Teacher and late projector remained synchronized without remote traffic.",
+    "notes": [
+      "Retains all 48 original cases. Each authored match draws 12 distinct cases. A custom match uses up to 12 items, with short packs reducing the round count."
+    ]
+  },
+  "family-sprint": {
+    "source": "/faro-games/semana_02/family_sprint.html",
+    "privacy": "Uses generic fictional family scenarios and accepts notebook or spoken answers. The app stores track and progress locally.",
+    "browser": "Chromium at 390 × 844 completed all 24 A1 and 30 A2 exercises, opened hints and extension examples, recovered progress and completed a two-word teacher deck.",
+    "contentAdapter": "Validated words packs create an independent clue deck. Optional translations appear in feedback and hints.",
+    "offline": "Downloaded explicitly and completed authored and custom exercises after shutting down HTTP.",
+    "notes": [
+      "Retains notebook instructions, model answers and extension prompts. Teacher decks preserve independent progress."
+    ]
+  },
+  "speaking-quest": {
+    "source": "/faro-games/semana_03/friday_3c_speaking_quest.html",
+    "privacy": "Removed school logo and class identifier. Paper tickets can use numbers or nicknames. The browser stores only slide and timer state.",
+    "browser": "Chromium at 390 × 844 visited all nine slides and verified the dialogue, mapped next, countdown start, pause, reload, reset, expiry and replay. The five timed slides use 7/7/7/4/3 minutes.",
+    "contentAdapter": "Fixed authored invitation and ticket activity.",
+    "offline": "Explicit download followed by HTTP shutdown and fresh player launch. Full activity navigation and timers passed.",
+    "notes": [
+      "A2 and B1 group speaking activity. Participants use paper or reusable tickets and count unique guests in person.",
+      "The former second-class link redirects to the portable Speaking Quest route and is included in its offline download."
+    ]
+  },
+  "numbers-dates-times": {
+    "source": "/faro-games/semana_03/monday_numbers_dates_times.html",
+    "privacy": "Removed school logo and class-grade labels. Uses fixed teaching examples. Browser-local storage keeps the selected track, slide, prompt queue and timer.",
+    "browser": "Chromium at 390 × 844 visited all 28 authored slides in A1, A2 and B1, revealed all 90 quick prompts and 30 listening prompts, played clips in each track, and verified timer pause, expiry, restart and reload.",
+    "contentAdapter": "Fixed authored board with separate numerical and pronunciation exercises for each track.",
+    "offline": "Downloaded explicitly, shut down HTTP, then opened from a blank page. Replayed local A1 and A2 listening and B1 pronunciation audio.",
+    "notes": [
+      "All 148 MP3 files are packaged locally. Legacy entry URLs still select their corresponding tracks.",
+      "Mobile toolbar buttons and level links stay within the header at 390 px. No horizontal overflow at 320 px."
+    ]
+  },
+  "party-mingle": {
+    "source": "/faro-games/semana_04/2026-09-24_party_mingle.html",
+    "privacy": "School branding and grade label removed. No roster, storage or external assets.",
+    "browser": "Chromium at 390 px completed all seven slides. Verified countdown, pause, reset, expiry, keyboard previous and replay.",
+    "contentAdapter": "fixed authored content",
+    "offline": "Downloaded and ran from the gallery with HTTP stopped. No external requests or page errors.",
+    "notes": [
+      "English facilitator instructions. The 33-minute estimate comes from five optional slide timers. Physical controls remain pending."
+    ]
+  },
+  "daily-routines": {
+    "source": "/faro-games/semana_05/daily_routines_clase.html",
+    "privacy": "Removed school logo. Optional schedule inputs remain in browser-local storage and can use invented times.",
+    "browser": "Chromium at 390 × 844 visited all 31 slides, played all six listening clips, checked wrong-answer feedback, entered three schedule times and verified reload. Imported a six-option quiz and answered through mapped controls.",
+    "contentAdapter": "Validated quiz packs add an optional separate set of questions and explanations alongside the authored lesson.",
+    "offline": "Downloaded explicitly, shut down HTTP, then opened from a blank page. Lesson, listening clips and custom quiz all passed.",
+    "notes": [
+      "Seventeen bundled MP3 clips replace browser-dependent synthesis for authored listening and examples."
+    ]
+  },
+  "clothing-store": {
+    "source": "/faro-games/semana_06/clothing_store_class1.html",
+    "privacy": "Generic CEFR labels and the original fictional store examples. The activity has no roster.",
+    "browser": "Chromium visited all 36 authored slides, exercised the three mapped level controls, switched customer/clerk roles on two example cards and restored the last slide after reload.",
+    "contentAdapter": "Fixed authored lesson and five role-play cards. The separate Vocabulary Lab supports imported words.",
+    "offline": "Downloaded from the production gallery and reopened through the player after HTTP shutdown at 390 px.",
+    "notes": [
+      "Corrected examples using plural clothing nouns and kept the price, size and fitting-room exchanges."
+    ]
+  },
+  "clothing-vocabulary": {
+    "source": "/faro-games/semana_06/clothing_store_vocabulary_lab.html",
+    "privacy": "The classroom view uses numbered participants. The projector stores the active card and hides an unrevealed example.",
+    "browser": "Verified 81 authored dictionary words, illustrated assets, Spanish search, 20 unique prompts for each of three challenge types, a synchronized shop sketch with a participant absent, state reload and custom words from the gallery editor.",
+    "contentAdapter": "Validated words packs add an Imported category and a custom review deck. The built-in vocabulary and shop challenges remain available.",
+    "offline": "Teacher and projector opened from the download after HTTP shutdown. No page errors, failed requests or external requests.",
+    "notes": [
+      "The five original illustrations were converted to WebP. The projector view syncs within the same browser. Example playback uses an installed local English voice."
+    ]
+  },
+  "mystery-menu": {
+    "source": "/faro-games/semana_07/mystery_menu/index.html",
+    "privacy": "Team names and game state stay in browser storage. Exported judging briefs omit team names. No legacy server or private files are served.",
+    "browser": "Chromium at 390 px tested two teams, consultation charges, barcode entry, payment with change, menu entry, manual verdict, projector podium, persisted reload, and standalone cashier undo.",
+    "contentAdapter": "Fixed ingredient catalogue and authored shopping rules. Teachers enter menus, score judges manually or import a validated verdict JSON.",
+    "offline": "Downloaded and opened the teacher, helper, projector and standalone checkout with HTTP stopped. No page errors or external requests.",
+    "notes": [
+      "Checkout and competition retain separate browser storage. Web Locks serialize tab updates.",
+      "Consultation and projection use tabs in the same browser. Separate-device support and physical barcode scanners are pending."
+    ]
+  },
+  "the-missing-key": {
+    "source": "/faro-games/semana_08/the_missing_key/index.html",
+    "privacy": "Numbered teams and browser-local progress. Replaced the original school room identifiers with a fictional route. The distributed bank contains public clues and verification hashes.",
+    "browser": "Two teams completed all four cases, including both bonus unlocks after The School Route. Verified invalid format, failed-code cooldown, pause, added time, saved winner restore, standings, reset and projector zoom across score updates. Print media styles checked in Chromium. A final run advanced setup and dismissed the first victory using the gallery touch controls.",
+    "contentAdapter": "Fixed authored cases with interdependent clues and a final lock. The four cases cover A2, A2–B1, B1 and B2.",
+    "offline": "Production service worker download followed by HTTP shutdown and fresh navigation. Completed four cases with the clue booklet and projector open. No page errors, failed requests or external requests.",
+    "notes": [
+      "Classroom projection is synchronized within the same browser. The clue booklet can also be opened or printed independently.",
+      "The B1 route and the B2 bonus no longer require access to the original school or separate PDF files."
+    ]
+  },
+  "s-and-z": {
+    "source": "/faro-games/semana_09/S_AND_Z.html",
+    "privacy": "Built-in synthetic American English audio and browser-local slide and practice state.",
+    "browser": "All eight lesson slides and a complete 14-prompt solo round passed at 390 px. Each prompt played a distinct local clip. Verified one incorrect answer, exact score, result reload, class reveal, independent mode progress, replay, and mapped Listen, numbered answer and Next controls.",
+    "contentAdapter": "Fixed, authored sound contrasts. Each listening choice is paired with a vetted recording in the exercise bank.",
+    "offline": "Production service worker download with 28 recordings. The preview server was stopped before the fresh player navigation. No page errors, external requests or unexpected failed requests.",
+    "notes": [
+      "Derived MP3 assets from the original local recordings. Click-to-play words and sentences, teacher notes and keyboard shortcuts are available."
+    ]
+  },
+  "beer-bird-bear-beard": {
+    "source": "/faro-games/semana_09/BEER_BIRD_BEAR_BEARD.html",
+    "privacy": "Built-in synthetic American English audio and browser-local slide and practice state.",
+    "browser": "All eight lesson slides and a complete 6-prompt solo round passed at 390 px. Each prompt played a distinct local clip. Verified one incorrect answer, exact score, result reload, class reveal, independent mode progress, replay, and mapped Listen, numbered answer and Next controls.",
+    "contentAdapter": "Fixed, authored sound contrasts. Each listening choice is paired with a vetted recording in the exercise bank.",
+    "offline": "Production service worker download with 17 recordings. The preview server was stopped before the fresh player navigation. No page errors, external requests or unexpected failed requests.",
+    "notes": [
+      "Derived MP3 assets from the original local recordings. Click-to-play words and sentences, teacher notes and keyboard shortcuts are available."
+    ]
+  },
+  "guess-the-patient": {
+    "source": "/faro-games/semana_10/guess_the_patient/index.html",
+    "privacy": "Illustrated fictional patients and browser-local board progress.",
+    "browser": "Chromium loaded all 36 portraits across three boards, verified visual descriptions, crossed out and restored a card after reload, submitted a partner-mode guess, and solved a solo round.",
+    "contentAdapter": "Fixed illustrated boards. Yes/no questions use the visible properties of each portrait.",
+    "offline": "Production download and fresh player navigation after HTTP shutdown. All three boards and both modes were tested at 390 px.",
+    "notes": [
+      "The original three image sheets were split into 36 WebP tiles."
+    ]
+  },
+  "health-loteria": {
+    "source": "/faro-games/semana_10/health_loteria/index.html",
+    "privacy": "Health vocabulary and illustrations. Caller and board progress stay in the browser.",
+    "browser": "Chromium completed a 48-card built-in deck and a four-word custom caller and solo round. Verified clue privacy, offline audio playback, reveal, the automatic timer, undo, history and a winning line on a synchronized numbered board. Marks survived reload.",
+    "contentAdapter": "Validated words packs supply the caller, riddles, and printable and digital boards. The imported deck can use a locally installed English voice.",
+    "offline": "Both game modes and the caller and digital board opened after download and HTTP shutdown. 96 recordings and four illustration sheets are included.",
+    "notes": [
+      "Numbered class boards sync between tabs in the same browser. Both illustrated and custom boards have print styles.",
+      "Saved a validated pack through the gallery editor after HTTP shutdown and saw that pack loaded in the player."
+    ]
+  },
+  "clinic-rally": {
+    "source": "/faro-games/semana_11/clinic_rally/index.html",
+    "privacy": "Generic team aliases. The teacher browser keeps the deck and scores locally. Team clients receive only their own active challenge and the public scoreboard.",
+    "browser": "Chromium completed all five modes in a custom quiz tournament with two teams and a projector. Verified pause/resume, keyboard answer selection, both dexterity tasks and recovery after reload. Unit tests cover built-in bank solvability, repeat submissions, team ownership and clock expiration. A built-in-bank race reached victory after successfully playing picture recognition, choice, word order and matching.",
+    "contentAdapter": "Validated quiz packs with two to six options. Built-in banks retain image recognition, matching pairs, word order and multiple choice.",
+    "offline": "Downloaded through the production service worker, stopped the preview server and completed all five modes in a fresh teacher, two team tabs and a projector. No page errors, failed requests or external requests.",
+    "notes": [
+      "Same-browser offline rooms use BroadcastChannel. Separate-device rooms use PeerJS signalling and require internet.",
+      "The downloaded game includes the 3D resources. The five-course browser test used the reduced-motion presentation.",
+      "Public PeerJS signalling test passed in Chromium across two loopback origins with a teacher, team and projector. It covered the lobby QR, incorrect-answer feedback, victory at 12 points and host closure. Physical devices are pending.",
+      "Saved a validated pack through the gallery editor after HTTP shutdown and saw that pack loaded in the player."
+    ]
+  },
+  "dental-lab": {
+    "source": "/faro-games/semana_12/dental_lab/index.html",
+    "privacy": "Generic CEFR labels and illustrations; no school logo or patient records are part of the app.",
+    "browser": "All 22 lesson slides, the 12 authored clues, a three-item custom round, replay and restored CEFR/deck settings passed in a reduced-motion Chromium run at 390 px. The gallery editor saved the words pack after download. A separate cold-offline Chromium run used SwiftShader to verify the canvas, drill and filling animation states, and pause.",
+    "contentAdapter": "Validated words packs form an optional practice deck. The original dental vocabulary and role-play remain available.",
+    "offline": "Gallery download and cold navigation after HTTP shutdown. Shared Three.js and the local illustration module are listed in the download manifest.",
+    "notes": [
+      "The app uses its local 3D scenes when WebGL is available. It defaults to illustrations when reduced motion is requested or WebGL fails."
+    ]
+  },
+  "monster-smiles": {
+    "source": "/faro-games/semana_12/monster_smiles/index.html",
+    "privacy": "Fictional monsters, numbered teams and speakers, and browser-local progress. The projector omits the private teacher answer before a verdict.",
+    "browser": "An eight-turn authored classroom game and a two-question custom solo quiz completed in Chromium. The classroom run verified timeout, pause, undo, scoring, projector agreement, and result restoration. The solo run used two and six choices. The final deterministic run also covered the four-object memory tray, local visual clues on the teacher screen and the common Next control.",
+    "contentAdapter": "Validated quiz packs feed the actual deck. The teacher grades group rounds. Solo samples score automatically for a quiz pack or use the authored model and self-grading.",
+    "offline": "Teacher, projector and solo play passed after download and HTTP shutdown. No external requests, unexpected request failures or page errors.",
+    "notes": [
+      "The scoreboard retains teeth, coins, bonuses and tie handling. The projector syncs through storage within the same browser."
+    ]
+  },
+  "family-feud-faro": {
+    "source": "/faro-games/family-feud/index.html",
+    "privacy": "Numbered default teams and browser-local nicknames, scores, and undo history. The projector stores only revealed answers. Optional dictation requests on-device processing and places the result in the editable answer field.",
+    "browser": "Completed a four-round survey with two teams and an independent projector tab. Verified ranking in the face-off, unknown and duplicate text handling, timer expiry, three strikes, steal, undo, results and saved-game recovery.",
+    "contentAdapter": "Validated survey packs replace the question bank. Three authored classroom decks remain available at A1, A2 and B1.",
+    "offline": "Fresh teacher and projector navigation after a production download and HTTP shutdown. The full custom match ended 680–0.",
+    "notes": [
+      "Published under its distinct Classroom Survey Show name and board design. The build retains the authored classroom questions and original synthesized sound cues.",
+      "The projector uses a tab in the same browser. Arduino and speech hardware remain optional.",
+      "Browser simulations verified 115200-baud setup, reset commands, split A/B messages, swapped buzzers and fallback after disconnect. A speech stub verified local-only mode and an editable transcript. Physical Arduino and microphone tests remain pending."
+    ]
+  },
+  "farito": {
+    "source": "/faro-games/farito/index.html",
+    "privacy": "No accounts. The mission asks for a fictional family. Conversation text and portrait choices stay in that learner browser. The teacher receives a numbered alias, progress, and help requests.",
+    "browser": "Completed all eight authored review words, six guided replies, the glossary, resume after reload, portrait editing, and a PNG download in Chromium at 390 px. A classroom test verified two independent learners, help acknowledgement, a custom words pack and room closure. Verified resuming after the room was closed. Across distinct Chromium loopback origins, public PeerJS carried progress, help acknowledgement and room closure, and preserved the learner label and progress across reload.",
+    "contentAdapter": "Validated words packs supply the review deck. A1, A2 and B1 use guided conversation prompts and a local portrait studio.",
+    "offline": "Downloaded through the gallery worker, stopped HTTP and completed both solo and same-browser classroom flows.",
+    "notes": [
+      "The original lighthouse mascot, authored family review and three-phase mission remain. Guided replies and the Canvas portrait use device-local code.",
+      "There is an optional separate-device mode using public PeerJS signalling. The student browser keeps per-room progress separately for each learner tab.",
+      "The separate-device test used loopback origins in Chromium. Physical devices and classroom network conditions remain pending."
+    ]
+  },
+  "grammar-rush": {
+    "source": "/grammar-rush/grammar-auction.html",
+    "privacy": "Default classroom mode uses same-device projection. Optional PeerJS rooms share team labels and wagers with the classroom host. No server or saved roster is needed by the catalogue entry.",
+    "browser": "Two projector teams, custom sentence, no-bet deductions, final spelling and winner recovery after reload passed. Online teacher and player pages connected through public PeerJS signalling. Generated QR, join URL and live teacher roster passed. Completed an online match with two team pages on distinct origins and one teacher in Chromium. Numbered key choices, stakes of 200 and 300, balances of 1500 and 700, final spelling and winner delivery to both teams passed. Separate physical devices pending.",
+    "contentAdapter": "Shared sentences pack replaces the pool used to draw the next round. The standalone projector HTML uses its authored bank.",
+    "offline": "Cold launch after preview shutdown passed in Chromium using the projector role.",
+    "notes": []
+  },
+  "optician-sprint": {
+    "source": "/faro-games/semana_13/optician_sprint/index.html",
+    "privacy": "No student rosters, names or accounts. Uses numbered teams and speaker slots (#1–#N) saved only in browser localStorage.",
+    "browser": "Static ES module classroom game with mandatory speaker rotation, 15–30s huddle timer, keyboard shortcuts, and instant podium.",
+    "contentAdapter": "Fixed authored CEFR A1/A2/B1 speaking bank with model answers and teaching tips.",
+    "offline": "All assets listed in offlineAssets; zero external network requests.",
+    "notes": [
+      "Built for single-projector classroom play without student phones."
+    ]
+  },
+  "bank-vault-heist": {
+    "source": "/faro-games/semana_14/bank_vault/index.html",
+    "privacy": "No student rosters, names or accounts. Uses numbered teams and speaker slots (#1–#N) saved only in browser localStorage.",
+    "browser": "Static ES module classroom game with mandatory speaker rotation, 15–30s huddle timer, keyboard shortcuts, and instant podium.",
+    "contentAdapter": "Fixed authored CEFR A1/A2/B1 speaking bank with model answers and teaching tips.",
+    "offline": "All assets listed in offlineAssets; zero external network requests.",
+    "notes": [
+      "Built for single-projector classroom play without student phones."
+    ]
+  },
+  "post-office-relay": {
+    "source": "/faro-games/semana_15/post_office_relay/index.html",
+    "privacy": "No student rosters, names or accounts. Uses numbered teams and speaker slots (#1–#N) saved only in browser localStorage.",
+    "browser": "Static ES module classroom game with mandatory speaker rotation, 15–30s huddle timer, keyboard shortcuts, and instant podium.",
+    "contentAdapter": "Fixed authored CEFR A1/A2/B1 speaking bank with model answers and teaching tips.",
+    "offline": "All assets listed in offlineAssets; zero external network requests.",
+    "notes": [
+      "Built for single-projector classroom play without student phones."
+    ]
+  },
+  "faro-grand-showdown": {
+    "source": "/faro-games/semana_16/grand_showdown/index.html",
+    "privacy": "No student rosters, names or accounts. Uses numbered teams and speaker slots (#1–#N) saved only in browser localStorage.",
+    "browser": "Static ES module classroom game with mandatory speaker rotation, 15–30s huddle timer, keyboard shortcuts, and instant podium.",
+    "contentAdapter": "Fixed authored CEFR A1/A2/B1 speaking bank with model answers and teaching tips.",
+    "offline": "All assets listed in offlineAssets; zero external network requests.",
+    "notes": [
+      "Built for single-projector classroom play without student phones."
+    ]
+  }
+}

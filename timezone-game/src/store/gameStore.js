@@ -32,11 +32,13 @@ const INITIAL_STATE = {
     attemptCount: 0,
     timer: TIMER_DURATION,
     paused: false,
+    turnLocked: false,
     gameState: 'intro', // 'intro' | 'playing' | 'winner'
 }
 
 export const useGameStore = create((set, get) => ({
     ...INITIAL_STATE,
+    questionCount: questions.length,
 
     // ─── Derived / Helpers ───────────────────────────
     getCurrentQuestion: () => {
@@ -51,15 +53,17 @@ export const useGameStore = create((set, get) => ({
 
     getWinner: () => {
         const { scores, teams } = get()
-        let maxScore = -1
-        let winnerIndex = 0
-        scores.forEach((score, i) => {
-            if (score > maxScore) {
-                maxScore = score
-                winnerIndex = i
-            }
+        const maxScore = Math.max(...scores)
+        const indices = []
+        scores.forEach((score, index) => {
+            if (score === maxScore) indices.push(index)
         })
-        return { team: teams[winnerIndex], score: maxScore, index: winnerIndex }
+        return {
+            team: indices.map(index => teams[index]).join(' & '),
+            score: maxScore,
+            index: indices[0],
+            indices,
+        }
     },
 
     // ─── Actions ─────────────────────────────────────
@@ -67,6 +71,8 @@ export const useGameStore = create((set, get) => ({
     startGame: () => {
         set({ gameState: 'playing', timer: TIMER_DURATION, paused: false })
     },
+
+    finishFeedback: () => set({ turnLocked: false }),
 
     togglePause: () => {
         set((state) => ({ paused: !state.paused }))
@@ -79,6 +85,7 @@ export const useGameStore = create((set, get) => ({
      */
     submitAnswer: (isCorrect) => {
         const state = get()
+        if (state.gameState !== 'playing' || state.turnLocked) return null
         const question = questions[state.currentQuestionIndex]
 
         if (!question) return { correct: false, points: 0 }
@@ -93,6 +100,7 @@ export const useGameStore = create((set, get) => ({
             const isGameOver = nextQuestionIndex >= questions.length
 
             set({
+                turnLocked: true,
                 scores: newScores,
                 currentQuestionIndex: nextQuestionIndex,
                 attemptCount: 0,
@@ -106,6 +114,7 @@ export const useGameStore = create((set, get) => ({
         } else {
             // Wrong answer: next team gets the SAME question
             set({
+                turnLocked: true,
                 attemptCount: state.attemptCount + 1,
                 currentTurn: (state.currentTurn + 1) % 4,
                 timer: TIMER_DURATION,
@@ -122,6 +131,7 @@ export const useGameStore = create((set, get) => ({
      */
     handleTimeout: () => {
         const state = get()
+        if (state.gameState !== 'playing' || state.turnLocked || state.paused) return
         set({
             attemptCount: state.attemptCount + 1,
             currentTurn: (state.currentTurn + 1) % 4,

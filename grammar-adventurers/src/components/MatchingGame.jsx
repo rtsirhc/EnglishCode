@@ -1,67 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-const MatchingGame = ({ pairs, onComplete }) => {
-    const [items, setItems] = useState([]);
+function makeCards(pairs) {
+    const cards = pairs.flatMap(pair => [
+        { id: pair.id + '-left', text: pair.left, side: 'left', verb: pair.right },
+        { id: pair.id + '-right', text: pair.right, side: 'right', verb: pair.right }
+    ]);
+    for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    return cards;
+}
+
+export default function MatchingGame({ pairs }) {
+    const [cards] = useState(() => makeCards(pairs));
     const [selected, setSelected] = useState(null);
     const [matched, setMatched] = useState([]);
+    const [feedback, setFeedback] = useState('');
 
-    useEffect(() => {
-        // Shuffle items
-        const allItems = pairs.flatMap(pair => [
-            { id: pair.id + '-left', text: pair.left, type: 'left', matchId: pair.id },
-            { id: pair.id + '-right', text: pair.right, type: 'right', matchId: pair.id }
-        ]).sort(() => Math.random() - 0.5);
-        setItems(allItems);
-    }, [pairs]);
-
-    const handleCardClick = (item) => {
-        if (matched.includes(item.id) || selected?.id === item.id) return;
-
-        if (!selected) {
-            setSelected(item);
+    function choose(card) {
+        if (card.id === selected?.id) {
+            setSelected(null);
+            setFeedback('');
+        } else if (!selected || card.side === selected.side) {
+            setSelected(card);
+            setFeedback('Choose a ' + (card.side === 'right' ? 'subject.' : 'verb.'));
         } else {
-            if (selected.matchId === item.matchId && selected.type !== item.type) {
-                // Match found!
-                setMatched([...matched, selected.id, item.id]);
-                setSelected(null);
-                if (matched.length + 2 === items.length) {
-                    setTimeout(onComplete, 1000);
-                }
-            } else {
-                // No match
-                setSelected(item); // Just switch selection or maybe wait a bit? 
-                // For simplicity, let's just deselect if wrong, or maybe visually indicate error.
-                // Let's implement a simple "try again" visual by resetting selected after a delay if intended,
-                // but here I'll just clear selection like a "swap focus" which is easier for kids (no penalty).
-                // Actually, let's make it strict: if click second and wrong, clear both.
-                setTimeout(() => setSelected(null), 500);
-            }
+            if (card.verb === selected.verb) {
+                setMatched([...matched, selected.id, card.id]);
+                setFeedback(matched.length + 2 === cards.length ? 'All pairs matched!' : 'Correct pair!');
+            } else setFeedback('Try another pair.');
+            setSelected(null);
         }
-    };
+    }
 
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            {items.map(item => {
-                const isMatched = matched.includes(item.id);
-                const isSelected = selected?.id === item.id;
-
-                return (
-                    <button
-                        key={item.id}
-                        onClick={() => handleCardClick(item)}
-                        disabled={isMatched}
-                        className={`
-              h-24 rounded-xl text-xl font-bold shadow-md transition-all transform
-              ${isMatched ? 'invisible' : 'scale-100 hover:scale-105 active:scale-95'}
-              ${isSelected ? 'bg-adventure-yellow text-white ring-4 ring-yellow-200' : 'bg-white text-adventure-blue'}
-            `}
-                    >
-                        {item.text}
-                    </button>
-                );
-            })}
+    return <>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+            {cards.map(card => (
+                <button key={card.id} onClick={() => choose(card)} disabled={matched.includes(card.id)}
+                    aria-pressed={selected?.id === card.id}
+                    className={`min-h-14 rounded-xl text-xl font-bold shadow-sm
+                        ${matched.includes(card.id) ? 'invisible' : ''}
+                        ${selected?.id === card.id ? 'bg-yellow-200 text-slate-900 ring-2 ring-yellow-400' : 'bg-white text-slate-800'}`}>
+                    {card.text}
+                </button>
+            ))}
         </div>
-    );
-};
-
-export default MatchingGame;
+        <p role="status" className="mt-3 min-h-6 text-sm font-bold text-slate-700">{feedback}</p>
+    </>;
+}

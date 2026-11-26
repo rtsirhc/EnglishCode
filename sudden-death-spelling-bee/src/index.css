@@ -199,3 +199,19 @@ input:focus {
 }
 
 .flex-1 { flex: 1; }
+
+.screen-container { min-height: 100vh; height: auto; max-height: none; overflow: visible; }
+button:disabled { opacity: .55; cursor: default; }
+.screen-container a { color: white; }
+.screen-container ol { padding-inline-start: 2em; }
+.match-columns > div, .match-columns input { min-width: 0; }
+@media(max-width: 760px) {
+  .match-columns { flex-direction: column; }
+  .match-columns .flex { flex-wrap: wrap; }
+  .match-columns .text-giant { overflow-wrap: anywhere; }
+  .match-columns .glass-panel { min-height: 115px; }
+}
+
+.victory-screen { overflow: hidden; }
+.victory-screen > h1 { font-size: clamp(2rem, 14vw, 4rem); }
+.victory-podium > div { width: min(24vw, 128px); min-width: 0; overflow-wrap: anywhere; }

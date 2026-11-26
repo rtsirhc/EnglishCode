@@ -1,4 +1,4 @@
-const GAME_DATA = {
+export const GAME_DATA = {
   title: 'Escape Planet Earth',
   story: "The year is 2050. Earth's resources are almost gone. Your team found an old research lab that has the answer to save the planet — but the lab is locked! Open 5 security doors by proving your knowledge. Each door has a secret code hidden in the answers. Find all the codes and escape!",
   totalRooms: 5,

@@ -1,0 +1,62 @@
+[
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_01/recursos_locales",
+    "destination": "faro-games/semana_01"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_02/recursos_locales",
+    "destination": "faro-games/semana_02"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_03/recursos_locales",
+    "destination": "faro-games/semana_03"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_04/recursos_locales",
+    "destination": "faro-games/semana_04"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_05/recursos_locales",
+    "destination": "faro-games/semana_05"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_06/recursos_locales",
+    "destination": "faro-games/semana_06"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_07/recursos_locales",
+    "destination": "faro-games/semana_07"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_08/recursos_locales",
+    "destination": "faro-games/semana_08"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_09/recursos_locales",
+    "destination": "faro-games/semana_09"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_10/recursos_locales",
+    "destination": "faro-games/semana_10"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_11/recursos_locales",
+    "destination": "faro-games/semana_11"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/02_planeaciones/semana_12/recursos_locales",
+    "destination": "faro-games/semana_12"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/family-feud/public",
+    "destination": "faro-games/family-feud"
+  },
+  {
+    "source": "/home/benjaminrm10/Documents/faro/farito/public",
+    "destination": "faro-games/farito"
+  },
+  {
+    "source": "/home/benjaminrm10/repos/betting_game/grammar-auction",
+    "destination": "grammar-rush"
+  }
+]

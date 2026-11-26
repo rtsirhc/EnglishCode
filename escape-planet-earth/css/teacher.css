@@ -100,3 +100,7 @@
   .team-progress-wrap { width: 100%; order: 10; }
   .team-time { width: auto; }
 }
+
+#join-url { display: block; margin-top: 1rem; }
+.team-progress-wrap progress { max-width: 100%; accent-color: var(--accent-green); }
+.team-name { overflow-wrap: anywhere; }

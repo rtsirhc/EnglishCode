@@ -58,7 +58,7 @@ export default function Scoreboard() {
     const currentTurn = useGameStore((s) => s.currentTurn)
 
     return (
-        <div className="flex items-center justify-center gap-3 px-4 py-2 w-full">
+        <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-2 w-full">
             {teams.map((team, i) => {
                 const isActive = i === currentTurn
                 const colors = TEAM_COLORS[i]

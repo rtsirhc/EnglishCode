@@ -87,7 +87,7 @@ export default function StudentScreen({ state, spinEvent }) {
               {state.lastResult.correct ? '🎉' : '💥'}
             </div>
             <h2 className="popup-verdict">
-              {state.lastResult.correct ? 'Correct!' : 'Eliminated!'}
+              {state.lastResult.correct ? 'Correct!' : state.lastResult.practiceRetry ? 'Try again!' : 'Eliminated!'}
             </h2>
             {state.lastResult.correct ? (
               <p className="popup-detail">
@@ -95,7 +95,7 @@ export default function StudentScreen({ state, spinEvent }) {
               </p>
             ) : (
               <div className="popup-detail">
-                <p className="eliminated-name">{state.lastResult.eliminatedName} is out! 💀</p>
+                {!state.lastResult.practiceRetry && <p className="eliminated-name">{state.lastResult.eliminatedName} is out!</p>}
                 <p>Correct spelling: <strong className="correct-word">{state.lastResult.word}</strong></p>
                 <p className="remaining-count">{state.lastResult.remaining} player{state.lastResult.remaining !== 1 ? 's' : ''} remaining</p>
               </div>

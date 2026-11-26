@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Speaking Quest · Consigue invitados</title>
+<style>
+:root{--ink:#07142e;--paper:#fffdf7;--pink:#e51d58;--cyan:#00a6b8;--yellow:#ffd21f;--green:#79b800}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Arial,sans-serif;background:var(--paper);color:var(--ink)}button{font:inherit}.app{height:100dvh;display:grid;grid-template-rows:62px 1fr 66px}.top{display:flex;align-items:center;gap:18px;padding:7px 28px;border-top:7px solid var(--pink);border-bottom:2px solid var(--ink);background:#fff}.logo{width:86px;height:42px;object-fit:contain}.title{font-weight:900;font-size:18px}.progress{flex:1;height:9px;background:#dbe0e7}.progress i{display:block;height:100%;background:var(--pink);transition:width .2s}.clock{font-size:25px;font-weight:900;font-variant-numeric:tabular-nums}.stage{min-height:0;display:grid;place-items:center;padding:24px;background-image:linear-gradient(#d8dce3 1px,transparent 1px);background-size:100% 38px}.slide{width:min(1210px,100%);height:100%;max-height:650px;display:flex;flex-direction:column;justify-content:center;background:#fff;border-left:11px solid var(--pink);padding:34px 42px}.kicker{font-weight:950;letter-spacing:2px;text-transform:uppercase;color:var(--pink);font-size:17px;margin:0 0 8px}.slide h1{font-family:Georgia,serif;font-size:clamp(44px,6vw,76px);line-height:.98;letter-spacing:-.04em;margin:0 0 18px}.lead{font-size:clamp(22px,2.5vw,31px);line-height:1.25;font-weight:800;margin:0 0 18px;max-width:1080px}.cards{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--ink)}.card{padding:20px;border-right:2px solid var(--ink);border-top:8px solid var(--cyan);min-width:0}.card:last-child{border-right:0}.card strong{display:block;font-family:Georgia,serif;font-size:clamp(28px,3vw,40px);margin-bottom:7px}.card p{font-size:clamp(16px,1.7vw,21px);line-height:1.28;font-weight:750;margin:0}.dialogue{display:grid;grid-template-columns:1fr 1fr;border:3px solid var(--ink)}.dialogue div{padding:22px;border-right:2px solid var(--ink)}.dialogue div:last-child{border-right:0}.dialogue b{display:block;color:var(--pink);font-size:16px;letter-spacing:1px;margin-bottom:8px}.dialogue p{font-family:Georgia,serif;font-weight:800;font-size:clamp(21px,2.4vw,31px);line-height:1.35;margin:3px 0}.rules{display:grid;grid-template-columns:repeat(2,1fr);border:2px solid var(--ink)}.rule{padding:18px 22px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);font-size:clamp(19px,2vw,25px);font-weight:850}.rule:nth-child(2n){border-right:0}.rule:nth-last-child(-n+2){border-bottom:0}.rule b{display:inline-grid;place-items:center;width:35px;height:35px;margin-right:9px;background:var(--yellow)}.mission{display:grid;grid-template-columns:1fr 320px;border:3px solid var(--ink)}.mission-main{padding:25px;background:var(--ink);color:#fff}.mission-main ol{margin:0;padding-left:29px;font-size:clamp(22px,2.4vw,31px);line-height:1.5;font-weight:850}.mission-time{display:grid;place-items:center;text-align:center;background:var(--yellow);padding:24px}.mission-time strong{font:900 clamp(54px,7vw,88px) Georgia,serif}.mission-time span{font-size:20px;font-weight:900}.captain{background:#e8f7f8}.speed{background:#fff4b8}.finish{background:#e9f5bf}.footer{display:flex;align-items:center;gap:12px;padding:8px 28px;border-top:2px solid var(--ink);background:#fff}.footer button{border:2px solid var(--ink);background:#fff;padding:10px 16px;font-weight:900;cursor:pointer}.footer button:active{transform:translateY(1px)}.footer .next{margin-left:auto;background:var(--ink);color:#fff}.footer .timer{background:var(--yellow)}.count{font-weight:900}@media(max-width:760px){.app{grid-template-rows:55px 1fr 59px}.top{padding:5px 9px;gap:8px}.logo{width:58px}.title{display:none}.clock{font-size:18px}.stage{padding:8px}.slide{padding:16px;border-left-width:6px}.slide h1{font-size:34px}.lead{font-size:17px}.cards{grid-template-columns:1fr}.card{padding:10px;border-right:0;border-bottom:2px solid var(--ink);border-top-width:4px}.card:last-child{border-bottom:0}.card strong{font-size:22px}.card p{font-size:14px}.dialogue div{padding:10px}.dialogue p{font-size:17px}.rules{grid-template-columns:1fr}.rule{padding:9px;font-size:15px;border-right:0!important;border-bottom:1px solid var(--ink)!important}.rule:last-child{border-bottom:0!important}.mission{grid-template-columns:1fr 135px}.mission-main{padding:13px}.mission-main ol{font-size:17px}.mission-time{padding:10px}.mission-time strong{font-size:42px}.mission-time span{font-size:13px}.footer{padding:6px 9px}.footer button{padding:8px 10px;font-size:13px}.count{display:none}}
+@media(max-width:760px){
+ html,body{height:auto;overflow:visible}
+ .app{height:auto;min-height:100dvh;grid-template-rows:auto 1fr auto}
+ .top{min-height:55px}
+ .title,.count{display:inline}
+ .title{font-size:1rem}
+ .clock,.count{white-space:nowrap}
+ .stage{display:block;overflow:visible}
+ .slide{max-height:none}
+ .footer{min-height:59px;flex-wrap:wrap;gap:.45rem}
+}
+@media(max-width:410px){.dialogue{grid-template-columns:1fr}.dialogue div{border:0}.dialogue div+div{border-top:2px solid var(--ink)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><span class="title">Speaking Quest</span><span class="progress"><i id="progress"></i></span><span class="clock" id="clock" role="timer">00:00</span></header>
+  <main class="stage"><section class="slide" id="slide"></section></main>
+  <footer class="footer"><button id="prev">← Atrás</button><span class="count" id="count"></span><button class="timer" id="timer">▶ Timer</button><button id="reset" aria-label="Reiniciar temporizador">↺</button><button class="next" id="next">Siguiente →</button></footer>
+</div>
+<script type="module">
+import { gameRuntime } from '/gallery/shared/runtime.js';
+
+const runtime=gameRuntime('speaking-quest','fixed',{
+ next:()=>advance(),
+ confirm:()=>toggleTimer(),
+ buzzer:()=>toggleTimer(),
+ hint:()=>resetTimer(),
+});
+const slides=[
+ {time:0,kicker:'Speaking game',title:'Consigue invitados',lead:'Convince your classmates to come to your event.',cards:[['Your event','Everyone is an organizer.'],['3 tickets','Use paper tickets with your nickname or number.'],['Your score','One point per different guest.']]},
+ {time:0,kicker:'Watch the example',title:'Invite and ask',dialogue:[['ORGANIZER',['Would you like to come to my party?','On September twentieth, at four fifteen.','We can dance. What music do you like?','Great! We can play pop music.']],['GUEST',['When is it? What time?','What can we do there?','I like pop.','Okay, I’ll come! Here is my ticket.']]]},
+ {time:0,kicker:'Then switch roles',title:'Both of you speak',rules:['Invite: say the event, date and time.','Guest: ask a question about the event.','Organizer: ask about their preferences.','Listen, reply and decide. Then switch roles.']},
+ {time:0,kicker:'Fair play',title:'Make every ticket count',rules:['Give one of YOUR tickets when you accept.','Keep received tickets. Never give them away.','One ticket per person. No self-points.','Spanish? Pause and try again in English.']},
+ {time:7*60,kicker:'Round 1 · One ticket to give',title:'Meet new people',dialogue:[['INVITE',['Would you like to come to…?','It is on… at…','What music / games do you like?','We can… because…']],['ANSWER',['When is it? What time?','What can we do there?','Can you repeat? How do you say…?','Yes, please. / No, thanks, because…']]]},
+ {time:7*60,kicker:'Round 2 · One more ticket to give',title:'Find a new guest',dialogue:[['YOUR PLAN',['We can watch / play / dance…','What would you prefer?','Why do you like it?','Then we can…']],['YOUR CHOICE',['I like… because…','I would prefer…','Help me, please.','I’ll come! / Maybe another event.']]]},
+ {time:7*60,kicker:'Round 3 · Your final ticket',title:'One last invitation',lead:'No tickets left? Keep inviting and answering. You can still earn points.',dialogue:[['INVITE',['Would you like to come to…?','It is on… at…','What would make it fun for you?']],['RESPOND',['I would like… because…','Can you repeat, please?','I have no tickets left, but…']]]},
+ {time:4*60,kicker:'Count your guests',title:'Different guests = points',lead:'Count received tickets only. Each different guest is one point. Your own tickets are worth zero.',cards:[['Count','Repeated guest? Count them once.'],['Check','Your partner checks your tickets.'],['Share','I have ___ guests. They chose my event because…']]},
+ {time:3*60,kicker:'Final choice',title:'Tell us why',lead:'Which invitation convinced you? Tell a classmate why.',cards:[['I chose…','…because…'],['My guest said…','…so we can…'],['Winners','Most different guests. Ties share the win.']]}
+];
+const saved=runtime.load(null);
+let index=Number.isInteger(saved?.index)?Math.max(0,Math.min(slides.length-1,saved.index)):0;
+const allotted=slides[index].time;
+let seconds=Number.isInteger(saved?.seconds)?Math.max(0,Math.min(allotted,saved.seconds)):allotted;
+if(Number.isFinite(saved?.deadline)&&saved.deadline>0)seconds=Math.max(0,Math.min(allotted,Math.ceil((saved.deadline-Date.now())/1000)));
+let timerId=null,deadline=0;
+const $=id=>document.getElementById(id);
+function cardHTML(cards){return `<div class="cards">${cards.map(x=>`<article class="card"><strong>${x[0]}</strong><p>${x[1]}</p></article>`).join('')}</div>`}
+function render(){const s=slides[index];$('slide').className='slide '+(s.theme||'');$('slide').innerHTML=`<p class="kicker">${s.kicker}</p><h1>${s.title}</h1>${s.lead?`<p class="lead">${s.lead}</p>`:''}${s.cards?cardHTML(s.cards):''}${s.dialogue?`<div class="dialogue">${s.dialogue.map(x=>`<div><b>${x[0]}</b>${x[1].map(line=>`<p>${line}</p>`).join('')}</div>`).join('')}</div>`:''}${s.rules?`<div class="rules">${s.rules.map((x,i)=>`<div class="rule"><b>${i+1}</b>${x}</div>`).join('')}</div>`:''}${s.steps?`<div class="mission"><div class="mission-main"><ol>${s.steps.map(x=>`<li>${x}</li>`).join('')}</ol></div><div class="mission-time"><strong>${Math.floor(s.time/60)}</strong><span>MINUTES</span></div></div>`:''}`;$('count').textContent=`${index+1} / ${slides.length}`;$('progress').style.width=`${(index+1)/slides.length*100}%`;$('prev').disabled=index===0;$('next').textContent=index===slides.length-1?'Inicio ↺':'Siguiente →';paint();save();}
+function paint(){
+ const m=String(Math.floor(seconds/60)).padStart(2,'0');
+ const s=String(seconds%60).padStart(2,'0');
+ $('clock').textContent=`${m}:${s}`;
+ $('timer').textContent=deadline?'Ⅱ Pausa':seconds?'▶ Timer':'▶ Reiniciar';
+ $('timer').disabled=$('reset').disabled=!slides[index].time;
+}
+function save(){runtime.save({index,seconds,deadline});}
+function stopTimer(){
+ clearInterval(timerId);
+ timerId=null;
+ deadline=0;
+}
+function tick(){
+ seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+ if(!seconds){
+  stopTimer();
+  save();
+ }
+ paint();
+}
+function toggleTimer(){
+ if(!slides[index].time)return;
+ if(deadline){
+  tick();
+  stopTimer();
+ }else{
+  if(!seconds)seconds=slides[index].time;
+  deadline=Date.now()+seconds*1000;
+  timerId=setInterval(tick,200);
+ }
+ paint();
+ save();
+}
+function resetTimer(){
+ stopTimer();
+ seconds=slides[index].time;
+ paint();
+ save();
+}
+function show(target){
+ if(index===target)return;
+ stopTimer();
+ index=target;
+ seconds=slides[index].time;
+ render();
+}
+function advance(){show((index+1)%slides.length);}
+$('prev').onclick=()=>show(Math.max(0,index-1));
+$('next').onclick=advance;
+$('timer').onclick=toggleTimer;
+$('reset').onclick=resetTimer;
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.repeat||event.altKey||event.ctrlKey||event.metaKey)return;
+ if(event.key==='PageDown'){event.preventDefault();advance();}
+ if(event.key==='ArrowLeft'||event.key==='PageUp'){event.preventDefault();$('prev').click();}
+ if(event.code==='KeyR')resetTimer();
+ if(event.code==='KeyF')document.documentElement.requestFullscreen?.().catch(()=>{});
+});
+render();
+</script>
+</body>
+</html>

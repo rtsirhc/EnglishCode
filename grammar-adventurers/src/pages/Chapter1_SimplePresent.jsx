@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import StoryPage from '../components/StoryPage';
 import Character from '../components/Character';
-import leoImg from '../assets/leo.png';
-import miaImg from '../assets/mia.png';
+import leoImg from '../assets/leo.webp';
+import miaImg from '../assets/mia.webp';
 
 const Chapter1_SimplePresent = () => {
     const [showRule, setShowRule] = useState(false);

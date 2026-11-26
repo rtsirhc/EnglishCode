@@ -1,17 +1,21 @@
+import { read } from '../../../gallery/shared/storage.js';
+import { validatePack } from '../../../gallery/shared/content.js';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Setup({ onSetupComplete }) {
   const [step, setStep] = useState('count');
   const [count, setCount] = useState('');
   const [names, setNames] = useState([]);
-  const [wordListText, setWordListText] = useState('');
+  const [wordListText, setWordListText] = useState(() => {
+    try { const pack = read('pack:spelling-bee', null); return pack ? validatePack(pack, 'words').items.map(item => item.word).join('\n') : 'cat\ndog\nbook\ntree\ndesk\nbread\nwater\nfamily\nschool\nfriend'; } catch { return 'cat\ndog\nbook'; }
+  });
   const inputRefs = useRef([]);
 
   const handleCountSubmit = (e) => {
     e.preventDefault();
     const n = parseInt(count, 10);
     if (n >= 1 && n <= 30) {
-      setNames(Array(n).fill(''));
+      setNames(Array.from({ length: n }, (_, index) => `Player ${index + 1}`));
       setStep('names');
     }
   };
@@ -28,14 +32,15 @@ export default function Setup({ onSetupComplete }) {
     if (e.key === 'Enter' && i < names.length - 1) inputRefs.current[i + 1]?.focus();
   };
 
-  const allFilled = names.length > 0 && names.every((n) => n.trim());
+  const duplicateNames = new Set(names.map(name => name.trim().toLowerCase())).size < names.length;
+  const allFilled = !duplicateNames && names.length > 0 && names.every((n) => n.trim());
 
   const handleStart = () => {
     const wordList = wordListText
       .split('\n')
       .map((w) => w.trim())
       .filter(Boolean);
-    if (allFilled) {
+    if (allFilled && wordList.length > 0) {
       onSetupComplete({
         students: names.map((n) => n.trim()),
         wordList,
@@ -74,6 +79,7 @@ export default function Setup({ onSetupComplete }) {
         <div className="setup-bee">🐝</div>
         <h1 className="setup-title">Student Names</h1>
         <p className="setup-sub">{names.length} student{names.length !== 1 ? 's' : ''}</p>
+        {duplicateNames && <p role="alert">Choose a different nickname for each player.</p>}
         <div className="names-grid">
           {names.map((name, i) => (
             <div key={i} className="name-row">
@@ -125,7 +131,7 @@ export default function Setup({ onSetupComplete }) {
         </p>
         <div className="setup-actions">
           <button className="back-btn" onClick={() => setStep('names')}>← Back</button>
-          <button className="setup-btn start-btn" onClick={handleStart}>
+          <button className="setup-btn start-btn" onClick={handleStart} disabled={!wordListText.trim()}>
             Start Game 🚀
           </button>
         </div>

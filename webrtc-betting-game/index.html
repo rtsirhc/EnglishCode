@@ -2,47 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏛️ Grammar Auction - Betting Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Grammar Betting Game - Betting Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- ROLE SELECT -->
     <div id="landing-screen" class="screen active">
-        <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+        <h1 class="gold glow-text">🏛️ Grammar Betting Game</h1>
         <p style="color: #94a3b8; margin-bottom: 30px; font-size: 1.2rem;">Multiplayer Classroom Betting Game</p>
+        <label for="host-mode">Connection</label>
+        <select id="host-mode">
+            <option value="local">Same browser · multiple tabs</option>
+            <option value="online">Separate devices · internet</option>
+        </select>
+        <label id="pack-choice" hidden><input type="checkbox" id="use-pack" checked> Play <span id="pack-title"></span></label>
         <div class="role-cards">
-            <div class="role-card card" id="btn-host-game">
-                <div class="icon">🖥️</div>
-                <h2>Host / Big Screen</h2>
-                <p>Project this on the classroom display. Controls questions, timer, and scoring.</p>
-            </div>
-            <div class="role-card card" id="btn-show-join">
-                <div class="icon">📱</div>
-                <h2>Student / Mobile</h2>
-                <p>Join from your phone. Place bets on the correct answers.</p>
-            </div>
+            <button type="button" class="role-card card" id="btn-host-game">🖥️ Host Game</button>
+            <button type="button" class="role-card card" id="btn-show-join">📱 Join as Team</button>
         </div>
+        <p id="host-error" role="alert"></p>
     </div>
 
     <!-- CLIENT JOIN -->
     <div id="client-join-screen" class="screen">
         <div class="client-join">
             <h2 class="gold glow-text">📱 Join the Game</h2>
-            <label>Room Code</label>
-            <input type="text" id="join-room-code" placeholder="0000" maxlength="4" inputmode="numeric">
-            <label>Team Name</label>
-            <input type="text" id="join-team-name" placeholder="e.g. The Tigers" maxlength="15">
+            <label for="join-room-code">Room code</label>
+            <input type="text" id="join-room-code" placeholder="A1B2C3D4" maxlength="8" autocomplete="off">
+            <label for="join-team-name">Team name</label>
+            <input type="text" id="join-team-name" placeholder="e.g. The Tigers" maxlength="20">
+            <label for="join-mode">Connection</label>
+            <select id="join-mode">
+                <option value="local">Same browser · multiple tabs</option>
+                <option value="online">Separate devices · internet</option>
+            </select>
             <button id="btn-join-game" class="btn btn-gold btn-lg">🔗 Join Game</button>
             <button id="btn-back-landing" class="btn btn-sm" style="background:transparent; color:#94a3b8; margin-top:10px;">Cancel</button>
-            <div id="join-error" class="red hidden" style="margin-top:15px; font-weight:bold;"></div>
+            <div id="join-error" role="alert" class="red hidden" style="margin-top:15px; font-weight:bold;"></div>
         </div>
     </div>
 
     <!-- HOST LOBBY -->
     <div id="host-lobby-screen" class="screen">
         <div class="host-header">
-            <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+            <h1 class="gold glow-text">🏛️ Grammar Betting Game</h1>
             <div style="display:flex;align-items:center;gap:12px;">
                 <span style="color:#94a3b8;font-size:0.75rem;">ROOM</span>
                 <div class="room-badge" id="host-room-code-display"></div>
@@ -61,7 +65,7 @@
             <div class="card qr-section">
                 <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">📲 Scan to Join</h3>
                 <div id="qrcode"></div>
-                <div class="join-link" id="share-url"></div>
+                <a class="join-link" id="share-url" target="_blank" rel="noopener"></a>
                 <button id="btn-copy-url" class="btn btn-blue btn-sm">📋 Copy Student Link</button>
             </div>
         </div>
@@ -70,7 +74,7 @@
     <!-- HOST GAME -->
     <div id="host-game-screen" class="screen">
         <div class="host-header">
-            <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+            <h1 class="gold glow-text">🏛️ Grammar Betting Game</h1>
             <button id="btn-mute" class="btn btn-sm" style="background:rgba(15,23,42,0.6);border:1px solid rgba(100,116,139,0.3);">Mute 🔊</button>
         </div>
         <div class="game-layout">
@@ -127,14 +131,15 @@
         </div>
 
         <div id="client-betting-area" class="client-betting">
-            <h3>Choose your answer:</h3>
+            <h3 id="client-question"></h3>
+            <p class="round-rule">Missing a round costs 1,000 points.</p>
             <div id="client-options" class="client-options-grid"></div>
             <div class="wager-container" style="margin-top:25px;">
                 <label style="color:#94a3b8;font-weight:bold;display:block;margin-bottom:10px;">💰 Bet Amount</label>
-                <input type="range" id="wager-slider" min="10" max="1000" value="100">
+                <input type="range" aria-label="Wager slider" id="wager-slider" min="10" max="1000" value="100">
                 <div class="wager-input-row">
                     <span>$</span>
-                    <input type="number" id="wager-amount" min="10" max="1000" value="100">
+                    <input type="number" aria-label="Bet amount" id="wager-amount" min="10" max="1000" value="100">
                 </div>
                 <div style="display:flex;justify-content:center;gap:10px;margin-top:15px;">
                     <button class="btn btn-sm btn-blue" id="btn-bet-min">Min</button>
@@ -164,10 +169,7 @@
         <p id="loading-text" style="color:#f59e0b;font-weight:bold;font-size:1.2rem;">Connecting...</p>
     </div>
 
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="audio.js"></script>
-    <script src="questions.js"></script>
-    <script src="app.js"></script>
+    <script src="/qrcode.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,529 @@
+{
+  "note": "Static source inventory; not a security/privacy/gameplay certification. Matches can include dead code and optional features.",
+  "games": [
+    {
+      "id": "detective-case-files",
+      "directory": "detective-case-files",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "bio-master",
+      "directory": "bio-master",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "classroom-feud",
+      "directory": "classroom-feud",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": []
+    },
+    {
+      "id": "compliance-cipher",
+      "directory": "compliance-cipher",
+      "externalHosts": {
+        "github.com": 1,
+        "cdn.tailwindcss.com": 1,
+        "cdnjs.cloudflare.com": 1,
+        "www.w3.org": 4
+      },
+      "review": [
+        {
+          "file": "compliance-cipher/public/index.html",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "compliance-cipher/server.js",
+          "flags": [
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "escape-planet-earth",
+      "directory": "escape-planet-earth",
+      "externalHosts": {
+        "www.w3.org": 4
+      },
+      "review": []
+    },
+    {
+      "id": "flags-and-nationalities",
+      "directory": "flags-and-nationalities",
+      "externalHosts": {
+        "github.com": 2,
+        "data.worldbank.org": 1
+      },
+      "review": []
+    },
+    {
+      "id": "geo-master-primary-edition",
+      "directory": "geo-master-primary-edition",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "grammar-adventurers",
+      "directory": "grammar-adventurers",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": []
+    },
+    {
+      "id": "grammar-auction",
+      "directory": "grammar-auction",
+      "externalHosts": {
+        "www.w3.org": 4
+      },
+      "review": []
+    },
+    {
+      "id": "grammar-battleship",
+      "directory": "grammar-battleship",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": [
+        {
+          "file": "grammar-battleship/server/index.js",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "grammar-battleship/src/views/GamePhase.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "grammar-battleship/src/views/Lobby.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "grammar-battleship/src/views/SetupPhase.jsx",
+          "flags": [
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grammar-time-machine",
+      "directory": "grammar-time-machine",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "human-sentence-scramble",
+      "directory": "human-sentence-scramble",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "library-kiosk-buzzer",
+      "directory": "library-kiosk-buzzer",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "mega-console",
+      "directory": "mega-console",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "mission-30-stage-override",
+      "directory": "mission-30-stage-override",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "negotiation-tactics",
+      "directory": "negotiation-tactics",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "paradox-blackwood",
+      "directory": "paradox-blackwood",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "sentence-auction",
+      "directory": "sentence-auction",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": [
+        {
+          "file": "sentence-auction/server/index.js",
+          "flags": [
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sentence-showdown",
+      "directory": "sentence-showdown",
+      "externalHosts": {},
+      "review": [
+        {
+          "file": "sentence-showdown/server/index.js",
+          "flags": [
+            "localBackend",
+            "socket"
+          ]
+        },
+        {
+          "file": "sentence-showdown/src/views/HostView.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "sentence-showdown/src/views/PlayerView.jsx",
+          "flags": [
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spelling-bee",
+      "directory": "spelling-bee",
+      "externalHosts": {
+        "localhost:3004": 1
+      },
+      "review": [
+        {
+          "file": "spelling-bee/server/index.js",
+          "flags": [
+            "localBackend",
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sudden-death-spelling-bee",
+      "directory": "sudden-death-spelling-bee",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": []
+    },
+    {
+      "id": "tense-master-sudden-death",
+      "directory": "tense-master-sudden-death",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "timezone-game",
+      "directory": "timezone-game",
+      "externalHosts": {
+        "vite.dev": 1
+      },
+      "review": []
+    },
+    {
+      "id": "transformation-taboo",
+      "directory": "transformation-taboo",
+      "externalHosts": {
+        "localhost:3001": 1
+      },
+      "review": [
+        {
+          "file": "transformation-taboo/server.js",
+          "flags": [
+            "localBackend",
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/components/Game1Student.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/components/Game1Teacher.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/components/Game2Student.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/components/Game2Teacher.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/components/TeacherLobby.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/src/pages/TeacherView.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "transformation-taboo/vite.config.js",
+          "flags": [
+            "localBackend",
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vocab-spelling",
+      "directory": "vocab-spelling",
+      "externalHosts": {
+        "www.w3.org": 1
+      },
+      "review": [
+        {
+          "file": "vocab-spelling/server/index.js",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "vocab-spelling/src/views/ResultsScreen.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "vocab-spelling/src/views/StudentScreen.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "vocab-spelling/src/views/TeacherScreen.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "vocab-spelling/src/views/TriviaStudentScreen.jsx",
+          "flags": [
+            "socket"
+          ]
+        },
+        {
+          "file": "vocab-spelling/src/views/TriviaTeacherScreen.jsx",
+          "flags": [
+            "socket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "webrtc-betting-game",
+      "directory": "webrtc-betting-game",
+      "externalHosts": {
+        "www.w3.org": 4
+      },
+      "review": []
+    },
+    {
+      "id": "wh-questions-game",
+      "directory": "wh-questions-game",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "world-history-quiz",
+      "directory": "world-history-quiz",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "world_cup",
+      "directory": "world_cup",
+      "externalHosts": {
+        "localhost:5174": 4,
+        "${address.address}:5174": 1
+      },
+      "review": [
+        {
+          "file": "world_cup/scripts/serve-built.mjs",
+          "flags": [
+            "localBackend"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "restaurant-mission",
+      "directory": "faro-games/semana_01",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "worst-restaurant",
+      "directory": "faro-games/semana_01",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "family-sprint",
+      "directory": "faro-games/semana_02",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "speaking-quest",
+      "directory": "faro-games/semana_03",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "numbers-dates-times",
+      "directory": "faro-games/semana_03",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "party-mingle",
+      "directory": "faro-games/semana_04",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "daily-routines",
+      "directory": "faro-games/semana_05",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "clothing-store",
+      "directory": "faro-games/semana_06",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "clothing-vocabulary",
+      "directory": "faro-games/semana_06",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "mystery-menu",
+      "directory": "faro-games/semana_07/mystery_menu",
+      "externalHosts": {
+        "www.w3.org": 1
+      },
+      "review": []
+    },
+    {
+      "id": "the-missing-key",
+      "directory": "faro-games/semana_08/the_missing_key",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "s-and-z",
+      "directory": "faro-games/semana_09",
+      "externalHosts": {
+        "dictionary.cambridge.org": 1
+      },
+      "review": []
+    },
+    {
+      "id": "beer-bird-bear-beard",
+      "directory": "faro-games/semana_09",
+      "externalHosts": {
+        "dictionary.cambridge.org": 1
+      },
+      "review": []
+    },
+    {
+      "id": "guess-the-patient",
+      "directory": "faro-games/semana_10/guess_the_patient",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "health-loteria",
+      "directory": "faro-games/semana_10/health_loteria",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "clinic-rally",
+      "directory": "faro-games/semana_11/clinic_rally",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "dental-lab",
+      "directory": "faro-games/semana_12/dental_lab",
+      "externalHosts": {
+        "www.nidcr.nih.gov": 2,
+        "www.betterhealth.vic.gov.au": 1
+      },
+      "review": []
+    },
+    {
+      "id": "monster-smiles",
+      "directory": "faro-games/semana_12/monster_smiles",
+      "externalHosts": {},
+      "review": []
+    },
+    {
+      "id": "family-feud-faro",
+      "directory": "faro-games/family-feud",
+      "externalHosts": {},
+      "review": [
+        {
+          "file": "faro-games/family-feud/app.js",
+          "flags": [
+            "hardware"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "farito",
+      "directory": "faro-games/farito",
+      "externalHosts": {
+        "www.w3.org": 1
+      },
+      "review": []
+    },
+    {
+      "id": "grammar-rush",
+      "directory": "grammar-rush",
+      "externalHosts": {
+        "cdnjs.cloudflare.com": 1,
+        "unpkg.com": 2
+      },
+      "review": []
+    }
+  ]
+}

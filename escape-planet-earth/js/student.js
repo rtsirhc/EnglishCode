@@ -1,530 +1,189 @@
-// Game State
-let session = null;
-let team = null;
-let currentRoomIndex = 0;
-let currentQuestionIndex = 0;
-let collectedLetters = [];
-let allCollectedLetters = []; // Across all rooms
-let startTime = null;
-let timerInterval = null;
-let elapsedMs = 0;
-let penaltyMs = 0;
-let hintsUsed = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+import { roomTransport } from '../../gallery/shared/room-transport.js';
+import { bindGameControls } from '../../gallery/shared/runtime.js';
+import { GAME_DATA } from './game-data.js';
+import { SoundManager } from './sound.js';
 
-const $main = document.getElementById('main-container');
+const $ = id => document.getElementById(id);
+const main = $('main-container');
+const params = new URLSearchParams(location.search);
+let link, host, team, receivedAt, pending, clock, disposeControls, selectedMode = params.get('mode') === 'online' ? 'online' : 'local';
+const time = ms => Math.floor(ms / 60000) + ':' + String(Math.floor(ms / 1000) % 60).padStart(2, '0');
 
-// Shuffle array (Fisher-Yates)
-function shuffleArray(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
+function button(text, event, classes = 'btn btn--large btn--full', attributes = '') {
+  return `<button type="button" class="${classes}" data-event="${event}" ${attributes}>${text}</button>`;
+}
+function letters(values, total) {
+  const scrambled = [...values];
+  for (let i = scrambled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
   }
-  return a;
+  return `<div class="collected-letters">${Array.from({ length: total }, (_, i) =>
+    `<div class="letter-slot">${scrambled[i] ?? '·'}</div>`).join('')}</div>`;
+}
+function controls(actions) {
+  disposeControls?.();
+  disposeControls = bindGameControls('escape-planet-earth', Object.fromEntries(Object.entries(actions).map(([key, event]) => [
+    key, () => main.querySelector(event)?.click()
+  ])));
+}
+function command(event, value) {
+  if (!link || !team || pending) return;
+  pending = setTimeout(() => {
+    pending = null;
+    $('connection-status').textContent = 'The teacher did not respond. Check the room connection and try again.';
+  }, 6000);
+  link.send({ type: 'command', event, data: { value, revision: team.revision } });
+}
+function renderJoin(error = '') {
+  clearTimeout(pending); pending = null;
+  clearInterval(clock); clock = null;
+  $('timer-bar').classList.add('hidden');
+  $('connection-status').textContent = '';
+  main.innerHTML = `<form class="join-screen fade-in" id="join-form">
+    <h2>🌍 Join the Escape Room</h2>
+    <div class="form-group"><label for="room-code-input">Room code</label><input id="room-code-input" class="input-field" maxlength="8" required autocomplete="off"></div>
+    <div class="form-group"><label for="team-name-input">Team name</label><input id="team-name-input" class="input-field" maxlength="20" required></div>
+    <div class="form-group"><label for="mode">Connection</label><select id="mode" class="input-field"><option value="local">Same browser · multiple tabs</option><option value="online">Separate devices · internet</option></select></div>
+    <button class="btn btn--full btn--large" id="join-btn">Join Game</button>
+    <p id="join-error" class="join-error" role="status"></p>
+  </form>`;
+  $('room-code-input').value = params.get('code') ?? '';
+  $('mode').value = selectedMode;
+  $('join-error').textContent = error;
+  $('join-form').onsubmit = event => { event.preventDefault(); join(); };
+  controls({ confirm: '#join-btn' });
 }
 
-// Sound toggle logic
-function toggleSound() {
-  const enabled = SoundManager.toggle();
-  document.getElementById('sound-toggle').innerText = enabled ? '🔊' : '🔇';
-}
-
-window.onload = init;
-
-function getQueryParam(param) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(param);
-}
-
-async function init() {
-  SoundManager.init();
-  const urlCode = getQueryParam('code');
-  renderJoinScreen(urlCode);
-}
-
-function renderJoinScreen(prefillCode) {
-  $main.innerHTML = `
-    <div class="join-screen fade-in">
-      <h2>🌍 Join the Escape Room</h2>
-      <div class="form-group">
-        <label>Room Code</label>
-        <input type="text" id="room-code-input" class="input-field" placeholder="e.g. ABC123" value="${prefillCode || ''}" style="text-transform: uppercase;">
-      </div>
-      <div class="form-group">
-        <label>Team Name</label>
-        <input type="text" id="team-name-input" class="input-field" placeholder="e.g. Eco Warriors" maxlength="20">
-      </div>
-      <button class="btn btn--full btn--large" onclick="joinGame()">Join Game</button>
-      <div id="join-error" class="join-error"></div>
-    </div>
-  `;
-}
-
-window.joinGame = async function() {
-  const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-  const name = document.getElementById('team-name-input').value.trim();
-  const errEl = document.getElementById('join-error');
-  
-  if (!code || !name) {
-    errEl.innerText = "Please enter both Room Code and Team Name.";
+async function join() {
+  const code = $('room-code-input').value.trim().toUpperCase();
+  const name = $('team-name-input').value.trim();
+  if (!/^[0-9A-F]{8}$/.test(code) || !name) {
+    $('join-error').textContent = 'Enter an eight-character room code and a team name.';
     return;
   }
-
-  errEl.innerText = "Joining...";
-  
+  selectedMode = $('mode').value;
+  $('join-btn').disabled = true;
+  $('join-error').textContent = 'Joining…';
   try {
-    session = await getSession(code);
-    if (!session) {
-      errEl.innerText = "Invalid room code.";
-      return;
-    }
-    
-    if (session.status === 'finished') {
-      errEl.innerText = "This game has already finished.";
-      return;
-    }
-
-    team = await createTeam(session.id, name);
-    
-    if (session.status === 'active') {
-      startGame();
-    } else {
-      renderWaitingScreen();
-      subscribeToSession(code, (payload) => {
-        if (payload.new && payload.new.status === 'active') {
-          startGame();
-        }
-      });
-    }
-  } catch (e) {
-    console.error(e);
-    errEl.innerText = "Error: " + (e.message || JSON.stringify(e));
-  }
+    link = await roomTransport({
+      namespace: 'escape-earth', code, mode: selectedMode, host: false,
+      receive(message, sender) {
+        if (host && sender !== host) return;
+        if (message.type === 'state') {
+          host = sender;
+          clearTimeout(pending); pending = null;
+          $('connection-status').textContent = '';
+          const first = team?.phase !== message.state.phase;
+          team = message.state;
+          receivedAt = Date.now();
+          render();
+          if (first && team.phase === 'finished') play('celebrate');
+        } else if (message.type === 'join-error' && !team) close(message.error);
+      },
+      disconnected() { close('The teacher closed this room.'); }
+    });
+    pending = setTimeout(() => close('Room unavailable. Check the room code and connection mode.'), 5000);
+    link.send({ type: 'join', name });
+  } catch (error) { close(error.message); }
 }
-
-function renderWaitingScreen() {
-  $main.innerHTML = `
-    <div class="waiting-screen fade-in">
-      <div class="spinner">⏳</div>
-      <h2>Waiting for Teacher</h2>
-      <p>You have joined successfully as:</p>
-      <div class="waiting-team-name">${team.team_name}</div>
-      <p>The game will start soon!</p>
-    </div>
-  `;
+function close(error) {
+  link?.close();
+  host = link = team = null;
+  renderJoin(error);
 }
-
-async function startGame() {
-  await setTeamStartTime(team.id);
-  startTime = Date.now();
-  timerInterval = setInterval(updateTimer, 1000);
-  document.getElementById('timer-bar').classList.remove('hidden');
-  renderStoryScreen();
+function play(effect) {
+  try { SoundManager[effect](); } catch { /* Audio is optional. */ }
 }
-
-function updateTimer() {
-  if (!startTime) return;
-  elapsedMs = Date.now() - startTime;
-  const total = elapsedMs + penaltyMs;
-  
-  const m = Math.floor(total / 60000);
-  const s = Math.floor((total % 60000) / 1000).toString().padStart(2, '0');
-  
-  document.getElementById('timer-time').innerText = `${m}:${s}`;
-  
-  const penEl = document.getElementById('timer-penalty');
-  if (penaltyMs > 0) {
-    const pm = Math.floor(penaltyMs / 60000);
-    penEl.innerText = `(+${pm} min penalty)`;
-    penEl.classList.remove('hidden');
-  }
+function timer() {
+  const current = team.elapsed + (team.finishedAt === null ? Math.max(0, Date.now() - receivedAt) : 0);
+  $('timer-time').textContent = time(current + team.penalty);
+  $('timer-penalty').classList.toggle('hidden', !team.penalty);
+  $('timer-penalty').textContent = '+' + time(team.penalty) + ' penalty';
 }
-
-function renderStoryScreen() {
-  $main.innerHTML = `
-    <div class="story-screen slide-up">
-      <span class="story-icon">🌍</span>
-      <h1>${GAME_DATA.title}</h1>
-      <p class="story-text">${GAME_DATA.story}</p>
-      <button class="btn btn--large btn--full" onclick="startRoom(0)">Start Room 1</button>
-    </div>
-  `;
+function hintPanel() {
+  const count = team.hints[team.room];
+  return `<div class="hint-section">
+    ${button(count === 0 ? 'Hint · +1 min' : count === 1 ? 'Hint · +5 min' : 'No hints left', 'hint', 'btn btn--hint', count >= 2 ? 'disabled' : '')}
+    ${team.hint ? `<p class="hint-text" role="status">${team.hint}</p>` : ''}
+  </div>`;
 }
-
-// --- Go Back: restart from Room 1 without resetting timer ---
-window.goBackToStart = function() {
-  if (confirm('Go back to Room 1? Your timer will keep running but you can redo all rooms.')) {
-    currentRoomIndex = 0;
-    currentQuestionIndex = 0;
-    collectedLetters = [];
-    allCollectedLetters = [];
-    hintsUsed = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
-    syncProgress(1, 0);
-    startRoom(0);
-  }
+function codeForm(final) {
+  return `<form id="code-form" class="code-entry mt-3">
+    <label for="code-input">${final ? 'Final escape code' : 'Door code'}</label>
+    <input id="code-input" class="code-input" maxlength="${final ? 6 : 5}" autocomplete="off" required>
+    <button class="btn btn--large btn--full mt-2" id="unlock-btn">${final ? 'Escape! 🚀' : 'Unlock Door'}</button>
+    ${team.feedback?.correct === false ? '<p class="join-error" role="status">Incorrect code. Check your letters and try again.</p>' : ''}
+  </form>`;
 }
-
-window.startRoom = async function(roomIndex) {
-  currentRoomIndex = roomIndex;
-  currentQuestionIndex = 0;
-  collectedLetters = [];
-  
-  const room = GAME_DATA.rooms[roomIndex];
-  document.getElementById('timer-room').innerHTML = `Room <strong>${roomIndex + 1}</strong>/5`;
-  
-  const baseProgress = roomIndex * 20;
-  await syncProgress(roomIndex + 1, baseProgress);
-  
-  renderQuestion();
-}
-
-function renderQuestion() {
-  const room = GAME_DATA.rooms[currentRoomIndex];
-  const q = room.questions[currentQuestionIndex];
-  
-  let optionsHtml = '';
-  if (q.type === 'multiple-choice') {
-    optionsHtml = `<ul class="options-list">` + 
-      q.options.map((opt, i) => `
-        <li class="option-item" onclick="checkAnswer(${i})">
-          <div class="option-label">${String.fromCharCode(65 + i)}</div>
-          <div>${opt}</div>
-        </li>
-      `).join('') + `</ul>`;
-  } else if (q.type === 'true-false') {
-    optionsHtml = `
-      <div class="tf-container">
-        <div class="tf-btn" onclick="checkAnswer(true)">True</div>
-        <div class="tf-btn" onclick="checkAnswer(false)">False</div>
-      </div>
-    `;
-  }
-  
-  const collectedHtml = renderCollectedLetters();
-  const hintsUsedCount = hintsUsed[room.id] || 0;
-
-  $main.innerHTML = `
-    <div class="room-header fade-in">
-      <span class="room-icon">${room.icon}</span>
-      <h2>${room.name}</h2>
-      <div class="room-topic">${room.topic}</div>
-    </div>
-    
-    <div class="card question-card">
-      <div class="question-number">Question ${currentQuestionIndex + 1} of 5</div>
-      <div class="question-text">${q.text}</div>
-      ${optionsHtml}
-    </div>
-    
-    ${collectedHtml}
-    
-    <div class="hint-section fade-in">
-      <div class="hint-indicators">
-        ${hintsUsedCount >= 1 ? '💡' : '🔒'} 
-        ${hintsUsedCount >= 2 ? '💡' : '🔒'}
-      </div>
-      <button class="btn btn--hint ${hintsUsedCount >= 2 ? 'used' : ''}" onclick="useHint()">
-        Need a hint?
-      </button>
-      <div class="hint-penalty-label">
-        ${hintsUsedCount === 0 ? '+1 min penalty' : hintsUsedCount === 1 ? '+5 min penalty' : 'No hints left'}
-      </div>
-      <div id="hint-display"></div>
-    </div>
-
-    <div class="text-center mt-3">
-      <button class="btn btn--danger" style="font-size:0.85rem; padding:8px 18px;" onclick="goBackToStart()">🔄 Restart from Room 1</button>
-    </div>
-  `;
-}
-
-// Render collected letters in SCRAMBLED order so students must unscramble
-function renderCollectedLetters() {
-  // Create a scrambled display order
-  const displayLetters = [];
-  for (let i = 0; i < 5; i++) {
-    if (collectedLetters[i]) {
-      displayLetters.push(collectedLetters[i]);
-    }
-  }
-  const scrambled = shuffleArray(displayLetters);
-  
-  let slots = '';
-  for (let i = 0; i < 5; i++) {
-    if (i < scrambled.length) {
-      slots += `<div class="letter-slot filled">${scrambled[i]}</div>`;
-    } else {
-      slots += `<div class="letter-slot">?</div>`;
-    }
-  }
-  return `
-    <div class="text-center mt-2 fade-in">
-      <p class="text-secondary mb-1" style="font-size:0.9rem">Collected Letters (scrambled)</p>
-      <div class="collected-letters">${slots}</div>
-    </div>
-  `;
-}
-
-window.useHint = function() {
-  const room = GAME_DATA.rooms[currentRoomIndex];
-  const q = room.questions[currentQuestionIndex];
-  let count = hintsUsed[room.id] || 0;
-  
-  if (count >= 2) return;
-  
-  count++;
-  hintsUsed[room.id] = count;
-  
-  const hintObj = count === 1 ? q.hint1 : q.hint2;
-  penaltyMs += hintObj.penaltyMs;
-  
-  SoundManager.hint();
-  syncProgress(room.id, team.progress);
-  
-  renderQuestion();
-  
-  const hintDisplay = document.getElementById('hint-display');
-  hintDisplay.innerHTML = `<div class="hint-text">💡 ${hintObj.text}</div>`;
-}
-
-window.checkAnswer = function(answer) {
-  const room = GAME_DATA.rooms[currentRoomIndex];
-  const q = room.questions[currentQuestionIndex];
-  
-  const items = document.querySelectorAll('.option-item, .tf-btn');
-  items.forEach(el => el.classList.add('disabled'));
-  
-  let isCorrect = false;
-  
-  if (q.type === 'multiple-choice') {
-    isCorrect = (answer === q.correctIndex);
-  } else if (q.type === 'true-false') {
-    isCorrect = (answer === q.correctAnswer);
-  }
-  
-  const targetEl = event.currentTarget;
-  if (isCorrect) {
-    targetEl.classList.add('correct');
-    SoundManager.correct();
-    collectedLetters.push(q.correctLetter);
-    
-    const newProg = (currentRoomIndex * 20) + ((currentQuestionIndex + 1) * 3);
-    syncProgress(room.id, newProg);
-    
-    setTimeout(() => {
-      showLetterReveal(q.correctLetter, q.letterExplanation);
-    }, 800);
+function render() {
+  const { phase, room: index } = team;
+  const room = GAME_DATA.rooms[index];
+  const actions = {};
+  $('timer-bar').classList.toggle('hidden', phase === 'waiting' || phase === 'finished');
+  if (phase !== 'waiting' && phase !== 'finished') {
+    $('timer-room').textContent = phase === 'final' ? 'Final Escape' : `Room ${index + 1}/5`;
+    timer();
+    clock ??= setInterval(timer, 1000);
   } else {
-    targetEl.classList.add('wrong');
-    SoundManager.wrong();
-    collectedLetters.push(q.fakeLetter);
-    
-    setTimeout(() => {
-      showLetterReveal(q.fakeLetter, 'Oops... that might not be the right letter.');
-    }, 800);
+    clearInterval(clock); clock = null;
   }
-}
-
-function showLetterReveal(letter, explanation) {
-  $main.innerHTML = `
-    <div class="letter-reveal">
-      <span class="letter-char">${letter}</span>
-      <div class="explanation">${explanation}</div>
-    </div>
-    ${renderCollectedLetters()}
-    <button class="btn btn--large btn--full mt-3" onclick="nextStep()">Continue ➡️</button>
-  `;
-}
-
-window.nextStep = function() {
-  currentQuestionIndex++;
-  
-  if (currentQuestionIndex < 5) {
-    renderQuestion();
+  if (phase === 'waiting') {
+    main.innerHTML = '<section class="waiting-screen"><h2>Waiting for Teacher</h2><p class="waiting-team-name"></p></section>';
+    main.querySelector('.waiting-team-name').textContent = team.name;
+  } else if (phase === 'story') {
+    main.innerHTML = `<section class="story-screen"><h1>${GAME_DATA.title}</h1><p class="story-text">${GAME_DATA.story}</p>${button('Start Room 1', 'begin')}</section>`;
+    actions.next = '[data-event=begin]';
+  } else if (phase === 'question') {
+    const q = room.questions[team.question];
+    const display = q.type === 'multiple-choice' ? q.options : ['True', 'False'];
+    main.innerHTML = `<header class="room-header"><span class="room-icon">${room.icon}</span><h2>${room.name}</h2><p>${room.topic}</p></header>
+      <div class="card question-card"><p class="question-number">Question ${team.question + 1} of ${room.questions.length}</p><p class="question-text">${q.text}</p>
+      <div class="options-list">${display.map((option, i) => button(option, 'answer', 'option-item', `data-choice="${i}"`)).join('')}</div></div>
+      ${letters(team.letters, 5)}${hintPanel()}${button('Restart from Room 1', 'restart', 'btn btn--danger')}`;
+    display.forEach((_, i) => { actions['answer' + (i + 1)] = `[data-choice="${i}"]`; });
+    if (team.hints[index] < 2) actions.hint = '[data-event=hint]';
+  } else if (phase === 'letter') {
+    main.innerHTML = `<div class="letter-reveal"><span class="letter-char">${team.feedback.letter}</span><p class="explanation">${team.feedback.text}</p></div>
+      ${letters(team.letters, 5)}${button('Continue →', 'continue')}`;
+    actions.next = '[data-event=continue]';
+  } else if (phase === 'code') {
+    main.innerHTML = `<header class="room-header"><h2>Unlock the Door</h2><p>Unscramble your collected letters.</p></header>
+      ${letters(team.letters, 5)}${codeForm(false)}${hintPanel()}${button('Retry This Room', 'retry', 'btn mt-2')}`;
+    actions.confirm = '#unlock-btn';
+    if (team.hints[index] < 2) actions.hint = '[data-event=hint]';
+  } else if (phase === 'unlocked') {
+    main.innerHTML = `<div class="room-complete"><h2>Door Unlocked! 🔓</h2><p class="code-word">${room.codeWord}</p>
+      <p>${room.finalLetterInstruction}</p>${letters(team.finalLetters, team.finalLetters.length)}
+      ${button(index < 4 ? 'Next Room →' : 'Final Escape 🚀', 'continue')}</div>`;
+    actions.next = '[data-event=continue]';
+  } else if (phase === 'final') {
+    main.innerHTML = `<div class="final-escape"><h2>${GAME_DATA.finalEscape.title}</h2><p>${GAME_DATA.finalEscape.instructions}</p>
+      ${letters(team.finalLetters, 6)}${codeForm(true)}${button('Restart from Room 1', 'restart', 'btn btn--danger mt-2')}</div>`;
+    actions.confirm = '#unlock-btn';
   } else {
-    renderCodeEntry();
+    main.innerHTML = `<div class="celebration-screen"><span class="trophy">🏆</span><h1>ESCAPED!</h1><p>${GAME_DATA.finalEscape.celebration}</p>
+      <div class="final-time">${time(team.elapsed + team.penalty)}</div><p>Hint penalty: ${time(team.penalty)}</p></div>`;
   }
+  main.onclick = event => {
+    const clicked = event.target.closest('[data-event]');
+    if (!clicked) return;
+    const action = clicked.dataset.event;
+    if (action === 'restart' && !confirm('Return to Room 1? The timer and penalties keep running.')) return;
+    const value = Number(clicked.dataset.choice);
+    const q = room.questions[team.question];
+    command(action, q?.type === 'true-false' ? value === 0 : value);
+  };
+  if ($('code-form')) $('code-form').onsubmit = event => {
+    event.preventDefault();
+    command(phase === 'final' ? 'escape' : 'unlock', $('code-input').value);
+  };
+  controls(actions);
 }
-
-function renderCodeEntry() {
-  const room = GAME_DATA.rooms[currentRoomIndex];
-  
-  $main.innerHTML = `
-    <div class="room-header fade-in">
-      <span class="room-icon">🔐</span>
-      <h2>Unlock the Door</h2>
-      <div class="room-topic">Unscramble your collected letters into a word</div>
-    </div>
-    
-    ${renderCollectedLetters()}
-    
-    <div class="code-entry fade-in mt-3">
-      <label>Enter the Code Word:</label>
-      <input type="text" id="code-input" class="code-input" maxlength="5" autocomplete="off">
-      <div id="code-error" class="join-error"></div>
-      <button class="btn btn--large btn--full mt-2" onclick="verifyCode()">Unlock Door</button>
-    </div>
-
-    <div class="text-center mt-3">
-      <button class="btn btn--danger" style="font-size:0.85rem; padding:8px 18px;" onclick="goBackToStart()">🔄 Restart from Room 1</button>
-    </div>
-  `;
-}
-
-window.verifyCode = function() {
-  const room = GAME_DATA.rooms[currentRoomIndex];
-  const inputEl = document.getElementById('code-input');
-  const errEl = document.getElementById('code-error');
-  const val = inputEl.value.trim().toUpperCase();
-  
-  if (val === room.codeWord) {
-    inputEl.classList.add('correct');
-    SoundManager.unlock();
-    errEl.innerText = "";
-    
-    // Save final letter(s) for the escape
-    if (room.finalLetterPositions) {
-       room.finalLetterPositions.forEach(p => {
-         allCollectedLetters.push(room.codeWord[p]);
-       });
-    } else {
-      allCollectedLetters.push(room.codeWord[room.finalLetterPosition]);
-    }
-    
-    const newProg = (currentRoomIndex + 1) * 20;
-    syncProgress(room.id, newProg);
-    
-    setTimeout(() => {
-      renderRoomComplete(room);
-    }, 1000);
-  } else {
-    inputEl.classList.add('wrong');
-    SoundManager.wrong();
-    errEl.innerText = "Incorrect code. If your letters don't form a word, you may have a wrong answer. Use the restart button below to try again!";
-    setTimeout(() => inputEl.classList.remove('wrong'), 500);
-  }
-}
-
-function renderRoomComplete(room) {
-  $main.innerHTML = `
-    <div class="room-complete">
-      <h2>Door Unlocked! 🔓</h2>
-      <div class="code-word">${room.codeWord}</div>
-      
-      <div class="final-letter-info">
-        <p class="mb-1">${room.finalLetterInstruction}</p>
-        <div class="final-letter">
-          ${room.finalLetterPositions ? 
-            room.codeWord[room.finalLetterPositions[0]] + ' & ' + room.codeWord[room.finalLetterPositions[1]] : 
-            room.codeWord[room.finalLetterPosition]}
-        </div>
-      </div>
-      
-      <button class="btn btn--large btn--full mt-2" onclick="proceedToNextRoom()">
-        ${currentRoomIndex < 4 ? 'Next Room ➡️' : 'Final Escape 🚀'}
-      </button>
-    </div>
-  `;
-}
-
-window.proceedToNextRoom = function() {
-  if (currentRoomIndex < 4) {
-    startRoom(currentRoomIndex + 1);
-  } else {
-    renderFinalEscape();
-  }
-}
-
-function renderFinalEscape() {
-  document.getElementById('timer-room').innerHTML = `<strong>FINAL ESCAPE</strong>`;
-  
-  $main.innerHTML = `
-    <div class="final-escape fade-in">
-      <span class="emoji-xl">🚀</span>
-      <h2>${GAME_DATA.finalEscape.title}</h2>
-      <p class="mb-2">${GAME_DATA.finalEscape.instructions}</p>
-      
-      <div class="code-entry">
-        <label>Final Escape Code (6 letters):</label>
-        <input type="text" id="final-code-input" class="code-input" maxlength="6" autocomplete="off" style="width: 100%; max-width: 340px;">
-        <div id="final-error" class="join-error"></div>
-        <button class="btn btn--large btn--full mt-2" onclick="verifyFinalCode()">ESCAPE! 🚀</button>
-      </div>
-
-      <div class="text-center mt-3">
-        <button class="btn btn--danger" style="font-size:0.85rem; padding:8px 18px;" onclick="goBackToStart()">🔄 Restart from Room 1</button>
-      </div>
-    </div>
-  `;
-}
-
-window.verifyFinalCode = function() {
-  const inputEl = document.getElementById('final-code-input');
-  const errEl = document.getElementById('final-error');
-  const val = inputEl.value.trim().toUpperCase();
-  
-  if (val === GAME_DATA.finalEscape.answer) {
-    inputEl.classList.add('correct');
-    clearInterval(timerInterval);
-    
-    finishTeam(team.id, elapsedMs, penaltyMs).catch(console.error);
-    
-    setTimeout(() => {
-      renderCelebration();
-    }, 1000);
-  } else {
-    inputEl.classList.add('wrong');
-    SoundManager.wrong();
-    errEl.innerText = "Access Denied. Unscramble your hint letters!";
-    setTimeout(() => inputEl.classList.remove('wrong'), 500);
-  }
-}
-
-function renderCelebration() {
-  SoundManager.celebrate();
-  document.getElementById('timer-bar').classList.add('hidden');
-  
-  const totalMs = elapsedMs + penaltyMs;
-  const m = Math.floor(totalMs / 60000);
-  const s = Math.floor((totalMs % 60000) / 1000).toString().padStart(2, '0');
-  
-  const pm = Math.floor(penaltyMs / 60000);
-  
-  $main.innerHTML = `
-    <div class="confetti-container" id="confetti"></div>
-    <div class="celebration-screen fade-in">
-      <span class="trophy">🏆</span>
-      <h1>ESCAPED!</h1>
-      <p class="message">${GAME_DATA.finalEscape.celebration}</p>
-      
-      <div class="final-time">${m}:${s}</div>
-      <div class="time-breakdown">
-        (Base time + ${pm} min hint penalty)
-      </div>
-      
-      <p class="mt-3 text-secondary">Look at the teacher's screen for the leaderboard!</p>
-    </div>
-  `;
-  
-  createConfetti();
-}
-
-function createConfetti() {
-  const container = document.getElementById('confetti');
-  const colors = ['#00d26a', '#4da6ff', '#ffd700', '#ff6b6b'];
-  
-  for (let i = 0; i < 50; i++) {
-    const confetti = document.createElement('div');
-    confetti.classList.add('confetti-piece');
-    confetti.style.left = Math.random() * 100 + 'vw';
-    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-    confetti.style.animationDelay = Math.random() * 2 + 's';
-    container.appendChild(confetti);
-  }
-}
-
-function syncProgress(roomVal, progressVal) {
-  if (!team) return;
-  updateTeamProgress(team.id, roomVal, progressVal, elapsedMs, penaltyMs, hintsUsed).catch(console.error);
-}
+$('sound-toggle').onclick = () => {
+  const enabled = SoundManager.toggle();
+  $('sound-toggle').textContent = enabled ? '🔊' : '🔇';
+  $('sound-toggle').setAttribute('aria-pressed', String(enabled));
+};
+window.addEventListener('pagehide', () => { clearInterval(clock); clearTimeout(pending); });
+renderJoin();

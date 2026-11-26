@@ -1,14 +1,18 @@
+import { read } from '../../../gallery/shared/storage.js';
+import { validatePack } from '../../../gallery/shared/content.js';
 import { useState } from 'react';
 import { socket } from '../lib/socket';
 import './Lobby.css';
 
+let teacherPack;
+try { teacherPack = validatePack(read('pack:grammar-battleship', null), 'axes'); } catch {}
 export default function Lobby({ setRoomId, setGameState, gameState, roomId }) {
     const [view, setView] = useState('menu'); // menu, create, join
     const [joinCode, setJoinCode] = useState('');
     const [playerName, setPlayerName] = useState('');
 
-    const [subjects, setSubjects] = useState('The dog\nThe students\nMy teacher\nA mysterious man\nThe old car\nThe broken robot\nOur loud neighbor\nThe sleeping cat\nThe braveknight\nA hungry bear');
-    const [participles, setParticiples] = useState('eaten\nbroken\nforgotten\nseen\nheard\ndiscovered\nstolen\nhidden\nfixed\nfound');
+    const [subjects, setSubjects] = useState(teacherPack?.items.map(item => item.subject).join('\n') || 'The dog\nThe students\nMy teacher\nA mysterious man\nThe old car\nThe broken robot\nOur loud neighbor\nThe sleeping cat\nThe brave knight\nA hungry bear');
+    const [participles, setParticiples] = useState(teacherPack?.items.map(item => item.participle).join('\n') || 'eaten\nbroken\nforgotten\nseen\nheard\ndiscovered\nstolen\nhidden\nfixed\nfound');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -18,12 +22,12 @@ export default function Lobby({ setRoomId, setGameState, gameState, roomId }) {
         setError('');
 
         const vocabLists = {
-            subjects: subjects.split('\n'),
-            pastParticiples: participles.split('\n')
+            subjects: [...new Set(subjects.split('\n').map(item => item.trim()).filter(Boolean))],
+            pastParticiples: [...new Set(participles.split('\n').map(item => item.trim()).filter(Boolean))]
         };
 
         if (vocabLists.subjects.length < 10 || vocabLists.pastParticiples.length < 10) {
-            setError('Please provide at least 10 items for each list to ensure enough words for a 10x10 board.');
+            setError('Please provide at least 10 different non-empty items for each list to ensure enough words for a 10x10 board.');
             setLoading(false);
             return;
         }
@@ -101,21 +105,21 @@ export default function Lobby({ setRoomId, setGameState, gameState, roomId }) {
                         <h2>Teacher Dashboard - Create Game</h2>
                         <p className="subtitle">Enter vocabulary to populate the X and Y axes of the Battlefield (10x10 grid).</p>
 
-                        {error && <div className="error-box">{error}</div>}
+                        {error && <div role="alert" className="error-box">{error}</div>}
 
                         <div className="vocab-grids">
                             <div className="input-group">
-                                <label>Y-Axis (Nouns/Subjects): One per line</label>
+                                <label htmlFor="board-subjects">Y-Axis (Nouns/Subjects): One per line</label>
                                 <textarea
-                                    value={subjects}
+                                    id="board-subjects" value={subjects}
                                     onChange={(e) => setSubjects(e.target.value)}
                                     placeholder="The boy&#10;The dog&#10;My friends..."
                                 />
                             </div>
                             <div className="input-group">
-                                <label>X-Axis (Verbs/Past Participles): One per line</label>
+                                <label htmlFor="board-participles">X-Axis (Verbs/Past Participles): One per line</label>
                                 <textarea
-                                    value={participles}
+                                    id="board-participles" value={participles}
                                     onChange={(e) => setParticiples(e.target.value)}
                                     placeholder="broken&#10;stolen&#10;seen..."
                                 />
@@ -135,14 +139,14 @@ export default function Lobby({ setRoomId, setGameState, gameState, roomId }) {
                     <div className="lobby-join animate-fade-in">
                         <h2>Join a Game</h2>
 
-                        {error && <div className="error-box">{error}</div>}
+                        {error && <div role="alert" className="error-box">{error}</div>}
 
                         <div className="input-group" style={{ maxWidth: '400px', margin: '0 auto 1rem auto' }}>
-                            <label>Room Code</label>
+                            <label htmlFor="join-code">Room Code</label>
                             <input
                                 type="text"
-                                maxLength="4"
-                                placeholder="e.g. A1B2"
+                                id="join-code" maxLength="8"
+                                placeholder="Eight-character code"
                                 value={joinCode}
                                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                                 style={{ textTransform: 'uppercase', textAlign: 'center', letterSpacing: '0.2rem', fontSize: '1.25rem' }}
@@ -150,10 +154,10 @@ export default function Lobby({ setRoomId, setGameState, gameState, roomId }) {
                         </div>
 
                         <div className="input-group" style={{ maxWidth: '400px', margin: '0 auto 2rem auto' }}>
-                            <label>Your Name</label>
+                            <label htmlFor="player-name">Your Name</label>
                             <input
                                 type="text"
-                                placeholder="Student Name"
+                                id="player-name" maxLength="60" placeholder="Player 2"
                                 value={playerName}
                                 onChange={(e) => setPlayerName(e.target.value)}
                             />

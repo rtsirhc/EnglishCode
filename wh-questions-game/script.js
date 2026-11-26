@@ -1,3 +1,14 @@
+import { questions as builtInQuestions } from './questions.js';
+import { gameRuntime } from '/gallery/shared/runtime.js';
+import { tone } from '/gallery/shared/sound.js';
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const runtime = gameRuntime('wh-questions-game', 'words', {
+    confirm: checkAnswer,
+    next: proceedToNext,
+    hint: revealLetter,
+    buzzer: () => { if (state.currentQuestionIndex >= 0 && elements.feedback.classList.contains('hidden')) togglePause(); },
+});
+const questions = runtime.pack ? runtime.pack.items.map(item => ({ q: item.clue, a: [item.word], clue: item.clue })) : builtInQuestions;
 // Game State
 const state = {
     teams: [],
@@ -8,6 +19,7 @@ const state = {
     currentAnswerString: "",
     timer: 15,
     timerInterval: null,
+    advanceTimeout: null,
     isPaused: false,
     shouldIncrementTurn: true,
     shouldPickNewQuestion: true
@@ -32,8 +44,8 @@ const elements = {
     feedbackContent: document.querySelector('.feedback-content'),
     scoreboardContainer: document.getElementById('scoreboard'),
     sounds: {
-        correct: document.getElementById('correct-sound'),
-        wrong: document.getElementById('wrong-sound')
+        correct: { play: () => tone('correct') },
+        wrong: { play: () => tone('wrong') }
     }
 };
 
@@ -46,21 +58,14 @@ function init() {
         });
     });
 
-    elements.answerInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkAnswer();
-    });
-
-    // Global Enter for proceed
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const feedbackVisible = !elements.feedback.classList.contains('hidden');
-            if (feedbackVisible && elements.nextBtn.style.display !== 'none') {
-                proceedToNext();
-            }
-        }
+    elements.answerInput.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.repeat) return;
+        event.preventDefault();
+        checkAnswer();
     });
 
     elements.clueBtn.addEventListener('click', revealLetter);
+    document.getElementById('check-btn').addEventListener('click', checkAnswer);
     elements.revealBtn.addEventListener('click', revealAnswer);
     elements.pauseBtn.addEventListener('click', togglePause);
 
@@ -185,6 +190,7 @@ function updateScoreboardValues() {
 }
 
 function checkAnswer() {
+    if (!elements.feedback.classList.contains('hidden') || state.currentQuestionIndex < 0) return;
     const userAnswer = elements.answerInput.value.trim().toLowerCase();
     const currentQ = questions[state.currentQuestionIndex];
 
@@ -219,7 +225,7 @@ function handleCorrect() {
 
     // Manual continue for correct answer
     // Use green color explicitly for the answer text
-    showFeedback(`Correct!<br><span style="font-size: 0.6em; color: var(--success-color); background: white; padding: 0 1rem; border-radius: 10px;">${answer.toUpperCase()}</span>`, "success", true);
+    showFeedback(`Correct!<br><span style="font-size: 0.6em; color: var(--success-color); background: white; padding: 0 1rem; border-radius: 10px;">${escapeHTML(answer.toUpperCase())}</span>`, "success", true);
 }
 
 function handleIncorrect() {
@@ -233,12 +239,22 @@ function handleIncorrect() {
     // Auto-advance for incorrect, no arrow
     showFeedback("Incorrect!", "error", false);
 
-    setTimeout(() => {
-        proceedToNext();
-    }, 2000);
+    state.advanceTimeout = setTimeout(proceedToNext, 2000);
+}
+
+function revealLetter() {
+    if (state.currentQuestionIndex < 0 || !elements.feedback.classList.contains('hidden')) return;
+    const remaining = state.currentAnswerString.split('').map((letter, index) => index)
+        .filter(index => state.currentAnswerString[index] !== ' ' && !state.revealedIndices.has(index));
+    if (!remaining.length) return;
+    state.revealedIndices.add(remaining[Math.floor(Math.random() * remaining.length)]);
+    state.teams[state.currentTeamIndex].score -= 2;
+    updateScoreboardValues();
+    renderAnswerSlots();
 }
 
 function revealAnswer() {
+    if (!elements.feedback.classList.contains('hidden') || state.currentQuestionIndex < 0) return;
     stopTimer();
     const answer = state.currentAnswerString;
     for (let i = 0; i < answer.length; i++) {
@@ -249,11 +265,12 @@ function revealAnswer() {
     state.shouldIncrementTurn = false; // Turn stays
     state.shouldPickNewQuestion = true; // New question (since answer revealed)
 
-    showFeedback(`Answer Revealed<br><span style="font-size: 0.6em;">${answer.toUpperCase()}</span>`, "error", true);
+    showFeedback(`Answer Revealed<br><span style="font-size: 0.6em;">${escapeHTML(answer.toUpperCase())}</span>`, "error", true);
 }
 
 function proceedToNext() {
-    console.log("Next button clicked. Increment:", state.shouldIncrementTurn, "New Q:", state.shouldPickNewQuestion);
+    if (elements.feedback.classList.contains('hidden')) return;
+    clearTimeout(state.advanceTimeout);
     elements.feedback.classList.remove('success', 'error');
     elements.feedback.classList.add('hidden');
 
@@ -328,6 +345,7 @@ function togglePause() {
 }
 
 function updatePauseBtn() {
+    elements.pauseBtn.setAttribute('aria-label', state.isPaused ? 'Resume timer' : 'Pause timer');
     if (state.isPaused) {
         elements.pauseBtn.textContent = '▶';
         elements.pauseBtn.classList.add('paused');
@@ -362,9 +380,7 @@ function handleTimeout() {
 
     showFeedback("Time's Up! -1 Pt", "error", false);
 
-    setTimeout(() => {
-        proceedToNext();
-    }, 2000);
+    state.advanceTimeout = setTimeout(proceedToNext, 2000);
 }
 
 // Start

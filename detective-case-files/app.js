@@ -1,3 +1,4 @@
+import { bindGameControls } from '/gallery/shared/runtime.js';
 /* =========================================================
    DETECTIVE CASE FILES — Game Logic
    ========================================================= */
@@ -19,7 +20,30 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      return Object.assign(defaultState(), parsed);
+      const restored = defaultState();
+      if (!parsed || typeof parsed !== 'object') return restored;
+      restored.teamName = typeof parsed.teamName === 'string' ? parsed.teamName.slice(0, 120) : '';
+      restored.muted = parsed.muted === true;
+      for (const c of CASES) {
+        const saved = parsed.cases?.[c.id];
+        if (!saved || typeof saved !== 'object') continue;
+        const item = defaultCaseState();
+        item.evidence = Array.isArray(saved.evidence) ? saved.evidence.filter(value => typeof value === 'string') : [];
+        item.hints = Array.isArray(saved.hints) ? [...new Set(saved.hints.filter(index => Number.isInteger(index) && c.questions[index]))] : [];
+        for (const [index, answer] of Object.entries(saved.answers || {})) {
+          if (Number.isInteger(answer) && c.questions[index]?.options[answer] !== undefined) item.answers[index] = answer;
+        }
+        for (const key of ['score', 'correctCount', 'evidenceBonus']) {
+          if (Number.isFinite(saved[key]) && saved[key] >= 0) item[key] = saved[key];
+        }
+        item.submitted = saved.submitted === true;
+        for (const key of ['ev1', 'ev2', 'ev3', 'fairness', 'fairnessWhy']) {
+          if (typeof saved.report?.[key] === 'string') item.report[key] = saved.report[key];
+        }
+        if (Array.isArray(saved.report?.extras)) item.report.extras = saved.report.extras.map(value => typeof value === 'string' ? value : '');
+        restored.cases[c.id] = item;
+      }
+      return restored;
     } catch {
       return defaultState();
     }
@@ -38,19 +62,15 @@
     }
   }
 
+  function defaultCaseState() {
+    return {
+      evidence: [], answers: {}, hints: [], submitted: false,
+      score: 0, correctCount: 0, evidenceBonus: 0,
+      report: { ev1: '', ev2: '', ev3: '', extras: [], fairness: '', fairnessWhy: '' }
+    };
+  }
   function getCaseState(id) {
-    if (!state.cases[id]) {
-      state.cases[id] = {
-        evidence: [],
-        answers: {},
-        hints: [],
-        submitted: false,
-        score: 0,
-        correctCount: 0,
-        evidenceBonus: 0,
-        report: { ev1: "", ev2: "", ev3: "", extras: [], fairness: "", fairnessWhy: "" }
-      };
-    }
+    state.cases[id] ||= defaultCaseState();
     return state.cases[id];
   }
 
@@ -327,12 +347,17 @@
       const html = sentences.map(sent => {
         const collected = cs.evidence.includes(sent);
         const keyClass = (showKeyCluesInStory && isKeySentence(sent, c)) ? " key-reveal" : "";
-        return `<span class="sentence${collected ? " collected" : ""}${keyClass}" data-sent="${escapeHtml(sent)}">${escapeHtml(sent)}</span>`;
+        return `<span class="sentence${collected ? " collected" : ""}${keyClass}" role="checkbox" tabindex="0" aria-checked="${collected}" data-sent="${escapeHtml(sent)}">${escapeHtml(sent)}</span>`;
       }).join(" ");
       return `<p>${html}</p>`;
     }).join("");
 
     el.storyBody.querySelectorAll(".sentence").forEach(span => {
+      span.addEventListener("keydown", event => {
+        if (!event.repeat && ['Enter', ' '].includes(event.key)) {
+          event.preventDefault(); span.click();
+        }
+      });
       span.addEventListener("click", () => {
         const text = span.dataset.sent;
         const pos = cs.evidence.indexOf(text);
@@ -343,6 +368,7 @@
           cs.evidence.push(text);
           span.classList.add("collected");
         }
+        span.setAttribute("aria-checked", String(cs.evidence.includes(text)));
         playClick();
         saveState();
         renderEvidence(c, cs);
@@ -747,5 +773,16 @@
     renderBoard();
   }
 
+  bindGameControls('detective-case-files', {
+    confirm: () => { if (!el.panelQuiz.classList.contains('hidden') && !el.submitQuizBtn.disabled) el.submitQuizBtn.click(); },
+    ...Object.fromEntries(Array.from({ length: 4 }, (_, index) => [
+      'answer' + (index + 1), () => {
+        if (el.panelQuiz.classList.contains('hidden')) return;
+        const cards = [...el.questionsContainer.querySelectorAll('.question-card')];
+        const card = cards.find(item => !item.querySelector('.selected'));
+        card?.querySelectorAll('.option-btn')[index]?.click();
+      }
+    ]))
+  });
   init();
 })();

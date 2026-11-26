@@ -109,7 +109,7 @@ export default function WinnerView() {
                                 'mb-2'
                             )}
                         >
-                            {winner.team} WINS!
+                            {winner.team} {winner.indices.length > 1 ? 'TIE!' : 'WINS!'}
                         </h1>
 
                         {/* Score */}
@@ -118,13 +118,13 @@ export default function WinnerView() {
                         </p>
 
                         {/* All Scores Summary */}
-                        <div className="flex gap-4 mb-10">
+                        <div className="flex flex-wrap justify-center gap-4 mb-10">
                             {teams.map((team, i) => (
                                 <div
                                     key={i}
                                     className={cn(
                                         'px-4 py-2 rounded-xl text-white font-bold text-lg',
-                                        i === winner.index
+                                        winner.indices.includes(i)
                                             ? 'bg-white/20 ring-2 ring-accent scale-110'
                                             : 'bg-white/10 opacity-60'
                                     )}

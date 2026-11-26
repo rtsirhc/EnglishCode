@@ -1,3 +1,10 @@
+import { gameRuntime } from '/gallery/shared/runtime.js';
+const runtime = gameRuntime('world-history-quiz', 'quiz', {
+ answer1: () => chooseVisible(0), answer2: () => chooseVisible(1), answer3: () => chooseVisible(2), answer4: () => chooseVisible(3), answer5: () => chooseVisible(4), answer6: () => chooseVisible(5),
+ confirm: () => { if (screens.boss.classList.contains('active')) submitBossAnswer(); }
+});
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function chooseVisible(index) { if (screens.quiz.classList.contains('active') && !optionButtons[index]?.hidden && !optionButtons[index]?.disabled) selectAnswer(index); }
 /* ═══════════════════════════════════════════
    WORLD HISTORY QUIZ — Game Logic
    100-question bank · 30-Q quiz · 10-Q Boss
@@ -129,9 +136,15 @@ const QUESTION_BANK = [
 ];
 
 
+if (runtime.pack) {
+  QUESTION_BANK.splice(0, QUESTION_BANK.length, ...runtime.pack.items.map(item => ({ q: item.question, options: item.options, answer: item.answer })));
+  document.querySelector('#start-screen h1').textContent = runtime.pack.title;
+  document.querySelector('#start-screen .description').textContent = 'Play your classroom question pack. Three strikes end the round. Complete it to unlock a recall challenge.';
+}
+
 // ─── Constants ──────────────────────────────
-const QUESTIONS_PER_ROUND = 30;
-const BOSS_QUESTIONS = 10;
+const QUESTIONS_PER_ROUND = Math.min(30, QUESTION_BANK.length);
+const BOSS_QUESTIONS = Math.min(10, QUESTION_BANK.length);
 const MAX_STRIKES = 3;
 const CORRECT_DELAY = 1000;
 const INCORRECT_DELAY = 2500;
@@ -351,8 +364,17 @@ function loadQuestion() {
         els.questionText.textContent = q.q;
         const shuffledOptions = shuffle(q.options);
 
+        while (optionButtons.length < shuffledOptions.length) {
+            const button = document.createElement('button');
+            const index = optionButtons.length;
+            button.id = 'option-' + index;
+            button.addEventListener('click', () => selectAnswer(index));
+            optionButtons[0].parentElement.append(button);
+            optionButtons.push(button);
+        }
         optionButtons.forEach((btn, i) => {
-            btn.textContent = shuffledOptions[i];
+            btn.hidden = i >= shuffledOptions.length;
+            btn.textContent = shuffledOptions[i] || '';
             btn.className = 'btn btn-option';
             btn.disabled = false;
         });
@@ -364,7 +386,7 @@ function loadQuestion() {
 }
 
 function selectAnswer(index) {
-    if (isAnswering) return;
+    if (isAnswering || !optionButtons[index] || optionButtons[index].hidden || optionButtons[index].disabled) return;
     isAnswering = true;
 
     const q = currentQuestions[currentIndex];
@@ -448,7 +470,7 @@ function showVictory() {
     els.resultIcon.textContent = '🏆';
     els.resultTitle.textContent = 'Victory!';
     els.resultCard.className = 'result-card victory';
-    els.resultMessage.textContent = 'You have proven yourself a true scholar of World History! The Final Boss awaits…';
+    els.resultMessage.textContent = runtime.pack ? 'You completed your classroom challenge! The Final Boss awaits…' : 'You have proven yourself a true scholar of World History! The Final Boss awaits…';
     els.replayText.textContent = 'Play Again';
     els.bossBtn.classList.remove('hidden');
 
@@ -622,7 +644,7 @@ function submitBossAnswer() {
         setTimeout(() => advanceBoss(), BOSS_CORRECT_DELAY);
     } else {
         els.bossVerdict.className = 'boss-verdict verdict-incorrect';
-        els.bossVerdict.innerHTML = `✗ Incorrect.<br>The correct answer: <strong>${q.answer}</strong>`;
+        els.bossVerdict.innerHTML = `✗ Incorrect.<br>The correct answer: <strong>${escapeHTML(q.answer)}</strong>`;
 
         setTimeout(() => advanceBoss(), BOSS_INCORRECT_DELAY);
     }
@@ -674,3 +696,5 @@ document.addEventListener('keydown', (e) => {
         submitBossAnswer();
     }
 });
+
+Object.assign(window, { selectAnswer, startGame, startBossFight, submitBossAnswer });

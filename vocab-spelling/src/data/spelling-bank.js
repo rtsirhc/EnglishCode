@@ -1,0 +1,27 @@
+const WORDS = [
+  'accurate','achieve','adaptation','advertisement','agriculture',
+  'alliance','analyze','apparently','apply','approximately',
+  'argue','artifact','astronomer','automated','available',
+  'basic','biodegradable','biodiversity','biotechnology','brainstorm',
+  'camouflage','catastrophic','categorize','cell membrane','centimeter',
+  'chronology','circumstances','civilization','colonization','collection',
+  'commemorate','compare','complex','conclusion','conquest',
+  'consider','constitution','contrast','create','creative',
+  'culture','define','democracy','develop','drought',
+  'dynasty','dwindled','ecosystem','effective','empire',
+  'enzyme','evaluate','evolution','everywhere','experiment',
+  'exploration','experience','fossil fuels','foreshadowing','generation',
+  'genetics','habitat','heritage','hyperbole','hydroelectric',
+  'identify','imagine','independent','indisputable','individual',
+  'influence','interdependent','jurisdictional','laboratory','manage',
+  'mechanical','metamorphosis','microorganism','microscope','millimeter',
+  'mysterious','nanotechnology','necessary','negative','organize',
+  'parliament','particular','persuade','philosopher','photosphere',
+  'photosynthesis','phototherapy','phytoplankton','predict','profession',
+  'reality show','reconnaissance','repetition','restaurant','scaffolding',
+  'sophomore','sovereignty','strawberry','streaming','sunglasses',
+  'suspension','technology','understand','underwater','unconstitutional',
+  'unprecedented','urbanization','vocabulary','wavelength','zigzagged',
+];
+
+export default WORDS;

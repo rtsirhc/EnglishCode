@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Beer, Bird, Bear, Beard</title>
+  <link rel="stylesheet" href="pronunciation.css">
+</head>
+<body data-deck="b">
+  <header class="course-bar">
+    <p id="deck-title">Beer, Bird, Bear, Beard</p>
+    <div class="settings">
+      <label for="mode">Modo</label>
+      <select id="mode"><option value="solo">Individual</option><option value="class">En clase</option></select>
+      <button id="jump">Ir a la práctica</button>
+    </div>
+  </header>
+  <main id="slide" aria-labelledby="slide-title"></main>
+  <aside id="notes" hidden></aside>
+  <footer>
+    <nav class="navigation" aria-label="Diapositivas">
+      <button id="prev" aria-label="Anterior">←</button>
+      <span id="position" aria-live="polite"></span>
+      <button id="next" aria-label="Siguiente">→</button>
+    </nav>
+    <div class="actions">
+      <button class="primary" id="listen">▶ Escuchar</button>
+      <button id="answer" hidden>Ver respuesta</button>
+      <button id="another" hidden>Otro intento</button>
+      <button id="note" aria-controls="notes" aria-expanded="false">Notas</button>
+      <button id="full" aria-label="Pantalla completa">⛶</button>
+    </div>
+  </footer>
+  <div id="status" role="status"></div>
+  <audio id="sample" preload="none"></audio>
+  <script type="module" src="pronunciation.js"></script>
+</body>
+</html>

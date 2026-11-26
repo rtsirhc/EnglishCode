@@ -1,191 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Compliance Cipher - Escape Room</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>The Compliance Cipher · EnglishCode</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./game.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col items-center justify-center p-4">
-
-    <!-- Team Login Screen -->
-    <div id="login-screen" class="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl text-center space-y-4">
-        <h1 class="text-3xl font-extrabold text-emerald-400">The Compliance Cipher</h1>
-        <p class="text-slate-400 text-sm">Industrial Sustainability & Policy Escape Room</p>
-        <input type="text" id="team-input" placeholder="Enter Team Name (e.g., EcoConsultants)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500">
-        <button onclick="startGame()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition">Initialize Simulation</button>
-    </div>
-
-    <!-- Main Game Arena -->
-    <div id="game-screen" class="hidden w-full max-w-2xl bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-6">
-        
-        <!-- Header: Stats & Timer -->
-        <div class="flex justify-between items-center bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <div>
-                <span id="team-display" class="text-xs text-emerald-400 uppercase tracking-wider block font-bold">Team: --</span>
-                <span id="level-display" class="text-xl font-bold text-slate-100">Level 1 / 4</span>
-            </div>
-            <div class="text-right">
-                <span class="text-xs text-slate-400 uppercase tracking-wider block">Elapsed Time (incl. penalties)</span>
-                <span id="timer-display" class="text-xl font-mono font-bold text-amber-400">00:00</span>
-            </div>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="w-full bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-800">
-            <div id="progress-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
-        </div>
-
-        <!-- Puzzle Box -->
-        <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
-            <h3 id="puzzle-title" class="text-lg font-bold text-slate-200">Level 1: The Triple P & Resource Leak Cipher</h3>
-            <p id="puzzle-desc" class="text-sm text-slate-300 leading-relaxed">
-                Analyze the Ramos Arizpe manufacturing plant audit. Severe aquifer depletion is occurring alongside high profitability. 
-                <br><br><strong>Riddle/Clue:</strong> Which pillar of the Triple P is most violated, and what is the code index for water depletion? (Format: PILLAR-NUMBER)
-            </p>
-            <div class="space-y-2">
-                <input type="text" id="passcode-input" placeholder="Enter Cryptic Passcode (e.g., PLAN-3)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 uppercase font-mono focus:outline-none focus:border-emerald-500">
-                <button onclick="submitPasscode()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-xl transition">Bypass Firewall / Submit Key</button>
-            </div>
-            <div id="feedback-msg" class="text-xs font-mono text-center text-red-400 h-4"></div>
-        </div>
-
-        <!-- Hint Section -->
-        <div class="flex justify-between items-center pt-2">
-            <button onclick="requestHint()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg transition text-amber-400">Request Hint (+1m / +5m Penalty)</button>
-            <span id="hints-status" class="text-xs text-slate-400">Hints used: 0 / 2</span>
-        </div>
-        <div id="hint-box" class="hidden p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg text-xs text-amber-300 font-mono"></div>
-    </div>
-
-    <!-- Victory Screen -->
-    <div id="victory-screen" class="hidden max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl text-center space-y-4">
-        <h2 class="text-3xl font-extrabold text-emerald-400">Vault Successfully Bypassed!</h2>
-        <p class="text-slate-300 text-sm">Your team cleared all 4 sustainability and policy levels.</p>
-        <div id="final-stats" class="text-xl font-mono font-bold text-amber-400"></div>
-    </div>
-
-    <script>
-        let currentLevel = 1;
-        let secondsElapsed = 0;
-        let penaltySeconds = 0;
-        let hintsUsed = 0;
-        let timerInterval = null;
-
-        const levelsData = {
-            1: {
-                title: "Level 1: The Triple P & Resource Leak Cipher",
-                desc: "Analyze the Ramos Arizpe manufacturing plant audit. Severe aquifer depletion is occurring alongside high profitability.<br><br><strong>Riddle/Clue:</strong> Which pillar of the Triple P is most violated, and what is the code index for water depletion? (Format: PILLAR-NUMBER)",
-                answer: "PLAN-3",
-                hints: [
-                    "Look closely at the most severely depleted natural resource in the audit report.",
-                    "The pillar affected is 'PLANET', and the leak index is 3."
-                ]
-            },
-            2: {
-                title: "Level 2: Climate Feedback Loops & Footprints",
-                desc: "Analyze regional temperature anomalies and industrial greenhouse gas emissions. Trace the causal chain backward from agricultural collapse.<br><br><strong>Riddle/Clue:</strong> What is the primary chemical gas code driving this loop, followed by the closed-loop identifier? (Format: GAS-WORD)",
-                answer: "CO2-LOOP",
-                hints: [
-                    "Trace the greenhouse gas emission chain backward from agricultural collapse.",
-                    "The target sequence starts with C-O-2 and ends with LOOP."
-                ]
-            },
-            3: {
-                title: "Level 3: Circular Supply Chain Optimization",
-                desc: "Re-engineer the broken linear electronic supply chain. You must insert a closed-loop strategy right between manufacturing and disposal.<br><br><strong>Riddle/Clue:</strong> What category of the 3 Rs is required to close this loop successfully? (Format: NUMBER-WORD)",
-                answer: "3RS-RECYCLE",
-                hints: [
-                    "You need to insert a circular loop step right between manufacturing and disposal.",
-                    "The required strategy uses the second of the 3 Rs."
-                ]
-            },
-            4: {
-                title: "Level 4: The Final Policy Enforcement Matrix",
-                desc: "Simultaneous violations detected: Severe toxic dumping into local water systems and refusal to adopt clean tech.<br><br><strong>Riddle/Clue:</strong> Deploy the exact 2 policy tools required to clear the firewall—one punitive monetary tool and one legal prohibition. (Format: TOOL1-TOOL2)",
-                answer: "FINE-BAN",
-                hints: [
-                    "Severe toxic dumping requires a punitive financial or legal block.",
-                    "Tools required: First a monetary punishment (F---), second a legal prohibition (B--)."
-                ]
-            }
-        };
-
-        function startGame() {
-            const teamName = document.getElementById('team-input').value.trim();
-            if (!teamName) {
-                alert('Please enter your team name!');
-                return;
-            }
-            document.getElementById('team-display').innerText = `Team: ${teamName}`;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            startTimer();
-        }
-
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                secondsElapsed++;
-                updateTimerDisplay();
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            let totalTime = secondsElapsed + penaltySeconds;
-            let mins = Math.floor(totalTime / 60).toString().padStart(2, '0');
-            let secs = (totalTime % 60).toString().padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
-        }
-
-        function requestHint() {
-            const hintBox = document.getElementById('hint-box');
-            hintBox.classList.remove('hidden');
-            
-            if (hintsUsed === 0) {
-                hintsUsed = 1;
-                penaltySeconds += 60; // +1 minute
-                hintBox.innerText = `[+1 Min Penalty] Hint 1: ${levelsData[currentLevel].hints[0]}`;
-            } else if (hintsUsed === 1) {
-                hintsUsed = 2;
-                penaltySeconds += 300; // +5 minutes
-                hintBox.innerText = `[+5 Min Penalty] Hint 2: ${levelsData[currentLevel].hints[1]}`;
-            } else {
-                hintBox.innerText = `You have exhausted all hints for Level ${currentLevel}!`;
-            }
-            document.getElementById('hints-status').innerText = `Hints used: ${hintsUsed} / 2`;
-            updateTimerDisplay();
-        }
-
-        function submitPasscode() {
-            const inputCode = document.getElementById('passcode-input').value.trim().toUpperCase();
-            const feedback = document.getElementById('feedback-msg');
-
-            if (inputCode === levelsData[currentLevel].answer) {
-                feedback.innerText = "";
-                document.getElementById('passcode-input').value = "";
-                document.getElementById('hint-box').classList.add('hidden');
-                hintsUsed = 0; // Reset hints for next level
-                document.getElementById('hints-status').innerText = `Hints used: 0 / 2`;
-
-                if (currentLevel < 4) {
-                    currentLevel++;
-                    document.getElementById('level-display').innerText = `Level ${currentLevel} / 4`;
-                    document.getElementById('progress-bar').style.width = `${(currentLevel - 1) * 25}%`;
-                    document.getElementById('puzzle-title').innerText = levelsData[currentLevel].title;
-                    document.getElementById('puzzle-desc').innerHTML = levelsData[currentLevel].desc;
-                } else {
-                    clearInterval(timerInterval);
-                    document.getElementById('game-screen').classList.add('hidden');
-                    document.getElementById('victory-screen').classList.remove('hidden');
-                    let totalTime = secondsElapsed + penaltySeconds;
-                    let finalMins = Math.floor(totalTime / 60);
-                    let finalSecs = totalTime % 60;
-                    document.getElementById('final-stats').innerText = `Final Time (incl. penalties): ${finalMins}m ${finalSecs}s`;
-                }
-            } else {
-                feedback.innerText = "Incorrect cryptographic key! The firewall rejected your input.";
-            }
-        }
-    </script>
+<body class="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8">
+  <main class="mx-auto max-w-5xl">
+    <header class="mb-8 flex flex-wrap items-center justify-between gap-3">
+      <div><p id="lesson-title" class="text-sm font-semibold uppercase text-emerald-400">INDUSTRIAL SUSTAINABILITY ESCAPE ROOM</p><h1 class="text-3xl font-extrabold">The Compliance Cipher</h1></div>
+      <a class="text-sm text-slate-300 underline" href="/" target="_top">Game library</a>
+    </header>
+    <p id="notice" role="status" class="mb-4 text-amber-300"></p>
+    <section id="setup" class="panel mx-auto max-w-xl space-y-5">
+      <h2 class="text-xl font-bold">Choose your screen</h2>
+      <div><label for="role" class="block">Mode</label><select id="role" class="field mt-2"><option value="solo">Play on this screen</option><option value="teacher">Host a class room</option><option value="team">Join a class room</option></select></div>
+      <div id="room-options" hidden class="space-y-4">
+        <div><label for="mode" class="block">Connection</label><select id="mode" class="field mt-2"><option value="local">Same browser</option><option value="online">Separate devices</option></select></div>
+        <p id="mode-help" class="text-sm text-slate-400"></p>
+      </div>
+      <label id="room-label" hidden class="block">Room code<input id="room-code" class="field mt-2 uppercase" maxlength="8" autocomplete="off"></label>
+      <label id="name-label" class="block">Team name<input id="team-name" class="field mt-2" maxlength="60" value="Team 1" autocomplete="off"></label>
+      <p class="text-sm text-slate-400">Solve each clue and enter its key. Hints add 1 minute, then 5 minutes, to your completion time.</p>
+      <button id="start" class="primary w-full">Start</button>
+      <p id="resume-note" class="text-sm text-slate-400"></p>
+    </section>
+    <section id="teacher" hidden class="space-y-6">
+      <div class="panel invite-panel items-center gap-6">
+        <div class="min-w-0 flex-1"><h2 class="text-xl font-bold">Class progress</h2><p class="mt-2">Room <strong id="share-code" class="font-mono text-2xl text-emerald-400"></strong></p><p id="share-help" class="my-3 text-sm text-slate-400"></p><a id="join-link" target="_blank" rel="noopener" class="block break-all text-sm text-emerald-300 underline"></a><button id="copy-link" class="secondary mt-3">Copy join link</button></div>
+        <div id="qrcode" class="rounded bg-white p-2"></div>
+      </div>
+      <div id="leaderboard" class="space-y-3" aria-live="polite"></div>
+    </section>
+    <section id="play" hidden class="panel mx-auto max-w-2xl space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3"><div><p id="team-display" class="text-emerald-400"></p><h2 id="stage" class="text-xl font-bold"></h2></div><p id="timer" class="font-mono text-xl text-amber-300" aria-label="Elapsed time including penalties"></p></div>
+      <progress id="progress" max="100" class="w-full" aria-label="Stages completed"></progress>
+      <p id="clue" class="whitespace-pre-line leading-relaxed"></p>
+      <form id="answer-form" class="space-y-3"><label for="passcode" class="block">Access key</label><input id="passcode" class="field uppercase" required maxlength="120" autocomplete="off" spellcheck="false"><button class="primary w-full">Submit key</button></form>
+      <p id="feedback" role="status" class="text-amber-300"></p>
+      <div class="flex flex-wrap items-center justify-between gap-3"><button id="hint" class="secondary">Request hint</button><span id="hint-status" class="text-sm text-slate-400"></span></div>
+      <p id="hint-text" class="text-sm text-amber-200"></p>
+    </section>
+    <section id="victory" hidden class="panel mx-auto max-w-xl space-y-5 text-center">
+      <p class="text-5xl" aria-hidden="true">✓</p><h2 class="text-3xl font-extrabold text-emerald-400">Vault unlocked</h2><p id="final-stats"></p><button id="replay" class="primary">Play again</button>
+    </section>
+    <button id="leave" hidden class="secondary mt-6">Return to setup</button>
+    <footer class="mt-8 text-center text-xs text-slate-500"><a href="./credits.html" target="_blank" rel="noopener" class="underline">QR code credits</a><span id="privacy" class="block mt-2">Solo progress and custom content stay in this browser.</span></footer>
+  </main>
 </body>
 </html>

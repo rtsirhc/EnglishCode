@@ -147,3 +147,7 @@
         padding: 0.5rem;
     }
 }
+button.board-cell { border: 1px solid transparent; padding: 0; color: inherit; font: inherit; }
+button.board-cell:disabled { opacity: 1; }
+button.board-cell:focus-visible { outline: 3px solid #fbbf24; z-index: 1; }
+.board-cell.cell-dud { border-color: #fbbf24; color: #fbbf24; }

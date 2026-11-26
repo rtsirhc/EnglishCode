@@ -1,3 +1,13 @@
+import { read } from '../../../gallery/shared/storage.js';
+import { validatePack } from '../../../gallery/shared/content.js';
+export let lessonTitle = '';
+let customItems;
+try {
+  const pack = validatePack(read('pack:timezone-game', null), 'words');
+  lessonTitle = pack.title;
+  customItems = pack.items.map(item => ({ question: item.clue, answer: item.word }));
+} catch { /* Use the authored English bank. */ }
+
 /**
  * Grammar & Vocabulary Game — Question Data
  * 30 questions text-based questions.
@@ -37,7 +47,11 @@ const rawQuestions = [
 ]
 
 // Simple seeded shuffle or Math.random shuffle
-const shuffled = [...rawQuestions].sort(() => Math.random() - 0.5)
+const shuffled = [...(customItems || rawQuestions)];
+for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+}
 
 export const questions = shuffled.map((q, index) => ({
     id: index + 1,

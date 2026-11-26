@@ -2,8 +2,8 @@ import React from 'react';
 import StoryPage from '../components/StoryPage';
 import Character from '../components/Character';
 import MatchingGame from '../components/MatchingGame';
-import samImg from '../assets/sam.png';
-import ivyImg from '../assets/ivy.png';
+import samImg from '../assets/sam.webp';
+import ivyImg from '../assets/ivy.webp';
 
 const Chapter2_VerbToBe = () => {
     return (

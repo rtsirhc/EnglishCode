@@ -551,3 +551,11 @@ input:focus { border-color: var(--teal); }
   80%  { opacity: 1; }
   100% { transform: translateY(105vh)  rotate(calc(var(--start-rotate, 0deg) + 800deg)); opacity: 0; }
 }
+
+.wheel-wrap, .wheel-canvas { max-width: 100%; }
+.wheel-canvas { height: auto; }
+@media (max-width: 550px) {
+  .teacher-header, .teacher-header-right { flex-wrap: wrap; justify-content: center; }
+  .podium-slot, .podium-slot.podium-empty { width: min(26vw, 140px); }
+  .podium-player-name { max-width: 25vw; }
+}

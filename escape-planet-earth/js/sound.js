@@ -1,6 +1,6 @@
 // Sound effects manager using Web Audio API
 // Uses simple synthesized sounds (no external files needed)
-const SoundManager = {
+export const SoundManager = {
   audioCtx: null,
   enabled: true,
 

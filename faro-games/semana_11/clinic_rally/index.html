@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090e20"><title>Clinic Rally</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css">
+<style>
+[hidden]{display:none!important}
+.race{background-color:#a27141;background-image:url('assets/scene-0.webp');background-size:100% 100%;background-position:center top;background-repeat:no-repeat;padding-top:30vh}
+.arena-1 .race{background-color:#047795;background-image:url('assets/scene-1.webp');background-size:100% 100%;background-position:center top;background-repeat:no-repeat}
+.arena-2 .race{background-color:#070b23;background-image:url('assets/scene-2.webp');background-size:100% 100%;background-position:center top;background-repeat:no-repeat}
+.team-label{background:#08101ce8;padding:8px 12px;border-radius:4px}.lane{border-bottom-color:#ffffff65}.runner{width:clamp(120px,15vw,230px)}.sprite{background-image:url('assets/racers.webp');animation-timing-function:steps(3,end)}
+.runner{width:clamp(110px,11vw,165px)}.sprite{position:absolute;bottom:0;background-image:url('assets/racer-0.webp');background-size:400% 100%;height:auto;aspect-ratio:1.8}.arena-1 .sprite{background-image:url('assets/racer-1.webp');background-position-y:0;aspect-ratio:2.2}.arena-2 .sprite{background-image:url('assets/racer-2.webp');background-position-y:0;aspect-ratio:2.1}
+@media(max-height:760px){.overlay .message{padding:12px}.overlay h2{font-size:38px;margin:0 0 8px}.overlay .connect{padding:10px;margin:8px 0}.overlay img{width:120px!important;height:120px!important}.overlay p{margin:8px}.code{font-size:36px}.overlay .connect strong{font-size:19px}}
+@media(max-height:700px){.race{padding-top:20vh}.lane{min-height:46px}.runner{max-height:85px}}
+</style><link rel="stylesheet" href="./assets/party.css"><link rel="stylesheet" href="./assets/mobile.css"><body><div id="app"><main class="join-page" style="color:#f4f7ff"><h1 class="brand">CLINIC <em>RALLY</em></h1><p id="boot-message">Cargando el juego…</p><button type="button" onclick="location.reload()">Volver a intentar</button></main></div><div id="toast" role="status"></div>
+<script defer src="/grammar-rush/local/vendor/qrcode.min.js"></script>
+<script type="module" src="./app.js"></script></body></html>

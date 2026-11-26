@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>⚡ Grammar Rush</title>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f172a; color: #e2e8f0;
+  min-height: 100vh; overflow-x: hidden;
+}
+.hidden { display: none !important; }
+.gold { color: #f59e0b; }
+.green { color: #22c55e; }
+.red { color: #ef4444; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 20px; border: none; border-radius: 10px;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.btn:active { transform: scale(0.96); }
+.btn-gold { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; }
+.btn-gold:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 0 15px rgba(245,158,11,0.4); }
+.btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+.btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.btn-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+.btn-lg { padding: 14px 28px; font-size: 1.1rem; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px; padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+input[type="text"], input[type="number"] {
+  background: rgba(15, 23, 42, 0.8); border: 2px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px; padding: 10px 14px; color: #e2e8f0;
+  font-size: 1rem; width: 100%; outline: none; transition: border-color 0.2s;
+}
+input:focus { border-color: #f59e0b; }
+
+.glow-text { text-shadow: 0 0 10px rgba(245,158,11,0.5), 0 0 30px rgba(245,158,11,0.2); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes flashGreen { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 70% { box-shadow: 0 0 20px 10px rgba(34,197,94,0); } }
+@keyframes flashRed { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow: 0 0 20px 10px rgba(239,68,68,0); } }
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-400px) rotate(720deg); opacity: 0; }
+}
+.animate-in { animation: fadeIn 0.3s ease forwards; }
+
+/* ROLE SELECT */
+#roleSelect {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; gap: 24px; padding: 20px; text-align: center;
+}
+#roleSelect h1 { font-size: 2.5rem; }
+#roleSelect .subtitle { color: #94a3b8; font-size: 1.1rem; margin-top: -8px; }
+.role-cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.role-card {
+  width: 260px; padding: 28px; cursor: pointer; text-align: center; transition: all 0.3s ease;
+}
+.role-card:hover { transform: translateY(-4px); border-color: #f59e0b; box-shadow: 0 8px 30px rgba(245,158,11,0.2); }
+.role-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.role-card h2 { color: #f59e0b; font-size: 1.2rem; margin-bottom: 8px; }
+.role-card p { color: #94a3b8; font-size: 0.85rem; line-height: 1.4; }
+
+/* HOST SCREEN */
+#hostScreen { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+.host-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(30,41,59,0.9));
+  border-bottom: 1px solid rgba(245,158,11,0.2);
+}
+.host-header h1 { font-size: 1.2rem; }
+.room-badge {
+  background: rgba(245,158,11,0.15); border: 2px solid #f59e0b;
+  padding: 4px 14px; border-radius: 8px; font-size: 1.4rem;
+  font-weight: 900; color: #f59e0b; letter-spacing: 3px;
+}
+
+/* Setup */
+.setup-panel {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; padding: 16px; overflow: auto;
+}
+.setup-left { display: flex; flex-direction: column; gap: 12px; }
+.qr-section { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.qr-section canvas, .qr-section img { border-radius: 10px; margin: 8px auto; }
+.join-link {
+  background: rgba(15,23,42,0.6); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 6px; padding: 8px; font-size: 0.7rem; color: #94a3b8;
+  word-break: break-all; margin: 6px 0; max-width: 280px;
+}
+.team-count-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.team-count-selector label { color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
+.team-count-btn {
+  width: 38px; height: 38px; border-radius: 8px; font-weight: 700;
+  border: 2px solid rgba(245,158,11,0.3); background: transparent; color: #e2e8f0;
+  cursor: pointer; font-size: 1rem; transition: all 0.2s;
+}
+.team-count-btn.active, .team-count-btn:hover {
+  background: #f59e0b; color: #0f172a; border-color: #f59e0b;
+}
+.connected-teams {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px; margin: 8px 0;
+}
+.team-chip {
+  display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px;
+}
+.team-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.team-chip .name { font-weight: 600; font-size: 0.85rem; }
+.kick-btn {
+  background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444; border-radius: 50%; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; padding: 0; margin-left: auto;
+  transition: all 0.2s; line-height: 1;
+}
+.kick-btn:hover { background: #ef4444; color: #fff; }
+.bet-card { position: relative; }
+.bet-card .kick-btn { position: absolute; top: 6px; right: 6px; opacity: 0.5; }
+.bet-card:hover .kick-btn { opacity: 1; }
+
+/* HOST GAME LAYOUT — SINGLE VIEWPORT */
+.game-layout {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px; padding: 10px;
+  overflow: hidden; min-height: 0;
+}
+.game-left {
+  grid-column: 1; grid-row: 1 / 4;
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 0; overflow: hidden;
+}
+.game-right {
+  grid-column: 2; grid-row: 1 / 4;
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 0; overflow: hidden;
+}
+
+/* Question display */
+.question-display {
+  text-align: center; padding: 14px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(30,41,59,0.9));
+  border: 2px solid rgba(245,158,11,0.3);
+}
+.q-number { font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px; }
+.q-sentence { font-size: 1.4rem; font-weight: 700; line-height: 1.3; color: #fff; }
+.q-timer { font-size: 2.2rem; font-weight: 900; margin-top: 8px; transition: color 0.3s; }
+.q-timer.urgent { color: #ef4444; animation: pulse 0.5s ease infinite; }
+
+/* Answer reveal bar */
+.answer-reveal {
+  text-align: center; padding: 10px; flex-shrink: 0;
+  border-radius: 10px; display: none;
+}
+.answer-reveal.show { display: block; }
+.answer-reveal.legal-answer { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); }
+.answer-reveal.illegal-answer { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); }
+.answer-reveal .verdict { font-size: 1.4rem; font-weight: 900; }
+.answer-reveal .correction { font-size: 1.18rem; color: #fff; margin-top: 10px; line-height: 1.45; font-weight: 800; }
+.answer-reveal .answer-explanation { margin: 10px auto 0; max-width: 760px; color: #fff7d6; font-size: 1rem; line-height: 1.45; }
+.answer-reveal .answer-example { margin: 10px auto 0; max-width: 760px; padding: 9px 12px; color: #241536; background: #ffe16b; border: 3px solid #241536; font-size: 1rem; line-height: 1.35; font-weight: 800; }
+.level-pill { display:inline-block; padding:3px 9px; border:2px solid currentColor; border-radius:4px; font-size:.72rem; font-weight:900; letter-spacing:.08em; }
+.level-A1 { color:#087f5b; background:#b7f7d8; } .level-A2 { color:#075985; background:#bae6fd; }
+.level-B1 { color:#92400e; background:#fed7aa; } .level-B2 { color:#9f1239; background:#fbcfe8; }
+.client-result .feedback-title { margin-top:16px; color:#ffe16b; font-size:1rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.client-result .feedback-explanation { margin-top:5px; color:#fff; font-size:1.08rem; line-height:1.45; font-weight:700; }
+.client-result .feedback-example { margin-top:12px; padding:10px 12px; background:#ffe16b; border:3px solid #241536; color:#241536; font-size:1rem; line-height:1.35; font-weight:800; }
+
+/* Bets grid */
+.bets-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px; flex: 1; overflow-y: auto; align-content: start;
+  min-height: 0;
+}
+.bet-card {
+  padding: 12px; border-radius: 10px;
+  background: rgba(30,41,59,0.6); border: 2px solid rgba(100,116,139,0.3);
+  transition: all 0.4s ease;
+}
+.bet-card.submitted { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+.bet-card.correct-reveal {
+  border-color: #22c55e; background: rgba(34,197,94,0.15);
+  animation: flashGreen 0.6s ease;
+}
+.bet-card.incorrect-reveal {
+  border-color: #ef4444; background: rgba(239,68,68,0.15);
+  animation: flashRed 0.6s ease;
+}
+.bet-card.no-bet-reveal {
+  border-color: #ef4444; background: rgba(239,68,68,0.15);
+  animation: flashRed 0.6s ease;
+}
+.bet-card .team-name { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+.bet-card .balance { color: #94a3b8; font-size: 0.8rem; }
+.bet-card .bet-info { margin-top: 6px; font-weight: 600; font-size: 0.95rem; }
+.bet-card .bet-amount { color: #f59e0b; }
+.bet-card .reveal-choice { font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; margin-left: 6px; }
+.bet-card .reveal-choice.legal { background: rgba(34,197,94,0.2); color: #22c55e; }
+.bet-card .reveal-choice.illegal { background: rgba(239,68,68,0.2); color: #ef4444; }
+.bet-card .delta { font-weight: 700; font-size: 0.9rem; margin-top: 4px; }
+.bet-card .delta.positive { color: #22c55e; }
+.bet-card .delta.negative { color: #ef4444; }
+
+/* Leaderboard */
+.leaderboard-panel {
+  flex: 1; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.leaderboard-panel h3 { flex-shrink: 0; margin-bottom: 8px; font-size: 0.95rem; }
+.lb-rows { flex: 1; overflow-y: auto; min-height: 0; }
+.lb-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-radius: 8px; margin-bottom: 5px;
+  background: rgba(30,41,59,0.6); transition: all 0.3s;
+}
+.lb-row:first-child { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
+.lb-rank { font-size: 1.1rem; font-weight: 900; min-width: 28px; text-align: center; }
+.lb-name { font-weight: 600; font-size: 0.9rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-balance { font-weight: 900; font-size: 1rem; color: #f59e0b; white-space: nowrap; }
+
+/* Host controls */
+.host-controls {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  padding: 8px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(15,23,42,0.6); border: 1px solid rgba(100,116,139,0.2);
+  grid-column: 1 / -1;
+}
+
+/* Final challenge */
+.final-challenge { text-align: center; padding: 30px; }
+.final-challenge h2 { font-size: 1.8rem; margin-bottom: 15px; }
+.fc-team { font-size: 1.3rem; color: #f59e0b; font-weight: 700; margin: 8px 0; }
+.fc-amount { font-size: 2.2rem; font-weight: 900; color: #22c55e; margin: 12px 0; }
+.fc-input-group { max-width: 480px; margin: 15px auto; display: flex; gap: 8px; }
+.fc-input-group input { flex: 1; font-size: 1.1rem; }
+.fc-feedback { font-size: 1.1rem; margin-top: 12px; font-weight: 600; }
+
+/* Winner */
+.winner-screen { text-align: center; padding: 40px 20px; }
+.winner-screen h1 { font-size: 2.5rem; margin-bottom: 15px; }
+.winner-screen .crown { font-size: 5rem; }
+.winner-screen .winner-name { font-size: 2.2rem; color: #f59e0b; font-weight: 900; margin: 15px 0; }
+.winner-screen .winner-title { font-size: 1.5rem; color: #22c55e; }
+.confetti-piece {
+  position: fixed; width: 10px; height: 20px; top: -20px;
+  animation: confetti 3s ease-out forwards;
+}
+
+/* CLIENT SCREEN */
+#clientScreen { padding: 16px; max-width: 500px; margin: 0 auto; min-height: 100vh; }
+.client-join {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 80vh; gap: 16px; text-align: center;
+}
+.client-join h2 { font-size: 1.6rem; }
+.client-join input { max-width: 280px; text-align: center; font-size: 1.4rem; letter-spacing: 5px; }
+.client-change-class { margin-top: 4px; }
+.client-join .team-input { font-size: 1rem; letter-spacing: normal; }
+
+.client-header {
+  text-align: center; padding: 12px; border-radius: 12px; margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(30,41,59,0.8));
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.client-team-name { font-size: 1.2rem; font-weight: 700; }
+.client-balance { font-size: 2.2rem; font-weight: 900; color: #f59e0b; margin: 6px 0; }
+.client-status { color: #94a3b8; font-size: 0.85rem; }
+
+.betting-panel { text-align: center; }
+.choice-buttons { display: flex; gap: 10px; margin: 12px 0; }
+.choice-btn {
+  flex: 1; padding: 16px; font-size: 1.1rem; font-weight: 900; border-radius: 12px;
+  border: 3px solid transparent; cursor: pointer; transition: all 0.2s;
+}
+.choice-btn.legal-btn { background: rgba(34,197,94,0.15); color: #22c55e; border-color: rgba(34,197,94,0.4); }
+.choice-btn.legal-btn.selected { background: #22c55e; color: #fff; border-color: #22c55e; box-shadow: 0 0 15px rgba(34,197,94,0.5); }
+.choice-btn.illegal-btn { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.4); }
+.choice-btn.illegal-btn.selected { background: #ef4444; color: #fff; border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+
+.amount-section { margin: 12px 0; }
+.amount-section label { display: block; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+.amount-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.amount-input-row input { flex: 1; text-align: center; font-size: 1.2rem; font-weight: 700; }
+.quick-amounts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.submit-bet-btn { width: 100%; padding: 16px; font-size: 1.2rem; margin-top: 12px; }
+.bet-submitted-msg { text-align: center; padding: 24px; font-size: 1.2rem; font-weight: 700; color: #f59e0b; }
+.client-result { text-align: center; padding: 24px; }
+.client-result .verdict { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+.client-result .change { font-size: 1.3rem; font-weight: 700; }
+.client-waiting { text-align: center; padding: 30px; color: #94a3b8; font-size: 1.1rem; }
+.client-waiting .dots::after { content: '...'; animation: pulse 1.5s ease infinite; }
+
+@media (max-width: 768px) {
+  .setup-panel { grid-template-columns: 1fr; }
+  .game-layout { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; }
+  .game-right { grid-column: 1; grid-row: auto; max-height: 200px; }
+  .host-header { flex-direction: column; gap: 6px; text-align: center; }
+  .q-sentence { font-size: 1.1rem; }
+  .q-timer { font-size: 1.8rem; }
+}
+
+/* =========================
+   ARCADE REDESIGN
+   Visual layer only: game logic and screen flow stay untouched.
+   ========================= */
+:root {
+  --ink: #f8f7ff;
+  --muted: #b9b5d8;
+  --night: #11102b;
+  --night-2: #1b1940;
+  --panel: rgba(31, 28, 68, .88);
+  --panel-solid: #211d4b;
+  --line: rgba(255,255,255,.14);
+  --aqua: #43e6d0;
+  --violet: #9d7bff;
+  --pink: #ff6fae;
+  --yellow: #ffd166;
+  --lime: #b6f36b;
+}
+
+/* Keep the app's screen switching reliable when a screen also has a layout rule. */
+#roleSelect.hidden, #hostScreen.hidden, #clientScreen.hidden { display: none !important; }
+
+html { background: var(--night); }
+body {
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(157,123,255,.22), transparent 28rem),
+    radial-gradient(circle at 88% 18%, rgba(67,230,208,.14), transparent 25rem),
+    linear-gradient(135deg, #11102b 0%, #171536 52%, #0e0d25 100%);
+  letter-spacing: .01em;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .26;
+  background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+.gold, .glow-text { color: var(--yellow); }
+.green { color: var(--lime); }
+.red { color: #ff8bb9; }
+.hidden { display: none !important; }
+
+.btn {
+  border: 1px solid rgba(255,255,255,.18); border-radius: 14px; padding: 11px 18px;
+  color: var(--ink); background: var(--night-2); box-shadow: 0 5px 0 rgba(0,0,0,.22);
+  font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+.btn:hover { filter: brightness(1.12); transform: translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,.2), 0 0 24px rgba(157,123,255,.2); }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.22); }
+.btn-gold { color: #241b42; background: linear-gradient(135deg, var(--yellow), #ffb84a); border-color: transparent; }
+.btn-green { color: #13233a; background: linear-gradient(135deg, var(--lime), var(--aqua)); border-color: transparent; }
+.btn-red { background: linear-gradient(135deg, #ff6fae, #e44f89); border-color: transparent; }
+.btn-blue { background: linear-gradient(135deg, #6d9bff, var(--violet)); border-color: transparent; }
+.btn:disabled { filter: grayscale(.6); opacity: .42; }
+
+.card {
+  background: linear-gradient(145deg, rgba(42,38,90,.94), rgba(25,23,58,.92));
+  border: 1px solid var(--line); border-radius: 22px; padding: 18px;
+  box-shadow: 0 16px 34px rgba(3,2,20,.22), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter: blur(14px);
+}
+input[type="text"], input[type="number"] {
+  color: var(--ink); background: rgba(13,12,39,.72); border: 2px solid rgba(157,123,255,.35);
+  border-radius: 13px; padding: 12px 14px; font-weight: 700; transition: border-color .2s, box-shadow .2s;
+}
+input:focus { border-color: var(--aqua); box-shadow: 0 0 0 4px rgba(67,230,208,.12); }
+
+#roleSelect { position: relative; gap: 20px; padding: 36px 20px; }
+#roleSelect::after { content: "READY PLAYER?"; color: var(--aqua); font-size: .68rem; font-weight: 900; letter-spacing: .28em; opacity: .8; }
+#roleSelect h1 { color: var(--ink); font-size: clamp(2.4rem, 7vw, 5rem); line-height: .98; letter-spacing: -.07em; text-shadow: 5px 5px 0 rgba(157,123,255,.25), 0 0 28px rgba(67,230,208,.2); }
+#roleSelect .subtitle { color: var(--muted); max-width: 480px; font-size: 1rem; }
+.role-cards { gap: 16px; max-width: 680px; }
+.role-card { width: min(300px, 88vw); min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.role-card::before { content: ""; position: absolute; width: 110px; height: 110px; right: -38px; top: -38px; border-radius: 50%; background: rgba(67,230,208,.16); }
+.role-card:hover { border-color: var(--aqua); transform: translateY(-7px) rotate(-1deg); box-shadow: 0 18px 36px rgba(67,230,208,.14); }
+.role-card:nth-child(2):hover { border-color: var(--pink); transform: translateY(-7px) rotate(1deg); box-shadow: 0 18px 36px rgba(255,111,174,.14); }
+.role-card .icon { font-size: 3.1rem; filter: drop-shadow(0 8px 10px rgba(0,0,0,.25)); }
+.role-card h2 { color: var(--ink); font-size: 1.25rem; margin-bottom: 9px; }
+.role-card p { color: var(--muted); line-height: 1.5; }
+
+#hostScreen, #clientScreen { position: relative; }
+.host-header { min-height: 68px; padding: 10px 20px; background: rgba(15,14,42,.76); border-bottom: 1px solid var(--line); box-shadow: 0 8px 28px rgba(0,0,0,.16); }
+.host-header h1 { color: var(--ink); font-size: 1.25rem; letter-spacing: -.03em; }
+.room-badge { color: var(--yellow); background: rgba(255,209,102,.1); border: 2px solid var(--yellow); border-radius: 12px; box-shadow: 0 0 18px rgba(255,209,102,.15); }
+.setup-panel { gap: 20px; padding: 20px; }
+.setup-left { gap: 16px; }
+.setup-panel .card h3, .qr-section h3 { color: var(--aqua) !important; letter-spacing: .04em; }
+.team-count-selector label { color: var(--muted); }
+.team-count-btn { border-radius: 12px; border-color: rgba(157,123,255,.45); color: var(--ink); }
+.team-count-btn.active, .team-count-btn:hover { color: #251c48; background: var(--aqua); border-color: var(--aqua); box-shadow: 0 0 18px rgba(67,230,208,.25); }
+.connected-teams { gap: 10px; }
+.team-chip { background: rgba(182,243,107,.08); border-color: rgba(182,243,107,.32); border-radius: 12px; }
+.team-chip .dot { background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+.join-link { background: rgba(13,12,39,.55); border-color: var(--line); border-radius: 10px; }
+.qr-section canvas, .qr-section img { border: 8px solid white; box-shadow: 0 8px 22px rgba(0,0,0,.26); }
+
+.game-layout { gap: 16px; padding: 16px; }
+.game-left, .game-right { gap: 14px; }
+.question-display { padding: 22px; background: linear-gradient(145deg, rgba(67,230,208,.12), rgba(42,38,90,.92)); border: 1px solid rgba(67,230,208,.46); border-radius: 22px; }
+.q-number { color: var(--aqua); text-transform: uppercase; letter-spacing: .12em; font-weight: 900; }
+.q-sentence { color: var(--ink); font-size: clamp(1.25rem, 2.5vw, 2rem); }
+.q-timer { color: var(--yellow); font-size: 2.7rem; text-shadow: 0 0 18px rgba(255,209,102,.35); }
+.q-timer.urgent { color: var(--pink); }
+.answer-reveal.legal-answer { background: rgba(182,243,107,.12); border-color: rgba(182,243,107,.45); }
+.answer-reveal.illegal-answer { background: rgba(255,111,174,.12); border-color: rgba(255,111,174,.45); }
+.answer-reveal .verdict { color: var(--ink); }
+.answer-reveal .correction { color: var(--muted); }
+.bets-grid { gap: 12px; }
+.bet-card { background: rgba(31,28,68,.72); border-color: rgba(255,255,255,.12); border-radius: 16px; padding: 14px; }
+.bet-card.submitted { border-color: var(--yellow); background: rgba(255,209,102,.1); }
+.bet-card.correct-reveal { border-color: var(--lime); background: rgba(182,243,107,.13); }
+.bet-card.incorrect-reveal, .bet-card.no-bet-reveal { border-color: var(--pink); background: rgba(255,111,174,.12); }
+.bet-card .balance { color: var(--muted); }
+.bet-card .bet-amount { color: var(--yellow); }
+.leaderboard-panel { padding: 18px; background: linear-gradient(145deg, rgba(42,38,90,.94), rgba(25,23,58,.92)); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 16px 34px rgba(3,2,20,.22); }
+.leaderboard-panel h3 { color: var(--aqua) !important; text-transform: uppercase; letter-spacing: .08em; }
+.lb-row { padding: 10px 12px; border: 1px solid rgba(255,255,255,.06); background: rgba(16,15,43,.54); border-radius: 12px; }
+.lb-row:first-child { background: rgba(255,209,102,.13); border-color: rgba(255,209,102,.4); }
+.lb-balance { color: var(--yellow); }
+.host-controls { gap: 10px; padding: 12px; background: rgba(13,12,39,.72); border: 1px solid var(--line); border-radius: 18px; }
+
+.final-challenge, .winner-screen { background: linear-gradient(145deg, rgba(42,38,90,.96), rgba(25,23,58,.96)); }
+.final-challenge h2, .winner-screen h1 { color: var(--ink); }
+.fc-team, .winner-screen .winner-name { color: var(--yellow); }
+.fc-amount, .winner-screen .winner-title { color: var(--lime); }
+.winner-screen .crown { filter: drop-shadow(0 0 22px rgba(255,209,102,.38)); }
+
+#clientScreen { max-width: 560px; padding: 20px; }
+.client-join { min-height: 88vh; }
+.client-join h2 { color: var(--ink); font-size: 2rem; letter-spacing: -.04em; }
+.client-join label, .amount-section label { color: var(--muted) !important; }
+.client-header { background: linear-gradient(145deg, rgba(67,230,208,.13), rgba(42,38,90,.92)); border-color: rgba(67,230,208,.38); border-radius: 22px; padding: 18px; }
+.client-team-name { color: var(--ink); }
+.client-balance { color: var(--yellow); text-shadow: 0 0 16px rgba(255,209,102,.3); }
+.client-status { color: var(--muted); }
+.betting-panel, .client-result, .client-waiting, .bet-submitted-msg { background: linear-gradient(145deg, rgba(42,38,90,.94), rgba(25,23,58,.92)); border: 1px solid var(--line); border-radius: 22px; padding: 22px; }
+.choice-buttons { gap: 12px; }
+.choice-btn { border-radius: 16px; transition: transform .18s, box-shadow .18s; }
+.choice-btn:hover { transform: translateY(-3px); }
+.choice-btn.legal-btn { color: var(--lime); background: rgba(182,243,107,.1); border-color: rgba(182,243,107,.4); }
+.choice-btn.legal-btn.selected { color: #15213c; background: var(--lime); border-color: var(--lime); box-shadow: 0 0 22px rgba(182,243,107,.35); }
+.choice-btn.illegal-btn { color: #ff9ac1; background: rgba(255,111,174,.1); border-color: rgba(255,111,174,.4); }
+.choice-btn.illegal-btn.selected { color: #2b183d; background: var(--pink); border-color: var(--pink); box-shadow: 0 0 22px rgba(255,111,174,.35); }
+.quick-amounts { gap: 8px; }
+.submit-bet-btn { color: #241b42; background: linear-gradient(135deg, var(--yellow), #ffb84a); }
+.client-waiting { color: var(--muted); }
+
+@media (max-width: 768px) {
+  .setup-panel, .game-layout { padding: 14px; gap: 14px; }
+  .host-header { min-height: 76px; }
+  .host-header h1 { font-size: 1.05rem; }
+  .room-badge { font-size: 1.15rem; }
+  .question-display { padding: 17px 14px; }
+  .game-right { max-height: 230px; }
+  .host-controls .btn { flex: 1 1 auto; }
+}
+
+/* =========================
+   GRAMMAR RUSH / ARENA UI
+   A structural arcade redesign layered on the existing game screens.
+   ========================= */
+:root {
+  --arena-bg: #080b16;
+  --arena-panel: #101727;
+  --arena-panel-2: #151f32;
+  --arena-ink: #f5f7ff;
+  --arena-muted: #7f8da6;
+  --arena-line: #2b3a55;
+  --arena-cyan: #3de4db;
+  --arena-orange: #ff9e45;
+  --arena-hot: #ff4f81;
+  --arena-lime: #c2ff5a;
+  --arena-radius: 9px;
+}
+
+body {
+  font-family: "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif;
+  background: var(--arena-bg);
+  color: var(--arena-ink);
+  background-image:
+    linear-gradient(90deg, rgba(61,228,219,.04) 1px, transparent 1px),
+    linear-gradient(rgba(61,228,219,.04) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% -20%, rgba(61,228,219,.12), transparent 58%);
+  background-size: 28px 28px, 28px 28px, auto;
+}
+body::before { opacity: .7; background-size: 56px 56px; mask-image: linear-gradient(to bottom, black, transparent 92%); }
+
+.card, .leaderboard-panel, .betting-panel, .client-result, .client-waiting, .bet-submitted-msg {
+  border-radius: var(--arena-radius);
+  border: 1px solid var(--arena-line);
+  background: linear-gradient(135deg, rgba(21,31,50,.98), rgba(12,18,32,.98));
+  box-shadow: 0 14px 35px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.card::before, .leaderboard-panel::before, .betting-panel::before { pointer-events:none; }
+.btn {
+  position: relative; overflow: hidden; border-radius: 5px; border: 0;
+  padding: 11px 17px; min-height: 40px; box-shadow: 0 4px 0 rgba(0,0,0,.32);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  letter-spacing: .12em; font-size: .72rem;
+  transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+}
+.btn::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.2) 50%,transparent 65%); transform:translateX(-120%); transition:transform .45s ease; }
+.btn:hover::after { transform:translateX(120%); }
+.btn:hover { transform: translateY(-2px); filter: brightness(1.12); box-shadow: 0 7px 0 rgba(0,0,0,.3), 0 0 20px rgba(61,228,219,.16); }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.btn-gold { color: #1b1421; background: linear-gradient(135deg, var(--arena-orange), #ffce68); }
+.btn-blue { color: #071821; background: linear-gradient(135deg, var(--arena-cyan), #65b9ff); }
+.btn-green { color: #10190d; background: linear-gradient(135deg, var(--arena-lime), #5ce6c1); }
+.btn-red { color: #fff; background: linear-gradient(135deg, var(--arena-hot), #bd3d9e); }
+
+/* Start screen: split stage + role dock */
+#roleSelect { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,420px); grid-template-rows:auto 1fr auto; align-items:center; justify-items:stretch; gap:0 7vw; max-width:1180px; margin:auto; padding:clamp(32px,8vh,100px) 36px; text-align:left; }
+#roleSelect h1 { grid-column:1; grid-row:1; max-width:680px; color:var(--arena-ink); font-family:Impact, "Arial Narrow", sans-serif; font-size:clamp(3.2rem,7vw,7.2rem); font-weight:900; letter-spacing:.015em; line-height:.83; text-transform:uppercase; text-shadow:7px 7px 0 #1c3150; }
+#roleSelect h1::after { content:" / CLASSROOM ARENA"; display:block; margin-top:19px; color:var(--arena-cyan); font:900 clamp(.8rem,1.5vw,1.15rem)/1 "Arial Narrow",sans-serif; letter-spacing:.3em; text-shadow:none; }
+#roleSelect .subtitle { grid-column:1; grid-row:2; align-self:start; max-width:540px; margin-top:28px; color:var(--arena-muted); font-size:1rem; line-height:1.5; }
+#roleSelect::after { grid-column:1; grid-row:3; justify-self:start; content:"INSERT COINS  •  PICK YOUR SIDE  •  PLAY"; color:var(--arena-orange); font-size:.64rem; font-weight:900; letter-spacing:.24em; }
+.role-cards { grid-column:2; grid-row:1 / 4; display:grid; grid-template-columns:1fr; gap:13px; width:100%; }
+.role-card { width:100%; min-height:180px; padding:22px; align-items:flex-start; justify-content:flex-end; text-align:left; border-radius:var(--arena-radius); border:1px solid var(--arena-line); background:linear-gradient(145deg,#182943,#0e1626); overflow:hidden; }
+.role-card::before { width:230px; height:230px; right:-95px; top:-105px; background:var(--arena-cyan); opacity:.12; mix-blend-mode:screen; }
+.role-card::after { content:"01"; position:absolute; top:15px; left:18px; color:var(--arena-cyan); font:900 2.5rem/1 Impact,sans-serif; opacity:.9; }
+.role-card:nth-child(2)::after { content:"02"; color:var(--arena-hot); }
+.role-card:hover, .role-card:nth-child(2):hover { transform:translateX(8px); border-color:var(--arena-cyan); box-shadow:12px 12px 0 rgba(61,228,219,.08), 0 0 24px rgba(61,228,219,.16); }
+.role-card:nth-child(2):hover { border-color:var(--arena-hot); box-shadow:12px 12px 0 rgba(255,79,129,.08), 0 0 24px rgba(255,79,129,.16); }
+.role-card .icon { position:absolute; right:22px; top:22px; margin:0; font-size:2.6rem; filter:grayscale(.1) drop-shadow(0 7px 0 rgba(0,0,0,.25)); }
+.role-card h2 { color:var(--arena-ink); margin:0 0 6px; font:900 1.08rem/1 Impact,"Arial Narrow",sans-serif; letter-spacing:.07em; text-transform:uppercase; }
+.role-card p { max-width:240px; color:var(--arena-muted); font-size:.82rem; line-height:1.4; }
+
+/* Teacher console */
+#hostScreen { background:linear-gradient(180deg,#080b16,#0b101c); }
+.host-header { min-height:58px; padding:9px 18px; background:#0e1626; border-bottom:2px solid var(--arena-cyan); box-shadow:0 5px 0 rgba(61,228,219,.08); }
+.host-header h1 { color:var(--arena-ink); font:900 1rem/1 Impact,"Arial Narrow",sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+.host-header h1::after { content:" // LIVE"; color:var(--arena-cyan); font-size:.72em; }
+.room-badge { border-radius:4px; border:1px solid var(--arena-orange); background:#241b1c; color:var(--arena-orange); font:900 1.25rem/1 Impact,sans-serif; box-shadow:4px 4px 0 rgba(255,158,69,.16); }
+.setup-panel { grid-template-columns:minmax(0,1fr) minmax(340px,420px); gap:18px; padding:18px; }
+.setup-left { gap:12px; }
+.setup-panel .card { padding:16px; }
+.setup-panel .card h3, .qr-section h3, .leaderboard-panel h3 { color:var(--arena-cyan) !important; font-family:Impact,"Arial Narrow",sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+.team-count-btn { border-radius:4px; border-color:#405473; background:#0c1423; }
+.team-count-btn.active, .team-count-btn:hover { color:#071821; background:var(--arena-cyan); border-color:var(--arena-cyan); box-shadow:3px 3px 0 rgba(61,228,219,.2); }
+.team-chip { border-radius:4px; background:#15251f; border-color:#345e4b; }
+.team-chip .dot { background:var(--arena-lime); box-shadow:0 0 8px var(--arena-lime); }
+.qr-section { position:relative; }
+.qr-section::after { content:"SCAN / JOIN"; position:absolute; right:14px; top:15px; color:var(--arena-orange); font:900 .62rem Impact,sans-serif; letter-spacing:.12em; }
+.qr-section canvas, .qr-section img { border:5px solid #f8f3e7; border-radius:3px; box-shadow:8px 8px 0 rgba(255,158,69,.13); }
+.join-link { border-radius:3px; border-color:#2b3a55; }
+
+/* Game stage */
+.game-layout { grid-template-columns:minmax(0,1fr) 300px; gap:14px; padding:14px; }
+.question-display { border-radius:var(--arena-radius); background:#101c2d; border:1px solid var(--arena-cyan); box-shadow:0 0 0 5px rgba(61,228,219,.05), 10px 10px 0 rgba(61,228,219,.08); }
+.q-number { color:var(--arena-orange); font-family:Impact,sans-serif; letter-spacing:.18em; text-transform:uppercase; }
+.q-sentence { font-family:"Arial Narrow","Segoe UI",sans-serif; letter-spacing:.01em; }
+.q-timer { font-family:Impact,sans-serif; color:var(--arena-orange); }
+.bet-card { border-radius:5px; background:#111a2a; border-color:#293a56; }
+.bet-card.submitted { border-color:var(--arena-orange); background:#2c211b; box-shadow:4px 4px 0 rgba(255,158,69,.1); }
+.bet-card.correct-reveal { border-color:var(--arena-lime); background:#172718; }
+.bet-card.incorrect-reveal, .bet-card.no-bet-reveal { border-color:var(--arena-hot); background:#291722; }
+.leaderboard-panel { padding:14px; }
+.lb-row { border-radius:4px; background:#0d1523; border-color:#24344e; }
+.lb-row:first-child { background:#302618; border-color:var(--arena-orange); }
+.lb-balance { color:var(--arena-orange); }
+.host-controls { border-radius:5px; background:#0d1523; border-color:#293a55; }
+
+/* Student phone / tablet: clear thumb-first controls */
+#clientScreen { max-width:540px; padding:14px; }
+.client-join { min-height:92vh; justify-content:center; }
+.client-join h2 { color:var(--arena-ink); font:900 2.2rem/1 Impact,"Arial Narrow",sans-serif; letter-spacing:.04em; text-transform:uppercase; }
+.client-join h2::before { content:"PLAYER 02 / "; color:var(--arena-hot); font-size:.45em; letter-spacing:.15em; vertical-align:middle; }
+.client-join input { border-radius:5px; background:#0c1423; }
+.client-header { position:relative; margin-bottom:10px; padding:14px; border-radius:var(--arena-radius); background:#101c2d; border:1px solid var(--arena-cyan); }
+.client-team-name { font-family:Impact,"Arial Narrow",sans-serif; letter-spacing:.08em; text-transform:uppercase; }
+.client-balance { color:var(--arena-orange); font-family:Impact,sans-serif; }
+.betting-panel, .client-result, .client-waiting, .bet-submitted-msg { padding:16px; }
+.betting-panel h3 { font:900 1.1rem/1 Impact,"Arial Narrow",sans-serif; letter-spacing:.08em; text-transform:uppercase; }
+.choice-buttons { gap:8px; }
+.choice-btn { min-height:74px; border-radius:5px; clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px)); }
+.choice-btn.legal-btn { color:var(--arena-lime); background:#162718; border:2px solid #4b7d4b; }
+.choice-btn.legal-btn.selected { color:#071821; background:var(--arena-lime); border-color:var(--arena-lime); box-shadow:5px 5px 0 rgba(194,255,90,.14); }
+.choice-btn.illegal-btn { color:#ff91b0; background:#281722; border:2px solid #79364d; }
+.choice-btn.illegal-btn.selected { color:#fff; background:var(--arena-hot); border-color:var(--arena-hot); box-shadow:5px 5px 0 rgba(255,79,129,.14); }
+.quick-amounts .btn { min-height:36px; padding:8px 10px; }
+.submit-bet-btn { min-height:52px; font-size:.8rem; }
+
+@media (max-width: 900px) {
+  #roleSelect { grid-template-columns:1fr; grid-template-rows:auto auto auto auto; gap:18px; min-height:100vh; padding:28px 20px; }
+  #roleSelect h1, #roleSelect .subtitle, #roleSelect::after, .role-cards { grid-column:1; }
+  #roleSelect h1 { grid-row:1; font-size:clamp(3rem,14vw,5rem); }
+  #roleSelect .subtitle { grid-row:2; margin-top:0; }
+  .role-cards { grid-row:3; }
+  #roleSelect::after { grid-row:4; }
+}
+@media (max-width: 768px) {
+  .setup-panel { grid-template-columns:1fr; }
+  .game-layout { grid-template-columns:1fr; }
+  .game-right { max-height:230px; }
+  .host-controls { position:sticky; bottom:8px; z-index:2; }
+}
+
+/* =========================
+   CIRCUS PARK / FUNFAIR EDITION
+   Bright, theatrical layout direction. This intentionally replaces the
+   dark dashboard treatment above while keeping the game DOM and logic.
+   ========================= */
+:root {
+  --park-cream: #fff4d9;
+  --park-paper: #fffaf0;
+  --park-ink: #24153b;
+  --park-red: #f24846;
+  --park-yellow: #ffd84d;
+  --park-blue: #3eb9e8;
+  --park-purple: #7749c7;
+  --park-green: #7dcf70;
+  --park-pink: #f58bb2;
+  --park-line: #2e1d49;
+  --park-shadow: 7px 7px 0 var(--park-ink);
+}
+
+html, body { background: var(--park-cream) !important; color: var(--park-ink) !important; }
+body {
+  font-family: "Trebuchet MS", "Arial Rounded MT Bold", sans-serif;
+  background-image:
+    radial-gradient(circle at 12% 15%, rgba(245,139,178,.44) 0 4px, transparent 5px),
+    radial-gradient(circle at 76% 23%, rgba(62,185,232,.42) 0 5px, transparent 6px),
+    radial-gradient(circle at 32% 84%, rgba(125,207,112,.4) 0 4px, transparent 5px),
+    linear-gradient(135deg, rgba(255,255,255,.55), transparent 45%),
+    var(--park-cream) !important;
+  background-size: 91px 83px, 127px 119px, 113px 97px, auto, auto !important;
+}
+body::before { opacity: .38 !important; background-image: repeating-linear-gradient(90deg, rgba(242,72,70,.08) 0 30px, transparent 30px 60px) !important; background-size: 100% 100% !important; mask-image: none !important; }
+body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:50; opacity:.14; background-image: radial-gradient(circle, var(--park-red) 0 3px, transparent 4px), radial-gradient(circle, var(--park-blue) 0 3px, transparent 4px), radial-gradient(circle, var(--park-yellow) 0 3px, transparent 4px); background-size: 180px 150px, 240px 210px, 310px 280px; background-position: 4% 18%, 74% 32%, 40% 76%; }
+
+.gold, .glow-text { color: var(--park-red) !important; text-shadow: 3px 3px 0 var(--park-yellow) !important; }
+.green { color: #278c4b !important; }
+.red { color: var(--park-red) !important; }
+.card, .leaderboard-panel, .betting-panel, .client-result, .client-waiting, .bet-submitted-msg {
+  border: 3px solid var(--park-line) !important;
+  border-radius: 8px !important;
+  background: var(--park-paper) !important;
+  color: var(--park-ink) !important;
+  box-shadow: var(--park-shadow) !important;
+  backdrop-filter: none !important;
+}
+.btn {
+  color: var(--park-ink) !important;
+  border: 3px solid var(--park-ink) !important;
+  border-radius: 5px !important;
+  clip-path: none !important;
+  box-shadow: 4px 4px 0 var(--park-ink) !important;
+  font-family: Impact, "Arial Narrow", sans-serif !important;
+  font-size: .78rem !important;
+  letter-spacing: .1em !important;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease !important;
+}
+.btn::after { display:none !important; }
+.btn:hover { transform: translate(-2px,-3px) rotate(-1deg) !important; filter: saturate(1.25) brightness(1.04) !important; box-shadow: 7px 8px 0 var(--park-ink), 0 0 0 4px rgba(255,216,77,.45) !important; }
+.btn:active { transform: translate(3px,3px) rotate(1deg) !important; box-shadow: 1px 1px 0 var(--park-ink) !important; }
+.btn-gold { background: var(--park-yellow) !important; }
+.btn-blue { background: var(--park-blue) !important; }
+.btn-green { background: var(--park-green) !important; }
+.btn-red { color: white !important; background: var(--park-red) !important; }
+
+/* Home: circus marquee and ticket booth */
+#roleSelect {
+  position:relative; display:grid !important; grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr) !important; grid-template-rows:auto 1fr auto !important;
+  max-width:1240px !important; min-height:100vh; gap:22px 54px !important; padding:52px 38px 38px !important; text-align:left !important; overflow:hidden;
+}
+#roleSelect::before { content:"✦  ✷  ✦  ✷  ✦"; position:absolute; top:13px; left:0; right:0; color:var(--park-purple); font-size:1.3rem; letter-spacing:2.3em; text-align:center; }
+#roleSelect h1 { grid-column:1 !important; grid-row:1 / 3 !important; align-self:center !important; max-width:620px !important; color:var(--park-red) !important; font-family:Impact, "Arial Black", sans-serif !important; font-size:clamp(4rem,8vw,8rem) !important; line-height:.82 !important; letter-spacing:.025em !important; text-transform:uppercase !important; text-shadow:8px 8px 0 var(--park-yellow), 13px 13px 0 var(--park-ink) !important; transform:rotate(-3deg); }
+#roleSelect h1::after { content:"THE GRAMMAR CIRCUS" !important; display:block; margin-top:28px; color:var(--park-blue) !important; font:900 clamp(.9rem,1.8vw,1.4rem)/1 Impact, sans-serif !important; letter-spacing:.24em; text-shadow:3px 3px 0 var(--park-ink) !important; }
+#roleSelect .subtitle { grid-column:1 !important; grid-row:3 !important; align-self:end; max-width:500px; margin:0 !important; color:var(--park-ink) !important; font-weight:800; font-size:1rem; line-height:1.45; transform:rotate(-1deg); }
+#roleSelect::after { grid-column:2 !important; grid-row:3 !important; justify-self:end; content:"ADMIT ONE  •  PLAY LOUD  •  LEARN LOUDER" !important; color:var(--park-purple) !important; font:900 .7rem Impact,sans-serif; letter-spacing:.15em; }
+.role-cards { grid-column:2 !important; grid-row:1 / 3 !important; display:flex !important; flex-direction:column !important; gap:22px !important; width:100% !important; align-self:center; }
+.role-card { position:relative; width:100% !important; min-height:210px !important; padding:30px 28px !important; display:flex !important; align-items:flex-start !important; justify-content:flex-end !important; border:3px solid var(--park-ink) !important; border-radius:8px !important; background:var(--park-yellow) !important; box-shadow:var(--park-shadow) !important; text-align:left !important; overflow:hidden; transform:rotate(2deg); }
+.role-card:nth-child(2) { background:var(--park-blue) !important; transform:rotate(-2deg); }
+.role-card::before { content:""; position:absolute; inset:0 0 auto 0; height:45px; background:repeating-linear-gradient(135deg, rgba(255,255,255,.62) 0 15px, transparent 15px 30px); opacity:.65; }
+.role-card::after { content:"TEACHER TICKET"; position:absolute; right:18px; top:17px; color:var(--park-red); font:900 .72rem Impact,sans-serif; letter-spacing:.1em; transform:rotate(2deg); }
+.role-card:nth-child(2)::after { content:"PLAYER TICKET"; color:var(--park-purple); transform:rotate(-2deg); }
+.role-card:hover, .role-card:nth-child(2):hover { transform:translateY(-8px) rotate(0deg) !important; border-color:var(--park-red) !important; }
+.role-card .icon { position:absolute; right:24px; bottom:28px; font-size:4rem; margin:0; filter:drop-shadow(4px 4px 0 rgba(36,21,59,.35)); }
+.role-card h2 { color:var(--park-ink) !important; margin:0 0 7px !important; font:900 1.35rem/1 Impact,"Arial Narrow",sans-serif !important; letter-spacing:.06em; text-transform:uppercase; }
+.role-card p { max-width:240px; color:var(--park-ink) !important; font-weight:700; font-size:.84rem; line-height:1.45; }
+
+/* Host: concession stand / game board */
+#hostScreen { background:var(--park-cream) !important; }
+.host-header { min-height:72px !important; padding:12px 22px !important; background:var(--park-red) !important; border:0 !important; border-bottom:6px solid var(--park-yellow) !important; box-shadow:0 5px 0 var(--park-ink) !important; }
+.host-header h1 { color:#fff !important; font:900 1.35rem/1 Impact,sans-serif !important; letter-spacing:.1em; text-shadow:3px 3px 0 var(--park-ink) !important; }
+.host-header h1::after { content:" • BIG TOP LIVE" !important; color:var(--park-yellow) !important; }
+.room-badge { border:3px solid var(--park-ink) !important; border-radius:4px !important; background:var(--park-yellow) !important; color:var(--park-ink) !important; box-shadow:3px 3px 0 var(--park-ink) !important; }
+.setup-panel { grid-template-columns:minmax(0,1fr) minmax(350px,430px) !important; gap:24px !important; padding:24px !important; background:repeating-linear-gradient(90deg, rgba(242,72,70,.06) 0 54px, transparent 54px 108px); }
+.setup-panel .card h3, .qr-section h3, .leaderboard-panel h3 { color:var(--park-purple) !important; font-family:Impact,sans-serif !important; letter-spacing:.12em; text-transform:uppercase; text-shadow:2px 2px 0 var(--park-yellow); }
+.team-count-btn { border:3px solid var(--park-ink) !important; border-radius:4px !important; background:white !important; color:var(--park-ink) !important; box-shadow:2px 2px 0 var(--park-ink); }
+.team-count-btn.active, .team-count-btn:hover { background:var(--park-green) !important; border-color:var(--park-ink) !important; box-shadow:3px 3px 0 var(--park-ink); }
+.team-chip { border:2px dashed var(--park-purple) !important; border-radius:4px !important; background:#f3e8ff !important; color:var(--park-ink); }
+.team-chip .dot { background:var(--park-green); box-shadow:none; }
+.qr-section { background:var(--park-yellow) !important; transform:rotate(1deg); }
+.qr-section::after { content:"TAKE YOUR TICKET" !important; color:var(--park-red) !important; font:900 .7rem Impact,sans-serif; letter-spacing:.12em; }
+.qr-section canvas, .qr-section img { border:8px solid white !important; border-radius:0 !important; box-shadow:5px 5px 0 var(--park-ink) !important; }
+.join-link { background:white !important; border:2px dashed var(--park-ink) !important; color:var(--park-ink) !important; border-radius:3px !important; }
+
+/* Question stage */
+.game-layout { grid-template-columns:minmax(0,1fr) 300px !important; gap:20px !important; padding:20px !important; background:repeating-linear-gradient(0deg, rgba(119,73,199,.06) 0 42px, transparent 42px 84px); }
+.question-display { border:4px solid var(--park-ink) !important; border-radius:7px !important; background:var(--park-blue) !important; box-shadow:var(--park-shadow) !important; transform:rotate(-.4deg); }
+.q-number { color:var(--park-red) !important; font:900 .95rem Impact,sans-serif; letter-spacing:.14em; text-transform:uppercase; text-shadow:1px 1px 0 white; }
+.q-sentence { color:var(--park-ink) !important; font-weight:900; }
+.q-timer { color:var(--park-red) !important; font-family:Impact,sans-serif; text-shadow:2px 2px 0 white; }
+.bet-card { border:3px solid var(--park-ink) !important; border-radius:6px !important; background:var(--park-paper) !important; box-shadow:4px 4px 0 rgba(36,21,59,.55) !important; }
+.bet-card.submitted { border-color:var(--park-orange, #ef791e) !important; background:#fff0c4 !important; }
+.bet-card.correct-reveal { border-color:#278c4b !important; background:#e5f8d6 !important; }
+.bet-card.incorrect-reveal, .bet-card.no-bet-reveal { border-color:var(--park-red) !important; background:#ffe0e9 !important; }
+.leaderboard-panel { background:var(--park-purple) !important; color:white !important; }
+.leaderboard-panel h3 { color:var(--park-yellow) !important; text-shadow:2px 2px 0 var(--park-ink) !important; }
+.lb-row { border:2px solid var(--park-ink) !important; border-radius:4px !important; background:var(--park-paper) !important; color:var(--park-ink); }
+.lb-row:first-child { background:var(--park-yellow) !important; }
+.lb-balance { color:var(--park-red) !important; }
+.host-controls { border:3px solid var(--park-ink) !important; border-radius:5px !important; background:var(--park-yellow) !important; }
+
+/* Player ticket / controls */
+#clientScreen { max-width:560px !important; padding:20px 16px !important; background:var(--park-cream); }
+.client-join { min-height:92vh; }
+.client-join h2 { color:var(--park-red) !important; font:900 2.5rem/.9 Impact,sans-serif !important; letter-spacing:.04em; text-transform:uppercase; text-shadow:3px 3px 0 var(--park-yellow) !important; }
+.client-join h2::before { content:"PLAYER TICKET / " !important; color:var(--park-purple) !important; font:900 .45em/1 Impact,sans-serif; text-shadow:none !important; }
+.client-join input, .amount-input-row input { border:3px solid var(--park-ink) !important; border-radius:4px !important; background:white !important; color:var(--park-ink) !important; box-shadow:3px 3px 0 var(--park-ink) !important; }
+.client-join label, .amount-section label { color:var(--park-purple) !important; font-weight:900 !important; text-transform:uppercase; letter-spacing:.08em; }
+.client-header { border:4px solid var(--park-ink) !important; border-radius:6px !important; background:var(--park-yellow) !important; box-shadow:var(--park-shadow) !important; }
+.client-team-name { color:var(--park-ink) !important; font:900 1.2rem Impact,sans-serif; }
+.client-balance { color:var(--park-red) !important; font:900 2.5rem Impact,sans-serif; text-shadow:2px 2px 0 white !important; }
+.client-status { color:var(--park-ink) !important; font-weight:800; }
+.betting-panel, .client-result, .client-waiting, .bet-submitted-msg { border:3px solid var(--park-ink) !important; background:white !important; box-shadow:var(--park-shadow) !important; }
+.betting-panel h3 { color:var(--park-purple) !important; font:900 1.25rem Impact,sans-serif; letter-spacing:.05em; }
+.choice-btn { border:4px solid var(--park-ink) !important; border-radius:6px !important; box-shadow:4px 4px 0 var(--park-ink); min-height:82px; transition:transform .12s,box-shadow .12s,filter .12s !important; }
+.choice-btn:hover { transform:translateY(-4px) rotate(-1deg); filter:saturate(1.2); }
+.choice-btn.legal-btn { color:var(--park-ink) !important; background:var(--park-green) !important; }
+.choice-btn.legal-btn.selected { background:var(--park-yellow) !important; box-shadow:1px 1px 0 var(--park-ink) !important; transform:translate(3px,3px) !important; }
+.choice-btn.illegal-btn { color:var(--park-ink) !important; background:var(--park-pink) !important; }
+.choice-btn.illegal-btn.selected { background:var(--park-red) !important; color:white !important; box-shadow:1px 1px 0 var(--park-ink) !important; transform:translate(3px,3px) !important; }
+
+@media (max-width: 900px) {
+  #roleSelect { grid-template-columns:1fr !important; grid-template-rows:auto auto auto auto !important; gap:22px !important; padding:48px 20px 28px !important; }
+  #roleSelect h1, #roleSelect .subtitle, #roleSelect::after, .role-cards { grid-column:1 !important; }
+  #roleSelect h1 { grid-row:1 !important; font-size:clamp(3.5rem,15vw,6rem) !important; }
+  #roleSelect .subtitle { grid-row:2 !important; }
+  .role-cards { grid-row:3 !important; }
+  #roleSelect::after { grid-row:4 !important; justify-self:start; }
+}
+@media (max-width: 768px) {
+  .setup-panel { grid-template-columns:1fr !important; padding:15px !important; }
+  .qr-section { min-height:430px; }
+  .game-layout { grid-template-columns:1fr !important; padding:14px !important; }
+  .game-right { max-height:240px; }
+  .host-controls { position:sticky; bottom:8px; z-index:3; }
+  .choice-buttons { gap:8px; }
+  .choice-btn { min-height:72px; font-size:.95rem; }
+}
+
+.topic-picker-card { min-width: 0; }
+.topic-picker-title { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:10px; color:var(--park-purple); font-family:Impact,sans-serif; letter-spacing:.05em; text-transform:uppercase; }
+.topic-picker-title small { color:var(--arena-muted); font:600 .68rem "Trebuchet MS",sans-serif; letter-spacing:0; text-transform:none; }
+.level-checks { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:10px; }
+.level-check, .topic-check { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.level-check { padding:5px 9px; border:2px solid var(--park-ink); border-radius:4px; background:var(--park-yellow); font-size:.72rem; box-shadow:2px 2px 0 var(--park-ink); }
+.level-check input, .topic-check input { accent-color:var(--park-red); }
+.topic-checks { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:5px 10px; max-height:150px; overflow:auto; padding-right:4px; }
+.topic-check { color:var(--park-ink); font-size:.76rem; font-weight:700; }
+.topic-check input { flex:none; }
+.topic-picker-actions { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; color:var(--park-purple); font-size:.72rem; font-weight:800; }
+.topic-picker-actions .btn { min-height:30px; padding:5px 9px; font-size:.62rem !important; }
+#topicPickerLive { flex:none; }
+#topicPickerLive .topic-checks { max-height:118px; }
+.topic-settings-button { width:100%; flex:none; }
+.topic-modal { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(36,21,59,.55); }
+.topic-modal-panel { width:min(680px, 100%); max-height:min(86vh, 720px); overflow:auto; padding:20px; border:4px solid var(--park-ink); border-radius:8px; background:var(--park-paper); box-shadow:12px 12px 0 var(--park-ink); }
+.topic-modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px; }
+.topic-modal-header h2 { margin:0; color:var(--park-red); font:900 1.6rem/1 Impact,sans-serif; letter-spacing:.06em; text-transform:uppercase; text-shadow:2px 2px 0 var(--park-yellow); }
+.topic-modal-close { width:38px; height:38px; border:3px solid var(--park-ink); border-radius:4px; background:var(--park-pink); color:var(--park-ink); font:900 1.6rem/1 Arial,sans-serif; cursor:pointer; box-shadow:3px 3px 0 var(--park-ink); }
+.topic-modal-help { margin:0 0 14px; color:var(--park-ink); font-size:.82rem; font-weight:700; }
+.topic-modal-done { margin-top:14px; width:100%; }
+@media (max-width: 768px) {
+  .topic-checks { max-height:126px; }
+  .topic-picker-title { display:block; }
+  .topic-picker-title small { display:block; margin-top:3px; }
+}
+
+/* Keep the answer lesson readable without pushing player cards off the game board. */
+.game-left { min-height:0; }
+.answer-reveal.show { flex:0 1 auto; max-height:220px; overflow-y:auto; overflow-x:hidden; padding:12px 16px; }
+.answer-reveal .verdict { font-size:1.35rem; line-height:1.1; }
+.answer-reveal .correction { margin-top:7px; font-size:1.02rem; line-height:1.25; }
+.answer-reveal .answer-explanation { margin-top:7px; font-size:.9rem; line-height:1.3; }
+.answer-reveal .answer-example { margin-top:7px; padding:7px 10px; font-size:.88rem; line-height:1.25; }
+.bets-grid { min-height:130px; }
+.q-level { margin:4px 0 5px; }
+@media (max-width:768px) {
+  .answer-reveal.show { max-height:245px; }
+  .bets-grid { min-height:180px; }
+}
+
+.auto-mode-toggle { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:5px 9px; border:3px solid var(--park-ink); background:var(--park-green); color:var(--park-ink); box-shadow:3px 3px 0 var(--park-ink); font-weight:900; font-size:.72rem; cursor:pointer; }
+.auto-mode-toggle input { accent-color:var(--park-red); width:16px; height:16px; }
+.auto-mode-toggle small { font-size:.62rem; font-weight:700; opacity:.8; }
+@media (max-width:768px) { .auto-mode-toggle { flex:1 1 100%; justify-content:center; } }
+
+/* High-contrast answer lesson on the light circus card. */
+.answer-reveal .correction { color:var(--park-ink) !important; }
+.answer-reveal .answer-explanation { color:var(--park-ink) !important; }
+.answer-reveal .answer-explanation strong { color:var(--park-red) !important; }
+
+.offline-download {grid-column:1 / -1; margin-top:20px; font-size:.85rem; line-height:1.5;}
+#offlineSetup {display:flex; flex-direction:column; gap:18px; color:var(--park-ink);}
+#offlineSetup.hidden {display:none;}
+#offlineSetup input, .offline-bet-controls input {background:white; color:var(--park-ink); border:3px solid var(--park-ink); border-radius:4px; padding:8px; width:100%; font:700 1.1rem system-ui;}
+#offlineSetup form {display:flex; flex-direction:column; gap:12px;}
+.offline-mode .team-count-selector {display:none;}
+.offline-bet-controls {display:flex; flex-direction:column; gap:7px; text-align:left; color:var(--park-ink);}
+.offline-bet-controls > div {display:flex; gap:8px; flex-wrap:wrap;}
+.offline-bet-controls .btn {flex:1; padding:8px;}
+.offline-bet-controls .picked {outline:3px solid var(--park-blue); outline-offset:2px;}
+.offline-mode .bets-grid {overflow-y:auto; min-height:240px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.offline-mode .answer-reveal.show {max-height:260px;}
+.offline-mode .answer-reveal .answer-explanation, .offline-mode .answer-reveal .answer-example {font-size:1.1rem;}
+.offline-mode .role-cards {gap:12px;}
+.client-result .feedback-explanation {color:var(--park-ink);}
+.client-result .feedback-title {color:var(--park-red);}
+</style>
+</head>
+<body>
+
+<!-- ROLE SELECT -->
+<div id="roleSelect">
+  <h1 class="gold glow-text">⚡ Grammar Rush</h1>
+  <p class="subtitle">A live classroom battle of grammar and nerve</p>
+  <div class="role-cards">
+    <div class="role-card card" onclick="initHost()">
+      <div class="icon">🖥️</div>
+      <h2>Teacher Console</h2>
+      <p>Run the room, control the clock, and reveal the board.</p>
+    </div>
+    <div class="role-card card" onclick="showClientJoin()">
+      <div class="icon">📱</div>
+      <h2>Player Station</h2>
+      <p>Use your phone or tablet. Read, choose, and bet.</p>
+    </div>
+    <div class="role-card card" onclick="initHost(true)">
+      <div class="icon">🎪</div><h2>Offline · Proyector</h2>
+      <p>Una laptop, equipos en el salón y marcador manual. Sin celulares ni conexión.</p>
+    </div>
+  </div>
+  <div class="offline-download"><a class="btn btn-blue" href="" download="Grammar-Rush-Offline.html">Descargar modo proyector</a><p>Guarda el archivo y ábrelo para jugar desde una sola computadora.</p></div>
+</div>
+
+<!-- HOST SCREEN -->
+<div id="hostScreen" class="hidden">
+  <div class="host-header">
+    <h1 class="gold glow-text">⚡ Grammar Rush</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:#94a3b8;font-size:0.75rem;">ROOM</span>
+      <div class="room-badge" id="hostRoomCode"></div>
+    </div>
+  </div>
+
+  <!-- Setup -->
+  <div id="hostSetup" class="setup-panel">
+    <div class="setup-left">
+      <div class="card">
+        <h3 class="gold" style="margin-bottom:10px;font-size:0.95rem;">📋 Game Setup</h3>
+        <div class="team-count-selector">
+          <label>Teams:</label>
+          <div id="teamCountBtns"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">👥 Connected (<span id="connectedCount">0</span>)</h3>
+        <div class="connected-teams" id="connectedTeams">
+          <p style="color:#64748b;font-style:italic;font-size:0.85rem;">Waiting for students to join...</p>
+        </div>
+      </div>
+      <div class="card topic-picker-card" id="topicPickerSetup"></div>
+      <button class="btn btn-blue btn-sm" onclick="newClass()">New room / class</button>
+      <button class="btn btn-gold btn-lg" id="startGameBtn" onclick="startGame()" disabled>🎮 Start Game</button>
+    </div>
+    <div class="card hidden" id="offlineSetup">
+      <h3>🎪 Equipos del salón</h3><p>Cada equipo empieza con $1,000. Registra sus respuestas y apuestas desde la laptop.</p>
+      <label for="offlineTeamName">Nombre del equipo</label>
+      <form onsubmit="event.preventDefault(); addOfflineTeam()"><input id="offlineTeamName" maxlength="40" placeholder="Los Tigres" required><button class="btn btn-gold" type="submit">＋ Añadir equipo</button></form>
+      <p>Correct: gana su apuesta y comparte el bonus. Incorrect: pierde su apuesta. Sin respuesta: pierde 20% del saldo.</p>
+      <a class="btn btn-blue btn-sm" href="" download="Grammar-Rush-Offline.html">↓ Guardar copia offline</a>
+    </div>
+    <div class="card qr-section" id="onlineSetup">
+      <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">📲 Scan to Join</h3>
+      <div id="qrCode"></div>
+      <div class="join-link" id="joinLinkDisplay"></div>
+      <button class="btn btn-blue btn-sm" onclick="copyJoinLink()">📋 Copy Student Link</button>
+      <p id="copyMsg" style="color:#22c55e;font-size:0.75rem;margin-top:4px;" class="hidden">✓ Copied!</p>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div id="hostGame" class="hidden" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="game-layout" id="gameLayout">
+      <!-- LEFT COLUMN -->
+      <div class="game-left">
+        <!-- Question -->
+        <div id="questionDisplay" class="question-display card hidden">
+          <div class="q-number" id="qNumber"></div>
+          <div id="qLevel"></div>
+          <div class="q-sentence" id="qSentence"></div>
+          <div class="q-timer" id="qTimer">30</div>
+        </div>
+        <!-- Answer Reveal -->
+        <div id="answerReveal" class="answer-reveal card"></div>
+        <!-- Bets -->
+        <div class="bets-grid" id="betsGrid"></div>
+      </div>
+      <!-- RIGHT COLUMN: Leaderboard -->
+      <div class="game-right">
+        <button class="btn btn-gold topic-settings-button" type="button" onclick="toggleTopicSettings(true)">🎟️ Question Mix</button>
+        <div class="leaderboard-panel">
+          <h3 class="gold">🏆 Leaderboard</h3>
+          <div class="lb-rows" id="lbRows"></div>
+        </div>
+      </div>
+      <!-- BOTTOM: Controls -->
+      <div class="host-controls" id="hostControls">
+        <button class="btn btn-gold" id="nextQuestionBtn" onclick="nextQuestion()">▶️ Next Question</button>
+        <button class="btn btn-blue btn-sm" id="skipTimerBtn" onclick="skipTimer()" disabled>⏩ Skip Timer</button>
+        <label class="auto-mode-toggle"><input type="checkbox" id="autoAdvanceToggle" onchange="toggleAutoAdvance(this.checked)"> <span>⚡ Auto round</span><small>skip + next in 5s</small></label>
+        <button class="btn btn-blue btn-sm" onclick="newClass()">New room / class</button>
+        <button class="btn btn-red btn-sm" id="endGameBtn" onclick="triggerFinalChallenge()">🏁 End Game</button>
+      </div>
+    </div>
+
+    <div id="topicSettingsModal" class="topic-modal hidden" role="dialog" aria-modal="true" aria-labelledby="topicSettingsTitle">
+      <div class="topic-modal-panel">
+        <div class="topic-modal-header"><h2 id="topicSettingsTitle">Question Mix</h2><button class="topic-modal-close" type="button" onclick="toggleTopicSettings(false)" aria-label="Close question mix">×</button></div>
+        <p class="topic-modal-help">Changes apply to the next question. The current round keeps its original card.</p>
+        <div id="topicPickerLive"></div>
+        <button class="btn btn-blue topic-modal-done" type="button" onclick="toggleTopicSettings(false)">✓ Apply to next question</button>
+      </div>
+    </div>
+
+    <!-- Final Challenge (replaces game layout) -->
+    <div id="finalChallenge" class="final-challenge card hidden" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <h2 class="gold glow-text">✍️ Final Challenge</h2>
+      <p style="color:#94a3b8;margin-bottom:8px;">Spell your earnings in words!</p>
+      <div class="fc-team" id="fcTeam"></div>
+      <div class="fc-amount" id="fcAmount"></div>
+      <div class="fc-input-group">
+        <input type="text" id="fcInput" placeholder="e.g. fourteen thousand five hundred" onkeydown="if(event.key==='Enter')checkSpelling()">
+        <button class="btn btn-gold" onclick="checkSpelling()">✓ Check</button>
+      </div>
+      <div class="fc-feedback" id="fcFeedback"></div>
+      <button class="btn btn-blue btn-sm" onclick="newClass()">New room / class</button>
+    </div>
+
+    <!-- Winner (replaces everything) -->
+    <div id="winnerScreen" class="winner-screen hidden" style="flex:1;">
+      <div class="crown">👑</div>
+      <h1 class="gold glow-text">🎉 WINNER! 🎉</h1>
+      <div class="winner-name" id="winnerName"></div>
+      <div class="winner-title" id="winnerTitle"></div>
+      <button class="btn btn-blue btn-sm" onclick="newClass()">New room / class</button>
+      <div id="finalStandings" style="margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT SCREEN -->
+<div id="clientScreen" class="hidden">
+  <div id="clientJoin" class="client-join">
+    <h2 class="gold glow-text">📱 Join the Auction</h2>
+    <div style="width:100%;max-width:280px;">
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Room Code</label>
+      <input type="text" id="clientRoomInput" oninput="stopClientConnection()" maxlength="4" placeholder="0000" inputmode="numeric">
+    </div>
+    <div style="width:100%;max-width:280px;">
+      <label style="color:#94a3b8;font-size:0.8rem;display:block;margin-bottom:4px;">Team Name</label>
+      <input type="text" id="clientTeamInput" class="team-input" placeholder="e.g. The Tigers" maxlength="20">
+    </div>
+    <button class="btn btn-gold btn-lg" id="clientJoinBtn" onclick="connectToHost()">🔗 Join Game</button>
+    <button type="button" class="btn btn-blue btn-sm client-change-class" onclick="changeClientClass()">↔ Change class / Cambiar de clase</button>
+    <p id="clientError" class="red" style="font-size:0.85rem;"></p>
+  </div>
+
+  <div id="clientGame" class="hidden">
+    <div class="client-header">
+      <div class="client-team-name" id="clientTeamDisplay"></div>
+      <div class="client-balance">$<span id="clientBalanceDisplay">1000</span></div>
+      <div class="client-status" id="clientStatusText">Waiting for game to start...</div>
+      <button type="button" class="btn btn-blue btn-sm" onclick="changeClientClass()">↔ Change class / Cambiar de clase</button>
+    </div>
+    <div id="clientWaiting" class="client-waiting">
+      <p>👀 Watch the big screen!</p>
+      <p class="dots" style="margin-top:8px;">Waiting</p>
+    </div>
+    <div id="clientBetting" class="betting-panel hidden">
+      <h3 style="margin-bottom:4px;">Is it CORRECT or INCORRECT?</h3>
+      <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:8px;">Read the sentence on the big screen!</p>
+      <div class="choice-buttons">
+        <button class="choice-btn legal-btn" id="legalBtn" onclick="selectChoice('LEGAL')">✅ CORRECT</button>
+        <button class="choice-btn illegal-btn" id="illegalBtn" onclick="selectChoice('ILLEGAL')">❌ INCORRECT</button>
+      </div>
+      <div class="amount-section">
+        <label>💰 Bet Amount</label>
+        <div class="amount-input-row">
+          <input type="number" id="betAmountInput" min="100" step="100" value="100">
+        </div>
+        <div class="quick-amounts">
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(100)">+$100</button>
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(200)">+$200</button>
+          <button class="btn btn-sm btn-blue" onclick="adjustBet(500)">+$500</button>
+          <button class="btn btn-sm btn-gold" onclick="allIn()">🔥 ALL IN</button>
+        </div>
+      </div>
+      <button class="btn btn-gold submit-bet-btn" id="submitBetBtn" onclick="submitBet()" disabled>🎯 Submit Bet</button>
+    </div>
+    <div id="clientBetSubmitted" class="bet-submitted-msg hidden">
+      ✅ Bet Locked In!<br><span style="font-size:0.85rem;color:#94a3b8;">Watch the big screen for the answer...</span>
+    </div>
+    <div id="clientResult" class="client-result hidden"></div>
+  </div>
+</div>
+
+<script>
+// ===== SOUND EFFECTS (Web Audio API — no external files) =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function ensureAudio() { if (!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+
+function playStartSound() {
+  if (window.HALLOWEEN_QUESTIONS) { spookyTone('start'); return; }
+  const ctx = ensureAudio();
+  [0, 0.15, 0.3].forEach((delay, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = [523, 659, 784][i];
+    gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + 0.3);
+  });
+}
+
+function playBuzzerSound() {
+  if (window.HALLOWEEN_QUESTIONS) { spookyTone('buzzer'); return; }
+  const ctx = ensureAudio();
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  const gain2 = ctx.createGain();
+  osc1.connect(gain1); gain1.connect(ctx.destination);
+  osc2.connect(gain2); gain2.connect(ctx.destination);
+  osc1.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(150, ctx.currentTime);
+  osc1.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.8);
+  gain1.gain.setValueAtTime(0.25, ctx.currentTime);
+  gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+  osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 0.8);
+
+  osc2.type = 'square';
+  osc2.frequency.setValueAtTime(440, ctx.currentTime);
+  osc2.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.5);
+  gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+  osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 0.5);
+}
+
+function playCorrectSound() {
+  if (window.HALLOWEEN_QUESTIONS) { spookyTone('correct'); return; }
+  const ctx = ensureAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  osc.frequency.setValueAtTime(1109, ctx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.2, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+}
+
+function playWrongSound() {
+  if (window.HALLOWEEN_QUESTIONS) { spookyTone('wrong'); return; }
+  const ctx = ensureAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(300, ctx.currentTime);
+  osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+}
+
+// ===== QUESTIONS =====
+const QUESTIONS = [
+  // Simple Present, Daily Routines, & Wh- Questions
+  {id: 1, sentence: "He wakes up at seven o'clock every day.", status: "LEGAL", correction: "Correct simple present routine."},
+  {id: 2, sentence: "She brushs her teeth after breakfast.", status: "ILLEGAL", correction: "Spelling mistake ('brushes')."},
+  {id: 3, sentence: "They don't play soccer on the weekend.", status: "LEGAL", correction: "Correct negative statement."},
+  {id: 4, sentence: "My father dosn't drink coffee in the evening.", status: "ILLEGAL", correction: "Spelling mistake ('doesn't')."},
+  {id: 5, sentence: "Do you watch television after school?", status: "LEGAL", correction: "Correct simple present question."},
+  {id: 6, sentence: "Does your brother likes to play video games?", status: "ILLEGAL", correction: "Grammar mistake ('like' instead of 'likes' with Does)."},
+  {id: 7, sentence: "Where does your best friend live?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 8, sentence: "We have our English class on Wendsday.", status: "ILLEGAL", correction: "Spelling mistake ('Wednesday')."},
+  {id: 9, sentence: "She works in a hospital downtown.", status: "LEGAL", correction: "Correct affirmative sentence."},
+  {id: 10, sentence: "What time do the supermarket close?", status: "ILLEGAL", correction: "Grammar mistake ('does' the supermarket)."},
+
+  // Adverbs of Frequency & Wh- Questions
+  {id: 11, sentence: "I usually eat a sandwich for lunch.", status: "LEGAL", correction: "Correct adverb placement."},
+  {id: 12, sentence: "He is allways late for his morning class.", status: "ILLEGAL", correction: "Spelling mistake ('always')."},
+  {id: 13, sentence: "They never go to the cinema on Mondays.", status: "LEGAL", correction: "Correct negative frequency."},
+  {id: 14, sentence: "How ofen do you go to the gym?", status: "ILLEGAL", correction: "Spelling mistake ('often')."},
+  {id: 15, sentence: "Do you often read books in bed?", status: "LEGAL", correction: "Correct question with adverb."},
+  {id: 16, sentence: "We don't usally travel during the winter.", status: "ILLEGAL", correction: "Spelling mistake ('usually')."},
+  {id: 17, sentence: "The teacher is rarely angry with the students.", status: "LEGAL", correction: "Correct adverb placement after 'to be'."},
+  {id: 18, sentence: "She always eat breakfast in the morning.", status: "ILLEGAL", correction: "Grammar mistake ('eats' for singular subject)."},
+  {id: 19, sentence: "Does she always finish her homework on time?", status: "LEGAL", correction: "Correct question."},
+  {id: 20, sentence: "They sometimes are noisy in the library.", status: "ILLEGAL", correction: "Say: They are sometimes noisy in the library.", explanation: "With the verb be, an adverb of frequency usually comes after am, is, or are. Put sometimes after are.", example: "They are sometimes noisy in the library. / She is always early."},
+
+  // Describing Things/People, Have/Has, & Wh- Questions
+  {id: 21, sentence: "My best friend has short curly hair.", status: "LEGAL", correction: "Correct description with 'has'."},
+  {id: 22, sentence: "She have two older brothers and a sister.", status: "ILLEGAL", correction: "Grammar mistake ('has' for singular subject)."},
+  {id: 23, sentence: "This backpack is heavy because it is full of books.", status: "LEGAL", correction: "Correct descriptive statement."},
+  {id: 24, sentence: "The new student is very tall and handsom.", status: "ILLEGAL", correction: "Spelling mistake ('handsome')."},
+  {id: 25, sentence: "Do they have a big garden in their house?", status: "LEGAL", correction: "Correct question."},
+  {id: 26, sentence: "He doesn't has a car, so he takes the bus.", status: "ILLEGAL", correction: "Grammar mistake ('doesn't have')."},
+  {id: 27, sentence: "Who do you play tennis with on Saturdays?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 28, sentence: "Mary has a beautifull dress for the party.", status: "ILLEGAL", correction: "Spelling mistake ('beautiful')."},
+  {id: 29, sentence: "Is your new English teacher friendly?", status: "LEGAL", correction: "Correct descriptive question."},
+  {id: 30, sentence: "The cat has white paws and a black tale.", status: "ILLEGAL", correction: "Spelling mistake/homophone ('tail')."},
+
+  // Prepositions of Place and Time & Wh- Questions
+  {id: 31, sentence: "The keys are on the kitchen table.", status: "LEGAL", correction: "Correct preposition of place."},
+  {id: 32, sentence: "My birthday is in the 15th of August.", status: "ILLEGAL", correction: "Preposition mistake ('on' for dates)."},
+  {id: 33, sentence: "When is your brother's birthday?", status: "LEGAL", correction: "Correct Wh- question."},
+  {id: 34, sentence: "Our flight leaves in night, so we can sleep.", status: "ILLEGAL", correction: "Preposition mistake ('at night')."},
+  {id: 35, sentence: "Is the library across from the supermarket?", status: "LEGAL", correction: "Correct question."},
+  {id: 36, sentence: "Why dose she wake up so early?", status: "ILLEGAL", correction: "Spelling mistake ('does')."},
+  {id: 37, sentence: "We don't have any exams in December.", status: "LEGAL", correction: "Correct preposition of time."},
+  {id: 38, sentence: "She leaves her shoes under of the bed.", status: "ILLEGAL", correction: "Grammar mistake (remove 'of', just 'under')."},
+  {id: 39, sentence: "Does the movie start at eight o'clock?", status: "LEGAL", correction: "Correct question."},
+  {id: 40, sentence: "There is a small park in front the school.", status: "ILLEGAL", correction: "Grammar mistake (missing 'of', 'in front of')."},
+
+  // There is/are (Questions & Answers), Time Expressions, & Misc
+  {id: 41, sentence: "Yes, there is a bank next to the school.", status: "LEGAL", correction: "Correct short answer and statement."},
+  {id: 42, sentence: "No, there isn't any apples in the basket.", status: "ILLEGAL", correction: "Grammar mistake ('aren't any' for plural)."},
+  {id: 43, sentence: "Are there any good restaurants near the hotel?", status: "LEGAL", correction: "Correct question."},
+  {id: 44, sentence: "There aren't no chairs in the empty room.", status: "ILLEGAL", correction: "Double negative ('aren't any' or 'are no')."},
+  {id: 45, sentence: "The museum is closed once a week on Tuesdays.", status: "LEGAL", correction: "Correct time expression."},
+  {id: 46, sentence: "Yes, there are a clock on the classroom wall.", status: "ILLEGAL", correction: "Grammar mistake ('is a clock' for singular)."},
+  {id: 47, sentence: "We practice playing the guitar every day.", status: "LEGAL", correction: "Correct statement."},
+  {id: 48, sentence: "Does she visit her grandparents every weak?", status: "ILLEGAL", correction: "Spelling mistake/homophone ('week')."},
+  {id: 49, sentence: "No, there aren't any eggs in the fridge.", status: "LEGAL", correction: "Correct negative answer."},
+  {id: 50, sentence: "He play basketball with his friends on Saturday.", status: "ILLEGAL", correction: "Grammar mistake (missing 's', 'plays')."}
+];
+
+// The teacher can mix these themes and levels before or during a game.
+const TOPIC_CATALOG = [
+  ...(window.HALLOWEEN_QUESTIONS ? [{id:'halloween',label:'🎃 Halloween · A1–B2'}] : []),
+  { id: 'greetings', label: 'Greetings & introductions' },
+  { id: 'polite', label: 'Polite expressions' },
+  { id: 'cafe', label: 'In a café' },
+  { id: 'clothing', label: 'Clothing store' },
+  { id: 'bakery', label: 'Bakery vocabulary' },
+  { id: 'number', label: 'Singular & plural' },
+  { id: 'articles', label: 'Articles: a / an' },
+  { id: 'doDoes', label: 'Questions with do / does' },
+  { id: 'quantity', label: 'How much / how many' },
+  { id: 'requests', label: 'Polite requests' },
+  { id: 'conversations', label: 'Customer–clerk conversations' },
+  { id: 'routines', label: 'Routines & frequency' },
+  { id: 'descriptions', label: 'Descriptions' },
+  { id: 'placeTime', label: 'Place & time' },
+  { id: 'thereIs', label: 'There is / there are' }
+];
+const LEVELS = ['A1', 'A2', 'B1', 'B2'];
+
+const EXTRA_QUESTIONS = [
+  {id:101, topic:'greetings', level:'A1', sentence:'Nice to meet you. My name is Carla.', status:'LEGAL', correction:'Correct introduction.'},
+  {id:102, topic:'greetings', level:'A1', sentence:'Hello, I am Diego. What is your name?', status:'LEGAL', correction:'Correct greeting and question.'},
+  {id:103, topic:'polite', level:'A1', sentence:'Please close the door.', status:'LEGAL', correction:'Correct polite expression.'},
+  {id:104, topic:'polite', level:'A1', sentence:'Give me your notebook, now.', status:'ILLEGAL', correction:'Use a polite request: Please give me your notebook.'},
+  {id:105, topic:'cafe', level:'A1', sentence:'I would like a hot chocolate, please.', status:'LEGAL', correction:'Correct café order.'},
+  {id:106, topic:'cafe', level:'A2', sentence:'Can I have the bill, please?', status:'LEGAL', correction:'Correct way to ask for the bill.'},
+  {id:107, topic:'cafe', level:'A1', sentence:'I like a sandwich, please.', status:'ILLEGAL', correction:'Say I would like a sandwich, please.'},
+  {id:108, topic:'clothing', level:'A1', sentence:'Do you have these shoes in blue?', status:'LEGAL', correction:'Correct question about color.'},
+  {id:109, topic:'clothing', level:'A2', sentence:'Can I try this jacket on?', status:'LEGAL', correction:'Correct request in a clothing store.'},
+  {id:110, topic:'clothing', level:'A1', sentence:'How much are this trousers?', status:'ILLEGAL', correction:'Say How much are these trousers? or How much is this pair of trousers?'},
+  {id:111, topic:'number', level:'A1', sentence:'These books are new.', status:'LEGAL', correction:'These is used with plural nouns.'},
+  {id:112, topic:'number', level:'A1', sentence:'This shoes are very comfortable.', status:'ILLEGAL', correction:'Say These shoes are very comfortable.'},
+  {id:113, topic:'articles', level:'A1', sentence:'She has an orange umbrella.', status:'LEGAL', correction:'An comes before a vowel sound.'},
+  {id:114, topic:'articles', level:'A1', sentence:'He is a excellent student.', status:'ILLEGAL', correction:'Say an excellent student.'},
+  {id:115, topic:'doDoes', level:'A1', sentence:'Does your sister play tennis?', status:'LEGAL', correction:'Does is correct with she / he / it.'},
+  {id:116, topic:'doDoes', level:'A2', sentence:'Do he work near the university?', status:'ILLEGAL', correction:'Say Does he work near the university?'},
+  {id:117, topic:'quantity', level:'A1', sentence:'How many apples do we need?', status:'LEGAL', correction:'How many is used with countable plural nouns.'},
+  {id:118, topic:'quantity', level:'A2', sentence:'How much students are in your class?', status:'ILLEGAL', correction:'Say How many students.'},
+  {id:119, topic:'requests', level:'A2', sentence:'Could you help me with this exercise, please?', status:'LEGAL', correction:'Correct polite request.'},
+  {id:120, topic:'requests', level:'B1', sentence:'Would you mind to repeat the question?', status:'ILLEGAL', correction:'Say Would you mind repeating the question?'},
+  {id:121, topic:'conversations', level:'A2', sentence:'Clerk: Can I help you? Customer: I am just looking, thanks.', status:'LEGAL', correction:'Natural customer–clerk exchange.'},
+  {id:122, topic:'conversations', level:'B1', sentence:'Customer: I would like return this shirt. Clerk: Do you have the receipt?', status:'ILLEGAL', correction:'Say I would like to return this shirt.'},
+  {id:123, topic:'requests', level:'B2', sentence:'Would it be possible for you to send me the revised schedule by Friday?', status:'LEGAL', correction:'Correct formal request.'},
+  {id:124, topic:'doDoes', level:'B1', sentence:'How long does the new student usually take to settle in?', status:'LEGAL', correction:'Correct do / does question structure.'},
+  {id:125, topic:'quantity', level:'B2', sentence:'There is a great deal of information, but only a few reliable sources.', status:'LEGAL', correction:'Correct quantity expressions.'},
+  {id:126, topic:'articles', level:'B1', sentence:'She hopes to become an engineer and work for an international company.', status:'LEGAL', correction:'Correct use of a / an.'},
+  {id:127, topic:'conversations', level:'B2', sentence:'Customer: I was wondering whether you could offer a refund. Clerk: Certainly, provided you have the receipt.', status:'LEGAL', correction:'Natural formal customer–clerk exchange.'},
+  {id:128, topic:'clothing', level:'B1', sentence:'This jacket is slightly too loose around the shoulders, although the sleeves fit perfectly.', status:'LEGAL', correction:'Correct clothing description.'},
+  {id:129, topic:'polite', level:'B2', sentence:'I am terribly sorry, but would you mind lowering your voice a little?', status:'LEGAL', correction:'Correct softening and polite expression.'},
+  {id:130, topic:'number', level:'B1', sentence:'Neither of these suggestions are practical for a class of thirty students.', status:'ILLEGAL', correction:'In formal grammar, say Neither of these suggestions is practical.'},
+  {id:131, topic:'clothing', level:'A1', sentence:'This red sweater is soft and warm.', status:'LEGAL', correction:'This is used with one item.', explanation:'Use this with one nearby item. Sweater is singular, so this red sweater is correct.', example:'This blue T-shirt is new.'},
+  {id:132, topic:'clothing', level:'A1', sentence:'These jacket is too small for me.', status:'ILLEGAL', correction:'Say: This jacket is too small for me.', explanation:'Jacket is one item, so use this, not these.', example:'This jacket is too small. These jackets are too small.'},
+  {id:133, topic:'clothing', level:'A1', sentence:'I need a pair of black socks.', status:'LEGAL', correction:'Correct article and clothing phrase.', explanation:'Use a pair of for two matching items such as socks, shoes, or trousers.', example:'I need a pair of blue jeans.'},
+  {id:134, topic:'clothing', level:'A1', sentence:'How much is these shoes?', status:'ILLEGAL', correction:'Say: How much are these shoes?', explanation:'Shoes is plural, so use these and are together.', example:'How much are these shoes? They are $40.'},
+  {id:135, topic:'clothing', level:'A2', sentence:'Do you have this shirt in a larger size?', status:'LEGAL', correction:'Natural way to ask for another size.', explanation:'Use Do you have... in a larger size? when you want the same item in a different size.', example:'Do you have these jeans in a smaller size?'},
+  {id:136, topic:'clothing', level:'A2', sentence:'Can I try on this dress?', status:'LEGAL', correction:'Correct position of try on.', explanation:'With a noun, try on can go before the item or after it.', example:'Can I try on this dress? / Can I try this dress on?'},
+  {id:137, topic:'clothing', level:'A2', sentence:'I am looking a jacket for winter.', status:'ILLEGAL', correction:'Say: I am looking for a jacket for winter.', explanation:'Look for means search for something. The preposition for is required.', example:'I am looking for a warm coat.'},
+  {id:138, topic:'clothing', level:'A2', sentence:'The sleeves are too long, but the color is perfect.', status:'LEGAL', correction:'Correct plural and singular agreement.', explanation:'Sleeves is plural, so use are. Color is singular, so use is.', example:'The buttons are nice, but the price is high.'},
+  {id:139, topic:'clothing', level:'A2', sentence:'I would like to return these shirt.', status:'ILLEGAL', correction:'Say: I would like to return this shirt.', explanation:'Shirt is one item, so use this. Use these only with plural nouns.', example:'I would like to return this shirt. I would like to return these shirts.'},
+  {id:140, topic:'clothing', level:'A2', sentence:'Do you have any discounts on coats?', status:'LEGAL', correction:'Correct question about price.', explanation:'Use any in questions and discounts on + item when asking about a lower price.', example:'Do you have any discounts on winter clothes?'},
+  {id:141, topic:'clothing', level:'B1', sentence:'Although the trousers are expensive, they are made of high-quality wool.', status:'LEGAL', correction:'Correct plural agreement for trousers.', explanation:'Trousers is treated as a plural noun, so use are and they.', example:'These scissors are sharp, but they are useful.'},
+  {id:142, topic:'clothing', level:'B1', sentence:'The shop assistant suggested me to try a different size.', status:'ILLEGAL', correction:'Say: The shop assistant suggested that I try a different size.', explanation:'Suggest is followed by that + subject + base verb, or by a gerund. Do not use suggest + person + to verb.', example:'She suggested trying a different size.'},
+  {id:143, topic:'clothing', level:'B1', sentence:'This jacket fits me well around the shoulders.', status:'LEGAL', correction:'Natural use of fit and clothing area.', explanation:'Fit describes whether clothing is the right size or shape for someone.', example:'These shoes fit me perfectly.'},
+  {id:144, topic:'clothing', level:'B1', sentence:'I wish this coat would be more warmer.', status:'ILLEGAL', correction:'Say: I wish this coat were warmer.', explanation:'Do not use more with the comparative warmer. After I wish, were is common for an unreal present situation.', example:'I wish these shoes were more comfortable.'},
+  {id:145, topic:'clothing', level:'B1', sentence:'The dress is made from recycled plastic bottles.', status:'LEGAL', correction:'Correct passive description of material.', explanation:'Use is made from when the original material changes into a new product.', example:'This fabric is made from recycled cotton.'},
+  {id:146, topic:'clothing', level:'B1', sentence:'I need to have my suit alter before the ceremony.', status:'ILLEGAL', correction:'Say: I need to have my suit altered before the ceremony.', explanation:'Have + object + past participle means arrange for someone else to do a service.', example:'I had my trousers shortened.'},
+  {id:147, topic:'clothing', level:'B2', sentence:'Had I known the fabric would shrink, I would have bought a larger size.', status:'LEGAL', correction:'Correct third conditional inversion.', explanation:'Had I known is an inverted third conditional. It describes an unreal past condition and result.', example:'Had I known, I would have kept the receipt.'},
+  {id:148, topic:'clothing', level:'B2', sentence:'The label recommends that the garment is washed by hand.', status:'ILLEGAL', correction:'Say: The label recommends that the garment be washed by hand.', explanation:'After recommend that in formal English, use the base form or passive subjunctive: be washed.', example:'The instructions recommend that the jacket be dry-cleaned.'},
+  {id:149, topic:'clothing', level:'B2', sentence:'The boutique offers a range of garments designed to withstand extreme weather.', status:'LEGAL', correction:'Correct reduced relative clause.', explanation:'Designed to withstand describes garments. It is a shortened form of garments that are designed to withstand.', example:'We sell boots made to last.'},
+  {id:150, topic:'clothing', level:'B2', sentence:'No sooner had I put the shirt on when I noticed the stain.', status:'ILLEGAL', correction:'Say: No sooner had I put the shirt on than I noticed the stain.', explanation:'The fixed pair is no sooner...than, not no sooner...when.', example:'No sooner had she arrived than the shop closed.'},
+  {id:151, topic:'clothing', level:'B2', sentence:'Were the fabric less delicate, it could be machine-washed.', status:'LEGAL', correction:'Correct formal conditional inversion.', explanation:'Were + subject is an inverted second conditional used for a hypothetical situation.', example:'Were the coat waterproof, I would buy it.'},
+  {id:152, topic:'clothing', level:'B2', sentence:'The customer demanded that the retailer refunds the full amount immediately.', status:'ILLEGAL', correction:'Say: The customer demanded that the retailer refund the full amount immediately.', explanation:'After demand that, formal English uses the base verb refund, without -s.', example:'They demanded that the store replace the damaged item.'},
+  {id:153, topic:'clothing', level:'A1', sentence:'The blue cap is cheaper than the red cap.', status:'LEGAL', correction:'Correct comparative with than.', explanation:'Use cheaper than to compare two prices.', example:'These trainers are cheaper than those boots.'},
+  {id:154, topic:'clothing', level:'A2', sentence:'What size do you take in jackets?', status:'LEGAL', correction:'Natural question about clothing size.', explanation:'What size do you take? asks which size normally fits you.', example:'What size do you take in jeans? I take a medium.'}
+];
+
+const BAKERY_QUESTIONS = [
+  {id:155, topic:'bakery', level:'A1', sentence:'I would like two bread rolls, please.', status:'LEGAL', correction:'Correct bakery vocabulary and polite order.', explanation:'A bread roll is a small round piece of bread. Use two because rolls is plural.', example:'I would like two bread rolls, please.'},
+  {id:156, topic:'bakery', level:'A1', sentence:'Can I have a slice of cake, please?', status:'LEGAL', correction:'Correct way to order a piece of cake.', explanation:'A slice is a thin piece cut from a cake or loaf.', example:'Can I have a slice of chocolate cake, please?'},
+  {id:157, topic:'bakery', level:'A1', sentence:'I want three loaf of bread.', status:'ILLEGAL', correction:'Say: I want three loaves of bread.', explanation:'Loaf is singular. The irregular plural is loaves.', example:'The baker made three loaves of whole-wheat bread.'},
+  {id:158, topic:'bakery', level:'A1', sentence:'These cookies are fresh from the oven.', status:'LEGAL', correction:'Correct plural bakery vocabulary.', explanation:'Cookies is plural, so these and are agree with it.', example:'These muffins are fresh from the oven.'},
+  {id:159, topic:'bakery', level:'A2', sentence:'Do you have any wholemeal bread?', status:'LEGAL', correction:'Natural question about a type of bread.', explanation:'Wholemeal bread is made with flour that includes the whole grain.', example:'Do you have any gluten-free bread?'},
+  {id:160, topic:'bakery', level:'A2', sentence:'How much are this croissant?', status:'ILLEGAL', correction:'Say: How much is this croissant?', explanation:'Croissant is one item, so use this and is.', example:'How much is this chocolate croissant?'},
+  {id:161, topic:'bakery', level:'A2', sentence:'The baguettes are still warm.', status:'LEGAL', correction:'Correct vocabulary and plural agreement.', explanation:'A baguette is a long, thin loaf of French bread. Baguettes is plural, so use are.', example:'The baguettes are on the cooling rack.'},
+  {id:162, topic:'bakery', level:'A2', sentence:'Could you pack the pastries separately, please?', status:'LEGAL', correction:'Correct polite bakery request.', explanation:'Could you + base verb is a polite way to ask the bakery worker to do something.', example:'Could you wrap the cupcakes separately, please?'},
+  {id:163, topic:'bakery', level:'B1', sentence:'The sourdough has a chewy crust and a light, airy crumb.', status:'LEGAL', correction:'Accurate description of sourdough bread.', explanation:'Crust is the outside of bread; crumb is the soft inside. Chewy and airy describe their texture.', example:'This loaf has a crisp crust and a soft crumb.'},
+  {id:164, topic:'bakery', level:'B1', sentence:'The baker recommended me trying the rye bread.', status:'ILLEGAL', correction:'Say: The baker recommended trying the rye bread.', explanation:'Recommend is followed by a gerund, or by that + subject + base verb. Do not use recommend + person + gerund.', example:'She recommended trying the cinnamon rolls.'},
+  {id:165, topic:'bakery', level:'B1', sentence:'This pastry is filled with raspberry jam and topped with icing.', status:'LEGAL', correction:'Correct passive description of a pastry.', explanation:'Filled with describes the inside, while topped with describes what is placed on top.', example:'The doughnut is filled with custard and topped with sugar.'},
+  {id:166, topic:'bakery', level:'B1', sentence:'There is fewer cupcakes in the display case today.', status:'ILLEGAL', correction:'Say: There are fewer cupcakes in the display case today.', explanation:'Cupcakes is a plural countable noun, so use there are and fewer.', example:'There are fewer muffins because the shop is closing soon.'},
+  {id:167, topic:'bakery', level:'B2', sentence:'Had the dough been kneaded longer, the bread would have risen more evenly.', status:'LEGAL', correction:'Correct inverted third conditional about baking.', explanation:'Had + subject + past participle is a formal inversion of If the dough had been kneaded.', example:'Had the oven been hotter, the crust would have browned sooner.'},
+  {id:168, topic:'bakery', level:'B2', sentence:'The recipe calls for that the butter is softened before mixing.', status:'ILLEGAL', correction:'Say: The recipe calls for the butter to be softened before mixing.', explanation:'Call for is followed by a noun and to-infinitive, not that + passive clause.', example:'The recipe calls for the eggs to be beaten lightly.'},
+  {id:169, topic:'bakery', level:'B2', sentence:'The patisserie specializes in viennoiserie, including laminated pastries such as croissants and pain au chocolat.', status:'LEGAL', correction:'Correct advanced bakery vocabulary and sentence structure.', explanation:'Viennoiserie refers to rich, layered pastries made with laminated dough.', example:'The patisserie specializes in handmade viennoiserie.'},
+  {id:170, topic:'bakery', level:'B2', sentence:'No sooner had the tray left the oven when customers asked for the buns.', status:'ILLEGAL', correction:'Say: No sooner had the tray left the oven than customers asked for the buns.', explanation:'The fixed pair is no sooner...than, even when describing a quick bakery sale.', example:'No sooner had the bread cooled than it sold out.'}
+];
+
+
+const EXISTING_TOPIC_MAP = {
+  routines: [1,20], descriptions: [21,30], placeTime: [31,40], thereIs: [41,50]
+};
+for (const [topic, range] of Object.entries(EXISTING_TOPIC_MAP)) {
+  QUESTIONS.forEach(q => { if (q.id >= range[0] && q.id <= range[1]) q.topic = topic; });
+}
+QUESTIONS.forEach(q => {
+  if (!q.topic) q.topic = q.id <= 20 ? 'routines' : q.id <= 30 ? 'descriptions' : q.id <= 40 ? 'placeTime' : 'thereIs';
+  q.level = q.id % 5 === 0 ? 'A2' : 'A1';
+});
+QUESTIONS.push(...EXTRA_QUESTIONS, ...BAKERY_QUESTIONS, ...(window.HALLOWEEN_QUESTIONS || []));
+
+// Helper: Shuffle Array (Fisher-Yates)
+function shuffleArray(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// ===== NUMBER TO WORDS =====
+function numberToWords(num) {
+  if (num === 0) return 'zero';
+  const ones = ['','one','two','three','four','five','six','seven','eight','nine',
+    'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function convert(n) {
+    if (n === 0) return '';
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
+    if (n < 1000) return ones[Math.floor(n/100)] + ' hundred' + (n%100 ? ' ' + convert(n%100) : '');
+    if (n < 1000000) return convert(Math.floor(n/1000)) + ' thousand' + (n%1000 ? ' ' + convert(n%1000) : '');
+    return convert(Math.floor(n/1000000)) + ' million' + (n%1000000 ? ' ' + convert(n%1000000) : '');
+  }
+  return convert(Math.abs(Math.floor(num))).trim();
+}
+function normalizeSpelling(str) {
+  return str.toLowerCase().replace(/dollars?/g,'').replace(/\band\b/g,'').replace(/[-,]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// ===== STATE =====
+let offlineMode = false;
+let role = null, roomCode = '', peer = null, joinUrl = '';
+
+const hostState = {
+  teamCount: 4, teams: {}, currentQ: 0, bets: {},
+  shuffledQuestions: [], questionHistory: [],
+  topicFilters: TOPIC_CATALOG.map(t => t.id), levelFilters: [...LEVELS],
+  timerInterval: null, timeLeft: 30, bettingOpen: false,
+  gameStarted: false, roundRevealed: false,
+  finalChallengeActive: false, fcTeamOrder: [], fcCurrentIndex: 0,
+  roundResults: {}, bettingDeadline: null, winner: null, autoAdvance: false, autoAdvanceTimer: null
+};
+
+const clientState = {
+  conn: null, teamName: '', balance: 1000,
+  selectedChoice: null, betSubmitted: false, peerId: null, teamId: null, room: '', reconnectTimer: null, joinTimeout: null, reconnectAttempts: 0, connectionPaused: false, hasJoined: false, offline: false, kicked: false, joining: false
+};
+
+// Persist plain game data only; PeerJS connections are recreated after a reload.
+const STORAGE_PREFIX = window.GRAMMAR_RUSH_LOCAL ? 'grammar-auction:lan:v1:' : 'grammar-auction:v1:';
+function readSaved(key) {
+  try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + key)); } catch (_) { return null; }
+}
+function writeSaved(key, value) {
+  try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); } catch (_) {}
+}
+function removeSaved(key) {
+  try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (_) {}
+}
+function saveHostSession() {
+  if (role !== 'host') return;
+  const {timerInterval, autoAdvanceTimer, teams, ...state} = hostState;
+  writeSaved('host:' + roomCode, {roomCode, state, teams: Object.fromEntries(
+    Object.entries(teams).map(([id, team]) => [id, {name: team.name, balance: team.balance, lastResult: team.lastResult || null}])
+  )});
+}
+function saveClientSession() {
+  if (!clientState.teamId || clientState.kicked) return;
+  writeSaved('client:' + clientState.room, {
+    teamId: clientState.teamId, teamName: clientState.teamName, balance: clientState.balance
+  });
+  writeSaved('active', {role: 'client', room: clientState.room});
+}
+function sendToTeam(team, message) {
+  if (message.type === 'result') team.lastResult = message;
+  try { if (team.conn && team.conn.open) team.conn.send(message); } catch (_) {}
+}
+function syncTeam(team, id) {
+  sendToTeam(team, {type: 'joined', balance: team.balance, lateJoin: hostState.gameStarted});
+  if (hostState.winner) { sendToTeam(team, {type: 'gameOver', winner: hostState.winner.name}); return; }
+  if (hostState.finalChallengeActive) { sendToTeam(team, {type: 'finalChallenge'}); return; }
+  if (!hostState.gameStarted) return;
+  sendToTeam(team, {type: 'gameStarted'});
+  const bet = hostState.bets[id];
+  if (hostState.bettingOpen) {
+    sendToTeam(team, {type: 'openBetting', questionId: hostState.currentQ});
+    if (bet) sendToTeam(team, {type: 'betConfirmed', choice: bet.choice});
+  } else if (hostState.roundRevealed && team.lastResult) {
+    if (bet) sendToTeam(team, {type: 'betConfirmed', choice: bet.choice});
+    sendToTeam(team, team.lastResult);
+  }
+}
+function runRoundTimer() {
+  clearInterval(hostState.timerInterval);
+  if (offlineMode) {
+    document.getElementById('qTimer').textContent = 'REGISTRA LAS APUESTAS';
+    document.getElementById('skipTimerBtn').textContent = '✓ Revelar y puntuar';
+    return;
+  }
+  const tick = () => {
+    hostState.timeLeft = Math.max(0, Math.ceil((hostState.bettingDeadline - Date.now()) / 1000));
+    const timer = document.getElementById('qTimer');
+    timer.textContent = hostState.timeLeft;
+    timer.classList.toggle('urgent', hostState.timeLeft <= 5);
+    if (hostState.timeLeft <= 0) {
+      clearInterval(hostState.timerInterval);
+      timer.textContent = "⏱️ TIME'S UP!";
+      revealAnswer();
+    }
+  };
+  hostState.timerInterval = setInterval(tick, 1000);
+  tick();
+}
+function restoreHostView() {
+  updateConnectedTeams(); updateStartBtn();
+  if (!hostState.gameStarted) return;
+  document.getElementById('hostSetup').classList.add('hidden');
+  document.getElementById('hostGame').classList.remove('hidden');
+  updateLeaderboard(); updateBetsDisplay();
+  if (hostState.winner) { showWinner(hostState.winner); return; }
+  if (hostState.finalChallengeActive) { triggerFinalChallenge(); return; }
+  const q = hostState.shuffledQuestions[hostState.currentQ - 1];
+  if (!q) return;
+  document.getElementById('questionDisplay').classList.remove('hidden');
+  document.getElementById('qNumber').textContent = `Question ${hostState.currentQ}`;
+  document.getElementById('qLevel').innerHTML = `<span class="level-pill level-${q.level}">LEVEL ${q.level}</span>`;
+  document.getElementById('qLevel').innerHTML = `<span class="level-pill level-${q.level}">LEVEL ${q.level}</span>`;
+  document.getElementById('qSentence').textContent = `"${q.sentence}"`;
+  renderQuestionArt(q);
+  document.getElementById('nextQuestionBtn').textContent = '▶️ Next Question';
+  document.getElementById('nextQuestionBtn').onclick = nextQuestion;
+  document.getElementById('nextQuestionBtn').disabled = hostState.bettingOpen;
+  document.getElementById('skipTimerBtn').disabled = !hostState.bettingOpen;
+  const autoToggle = document.getElementById('autoAdvanceToggle');
+  if (autoToggle) autoToggle.checked = Boolean(hostState.autoAdvance);
+  if (hostState.bettingOpen) runRoundTimer();
+  else if (hostState.roundRevealed) {
+    renderAnswer(q);
+    updateBetsDisplayRevealed(hostState.roundResults);
+    scheduleAutoAdvance();
+  }
+}
+function newClass() {
+  if (offlineMode) {
+    if (!confirm('¿Empezar una nueva partida offline? Se reiniciarán equipos y saldo.')) return;
+    removeSaved('host:offline');
+    writeSaved('active', {role:'offline', room:'offline'});
+    window.location.href = window.location.pathname + '?role=offline';
+    return;
+  }
+  const suggested = String(Math.floor(1000 + Math.random() * 9000));
+  const input = prompt('Room code for the new class (4 digits). A new code starts with fresh teams and $1,000 each.', suggested);
+  if (input === null) return;
+  const code = input.trim();
+  if (!/^\d{4}$/.test(code)) { alert('Enter a 4-digit room code.'); return; }
+  if (readSaved('host:' + code)) {
+    if (!confirm('This room already has a saved class. Reset its teams and scores?')) return;
+    removeSaved('host:' + code);
+  }
+  writeSaved('active', {role: 'host', room: code});
+  if (peer) peer.destroy();
+  window.location.href = window.location.pathname + '?role=host&room=' + code;
+}
+
+function filteredQuestionBank() {
+  const topics = hostState.topicFilters.length ? hostState.topicFilters : TOPIC_CATALOG.map(t => t.id);
+  const levels = hostState.levelFilters.length ? hostState.levelFilters : [...LEVELS];
+  return QUESTIONS.filter(q => topics.includes(q.topic) && levels.includes(q.level));
+}
+
+function answerLabel(status) { return status === 'LEGAL' ? 'CORRECT' : 'INCORRECT'; }
+function questionFeedback(q) {
+  return {
+    explanation: q.explanation || (q.status === 'LEGAL' ? 'The sentence follows the grammar rule for this topic.' : q.correction),
+    example: q.example || ''
+  };
+}
+function questionPool() {
+  const available = filteredQuestionBank();
+  if (!available.length) return [];
+  const history = new Set(hostState.questionHistory || []);
+  let fresh = available.filter(q => !history.has(q.id));
+  if (!fresh.length) { hostState.questionHistory = []; fresh = available; }
+  return shuffleArray(fresh);
+}
+function markQuestionUsed(q) {
+  hostState.questionHistory = hostState.questionHistory || [];
+  if (!hostState.questionHistory.includes(q.id)) hostState.questionHistory.push(q.id);
+}
+
+function renderTopicPicker() {
+  const topicsMarkup = TOPIC_CATALOG.map(topic => `
+    <label class="topic-check"><input type="checkbox" data-topic-filter="${topic.id}" ${hostState.topicFilters.includes(topic.id) ? 'checked' : ''}><span>${topic.label}</span></label>`).join('');
+  const levelsMarkup = LEVELS.map(level => `
+    <label class="level-check"><input type="checkbox" data-level-filter="${level}" ${hostState.levelFilters.includes(level) ? 'checked' : ''}><b>${level}</b></label>`).join('');
+  const markup = `<div class="topic-picker-title"><span>🎟️ Question mix</span><small>Choose what enters the next round · Cards repeat when the mix runs out</small></div>
+    <div class="level-checks">${levelsMarkup}</div><div class="topic-checks">${topicsMarkup}</div>
+    <div class="topic-picker-actions"><button class="btn btn-blue btn-sm" type="button" onclick="selectAllQuestionFilters()">All themes</button><span id="topicPoolCount">${filteredQuestionBank().length} cards ready</span></div>`;
+  ['topicPickerSetup', 'topicPickerLive'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = markup; });
+  document.querySelectorAll('[data-topic-filter], [data-level-filter]').forEach(input => input.addEventListener('change', handleQuestionFilterChange));
+}
+
+function handleQuestionFilterChange(event) {
+  // Setup and modal contain mirrored controls. The changed control is the source of truth.
+  const source = event && event.target;
+  if (source) {
+    const attr = source.dataset.topicFilter ? 'data-topic-filter' : 'data-level-filter';
+    const value = source.dataset.topicFilter || source.dataset.levelFilter;
+    document.querySelectorAll(`[${attr}="${value}"]`).forEach(input => { input.checked = source.checked; });
+  }
+  const setupRoot = document.getElementById('topicPickerSetup') || document;
+  hostState.topicFilters = [...setupRoot.querySelectorAll('[data-topic-filter]:checked')].map(input => input.dataset.topicFilter);
+  hostState.levelFilters = [...setupRoot.querySelectorAll('[data-level-filter]:checked')].map(input => input.dataset.levelFilter);
+  if (!hostState.topicFilters.length) hostState.topicFilters = TOPIC_CATALOG.map(t => t.id);
+  if (!hostState.levelFilters.length) hostState.levelFilters = [...LEVELS];
+  const used = hostState.shuffledQuestions.slice(0, hostState.currentQ);
+  const usedIds = new Set(used.map(q => q.id));
+  const available = shuffleArray(filteredQuestionBank().filter(q => !usedIds.has(q.id)));
+  hostState.shuffledQuestions = [...used, ...available];
+  document.querySelectorAll('#topicPoolCount').forEach(el => el.textContent = `${filteredQuestionBank().length} cards ready`);
+  saveHostSession();
+}
+
+function selectAllQuestionFilters() {
+  hostState.topicFilters = TOPIC_CATALOG.map(t => t.id);
+  hostState.levelFilters = [...LEVELS];
+  renderTopicPicker();
+  handleQuestionFilterChange();
+}
+
+function toggleTopicSettings(open) {
+  const modal = document.getElementById('topicSettingsModal');
+  if (!modal) return;
+  modal.classList.toggle('hidden', !open);
+  if (open) modal.querySelector('.topic-modal-close').focus();
+}
+
+// Offline play never creates a Peer or makes network requests.
+const onlineLibraryLoads = new Map();
+function loadOnlineLibrary(url, symbol) {
+  if (window[symbol]) return Promise.resolve();
+  if (onlineLibraryLoads.has(symbol)) return onlineLibraryLoads.get(symbol);
+  const promise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = () => { onlineLibraryLoads.delete(symbol); script.remove(); reject(new Error('Network unavailable')); };
+    document.head.appendChild(script);
+  });
+  onlineLibraryLoads.set(symbol, promise);
+  return promise;
+}
+function addOfflineTeam() {
+  if (!offlineMode || hostState.gameStarted) return;
+  const input = document.getElementById('offlineTeamName');
+  const name = input.value.trim();
+  if (!name) return;
+  if (Object.keys(hostState.teams).length >= 12) { alert('Máximo 12 equipos para el proyector.'); return; }
+  const id = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  hostState.teams[id] = {name, balance:1000};
+  input.value = '';
+  saveHostSession(); updateConnectedTeams(); updateStartBtn(); input.focus();
+}
+function offlineBetControls(id, team, bet) {
+  return `<div class="offline-bet-controls">
+    <label for="stake-${id}">Apuesta ($)</label>
+    <input id="stake-${id}" type="number" min="${Math.min(100, team.balance)}" max="${team.balance}" step="1" value="${bet ? bet.amount : Math.min(100, team.balance)}" aria-label="Apuesta de ${escHtml(team.name)}">
+    <div><button class="btn btn-gold btn-sm ${bet && bet.choice === 'LEGAL' ? 'picked' : ''}" onclick="recordOfflineBet('${id}', 'LEGAL')">✓ Correct</button>
+    <button class="btn btn-red btn-sm ${bet && bet.choice === 'ILLEGAL' ? 'picked' : ''}" onclick="recordOfflineBet('${id}', 'ILLEGAL')">✕ Incorrect</button></div>
+    ${bet ? `<button class="btn btn-blue btn-sm" onclick="clearOfflineBet('${id}')">Deshacer apuesta</button>` : ''}
+  </div>`;
+}
+function recordOfflineBet(id, choice) {
+  const team = hostState.teams[id];
+  if (!offlineMode || !hostState.bettingOpen || !team || !['LEGAL','ILLEGAL'].includes(choice)) return;
+  const amount = Number(document.getElementById('stake-' + id).value);
+  if (!Number.isInteger(amount) || amount < Math.min(100, team.balance) || amount > team.balance) {
+    alert('La apuesta debe ser un número entero entre ' + Math.min(100, team.balance) + ' y ' + team.balance + '.'); return;
+  }
+  hostState.bets[id] = {choice, amount};
+  saveHostSession(); updateBetsDisplay(); checkAllBetsIn();
+}
+function clearOfflineBet(id) {
+  if (!offlineMode || !hostState.bettingOpen) return;
+  delete hostState.bets[id]; saveHostSession(); updateBetsDisplay();
+}
+// ===== AUTO-DETECT ROLE / RESUME =====
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const active = readSaved('active') || {};
+  const r = 'offline';
+  const room = params.get('room') || active.room;
+  if (r === 'offline') initHost(true);
+  else if (r === 'host') initHost();
+  else if (r === 'client') {
+    showClientJoin();
+    if (room) {
+      document.getElementById('clientRoomInput').value = room;
+      const saved = readSaved('client:' + room);
+      if (saved) {
+        document.getElementById('clientTeamInput').value = saved.teamName;
+        connectToHost();
+      }
+    }
+  }
+})();
+
+// ===== HOST =====
+function initHost(offline = false) {
+  offlineMode = offline;
+  role = 'host';
+  const params = new URLSearchParams(window.location.search);
+  const active = readSaved('active') || {};
+  const requestedRoom = offlineMode ? 'offline' : (params.get('room') || (active.role === 'host' ? active.room : null));
+  const saved = requestedRoom ? readSaved('host:' + requestedRoom) : readSaved('host');
+  if (saved && saved.state && saved.teams) {
+    Object.assign(hostState, saved.state);
+    hostState.teams = saved.teams;
+  }
+  if (!saved && window.HALLOWEEN_QUESTIONS) { hostState.topicFilters = ['halloween']; hostState.levelFilters = ['A1','A2','B1','B2']; }
+  roomCode = offlineMode ? 'offline' : saved ? saved.roomCode : (/^\d{4}$/.test(requestedRoom || '') ? requestedRoom : String(Math.floor(1000 + Math.random() * 9000)));
+  writeSaved('active', {role: offlineMode ? 'offline' : 'host', room: roomCode});
+  document.getElementById('roleSelect').classList.add('hidden');
+  document.getElementById('hostScreen').classList.remove('hidden');
+  document.getElementById('hostRoomCode').textContent = roomCode;
+  renderTopicPicker();
+  if (window.GRAMMAR_RUSH_LOCAL) {
+    document.querySelector('.host-header h1').textContent = '🎃 Grammar Rush · LOCAL';
+    document.querySelector('#onlineSetup h3').textContent = '📡 Conecta tu equipo';
+    if (window.HALLOWEEN_QUESTIONS) document.getElementById('topicPickerSetup').insertAdjacentHTML('beforebegin', '<button class="btn btn-gold" onclick="halloweenMix()">🎃 Jugar Halloween · A1–B2</button>');
+    document.getElementById('qrCode').textContent = 'Usa en los celulares la dirección Alumnos que muestra la ventana del servidor. Todos deben conectarse al mismo Wi-Fi o hotspot.';
+  }
+
+  document.body.classList.toggle('offline-mode', offlineMode);
+  document.getElementById('offlineSetup').classList.toggle('hidden', !offlineMode);
+  document.getElementById('onlineSetup').classList.toggle('hidden', offlineMode);
+  if (offlineMode) document.getElementById('hostRoomCode').textContent = 'OFFLINE';
+  else {
+    joinUrl = `${window.GRAMMAR_RUSH_LOCAL_ORIGIN || window.location.origin}${window.location.pathname}?role=client&room=${roomCode}`;
+    document.getElementById('joinLinkDisplay').textContent = joinUrl;
+    if (window.GRAMMAR_RUSH_LOCAL) renderLocalJoin();
+    else loadOnlineLibrary('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', 'QRCode').then(() => {
+      new QRCode(document.getElementById('qrCode'), {text: joinUrl, width:180, height:180});
+    }).catch(() => { document.getElementById('qrCode').textContent = 'Use the student link below.'; });
+  }
+
+  const btnContainer = document.getElementById('teamCountBtns');
+  for (let i = 2; i <= 8; i++) {
+    const b = document.createElement('button');
+    b.className = 'team-count-btn' + (i === hostState.teamCount ? ' active' : '');
+    b.textContent = i;
+    b.onclick = () => {
+      document.querySelectorAll('.team-count-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      hostState.teamCount = i;
+      saveHostSession();
+      updateStartBtn();
+    };
+    btnContainer.appendChild(b);
+  }
+
+  if (!offlineMode) connectHostPeer(Boolean(saved));
+  restoreHostView();
+  saveHostSession();
+}
+function peerOptions() {
+  // PeerJS already supplies its public signaling/STUN defaults. A deployment
+  // may add a TURN relay through window.GRAMMAR_RUSH_TURN for carrier NATs.
+  const turn = window.GRAMMAR_RUSH_TURN;
+  const iceServers = [{urls: 'stun:stun.l.google.com:19302'}];
+  if (turn && turn.urls && turn.username && turn.credential) iceServers.push(turn);
+  return {debug: 0, config: {iceServers}};
+}
+async function connectHostPeer(resuming) {
+  try { await loadOnlineLibrary('https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js', 'Peer'); }
+  catch (_) { setTimeout(() => connectHostPeer(true), 4000); return; }
+  peer = new Peer('ESL-AUCTION-' + roomCode, peerOptions());
+  peer.on('error', (err) => {
+    if (err.type === 'unavailable-id') {
+      peer.destroy();
+      // A refreshing host may need a moment for its old signaling ID to be released.
+      if (resuming) setTimeout(() => connectHostPeer(true), 2000);
+      else { removeSaved('host:' + roomCode); alert('That room code is already in use. Choose another code.'); newClass(); }
+    }
+  });
+  peer.on('disconnected', () => { if (!peer.destroyed) peer.reconnect(); });
+  setupHostListeners();
+}
+function setupHostListeners() {
+  peer.on('reconnected', () => {
+    for (const [id, team] of Object.entries(hostState.teams)) syncTeam(team, id);
+  });
+  peer.on('connection', (conn) => {
+    conn.on('data', (data) => handleClientMessage(conn, data));
+    conn.on('close', () => {
+      const team = hostState.teams[conn.teamId];
+      if (team && team.conn === conn) {
+        team.conn = null;
+        updateConnectedTeams();
+        saveHostSession();
+      }
+    });
+  });
+}
+
+function handleClientMessage(conn, data) {
+  switch (data.type) {
+    case 'join': {
+      if (typeof data.teamId !== 'string' || !/^[a-zA-Z0-9-]{16,80}$/.test(data.teamId)) return;
+      conn.teamId = data.teamId;
+      let team = hostState.teams[conn.teamId];
+      if (!team) {
+        // Teams may join after the game starts. They begin with $1,000 and are
+        // synced into the current round instead of being rejected.
+        team = hostState.teams[conn.teamId] = {
+          name: String(data.teamName || 'Team').slice(0, 80),
+          balance: 1000,
+          joinedLate: hostState.gameStarted
+        };
+      }
+      const oldConn = team.conn;
+      team.conn = conn;
+      if (oldConn && oldConn !== conn) oldConn.close();
+      saveHostSession();
+      syncTeam(team, conn.teamId);
+      updateConnectedTeams(); updateStartBtn();
+      if (hostState.gameStarted) updateLeaderboard();
+      break;
+    }
+    case 'bet':
+      if (hostState.bettingOpen && ['LEGAL', 'ILLEGAL'].includes(data.choice) && Number.isFinite(data.amount) && !hostState.bets[conn.teamId]) {
+        const team = hostState.teams[conn.teamId];
+        if (team && team.conn === conn) {
+          const betAmount = Math.min(Math.max(100, data.amount), team.balance);
+          hostState.bets[conn.teamId] = { choice: data.choice, amount: betAmount };
+          saveHostSession();
+          conn.send({ type: 'betConfirmed', choice: data.choice });
+          updateBetsDisplay();
+          checkAllBetsIn();
+        }
+      }
+      break;
+  }
+}
+
+function updateConnectedTeams() {
+  const container = document.getElementById('connectedTeams');
+  const teamEntries = Object.entries(hostState.teams);
+  document.getElementById('connectedCount').textContent = teamEntries.length;
+  if (teamEntries.length === 0) {
+    container.innerHTML = '<p style="color:#64748b;font-style:italic;font-size:0.85rem;">Waiting for students to join...</p>';
+    return;
+  }
+  container.innerHTML = teamEntries.map(([pid, t]) =>
+    `<div class="team-chip"><div class="dot"></div><div class="name">${escHtml(t.name)}${offlineMode || (t.conn && t.conn.open) ? '' : ' · reconnecting'}</div><button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button></div>`
+  ).join('');
+}
+
+function kickTeam(peerId) {
+  const t = hostState.teams[peerId];
+  if (!t) return;
+  if (confirm(`Are you sure you want to remove team "${t.name}"?`)) {
+    if (t.conn) {
+      try { t.conn.send({type: 'KICK'}); } catch(e){}
+      setTimeout(() => { try { t.conn.close(); } catch(e){} }, 500);
+    }
+    delete hostState.teams[peerId];
+    saveHostSession();
+    if (hostState.bets) delete hostState.bets[peerId];
+    
+    // Remove from fcTeamOrder if it exists
+    if (hostState.fcTeamOrder) {
+      hostState.fcTeamOrder = hostState.fcTeamOrder.filter(([id]) => id !== peerId);
+    }
+
+    updateConnectedTeams();
+    updateStartBtn();
+    
+    if (hostState.gameStarted) {
+      if (typeof updateBetsUI === 'function') updateBetsUI();
+      if (hostState.bettingOpen && typeof checkAllBetsIn === 'function') checkAllBetsIn();
+    }
+  }
+}
+
+function updateStartBtn() {
+  const count = Object.keys(hostState.teams).length;
+  const btn = document.getElementById('startGameBtn');
+  btn.disabled = count < 2;
+  btn.textContent = count < 2 ? `🎮 Need at least 2 teams (${count} joined)` : `🎮 Start Game (${count} teams)`;
+}
+
+function copyJoinLink() {
+  navigator.clipboard.writeText(joinUrl).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = joinUrl;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  });
+  const msg = document.getElementById('copyMsg');
+  msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000);
+}
+
+// ===== GAME FLOW =====
+function startGame() {
+  hostState.gameStarted = true;
+  // Randomize only the cards matching the teacher's current mix.
+  hostState.questionHistory = [];
+  hostState.shuffledQuestions = questionPool();
+  hostState.currentQ = 0;
+
+  document.getElementById('hostSetup').classList.add('hidden');
+  document.getElementById('hostGame').classList.remove('hidden');
+  broadcastToAll({ type: 'gameStarted' });
+  updateLeaderboard();
+  updateBetsDisplay();
+  saveHostSession();
+}
+
+function nextQuestion() {
+  clearTimeout(hostState.autoAdvanceTimer);
+  hostState.autoAdvanceTimer = null;
+  if (hostState.bettingOpen || hostState.finalChallengeActive || hostState.winner) return;
+  if (hostState.currentQ >= hostState.shuffledQuestions.length) {
+    const pool = questionPool();
+    if (!pool.length) {
+      alert('No questions match these topics and levels. Open Question Mix and choose another combination.');
+      return;
+    }
+    hostState.shuffledQuestions.push(...pool);
+  }
+
+  const q = hostState.shuffledQuestions[hostState.currentQ];
+  markQuestionUsed(q);
+  hostState.currentQ++;
+  hostState.bets = {};
+  hostState.bettingOpen = true;
+  hostState.roundRevealed = false;
+  hostState.timeLeft = 30;
+  hostState.bettingDeadline = Date.now() + 30000;
+  hostState.roundResults = {};
+
+  playStartSound();
+
+  document.getElementById('questionDisplay').classList.remove('hidden');
+  document.getElementById('qNumber').textContent = `Question ${hostState.currentQ}`;
+  document.getElementById('qLevel').innerHTML = `<span class="level-pill level-${q.level}">LEVEL ${q.level}</span>`;
+  document.getElementById('qSentence').textContent = `"${q.sentence}"`;
+  renderQuestionArt(q);
+  document.getElementById('qTimer').textContent = '30';
+  document.getElementById('qTimer').classList.remove('urgent');
+  document.getElementById('nextQuestionBtn').disabled = true;
+  document.getElementById('skipTimerBtn').disabled = false;
+
+  const ar = document.getElementById('answerReveal');
+  ar.classList.remove('show', 'legal-answer', 'illegal-answer');
+  ar.innerHTML = '';
+
+  updateBetsDisplay();
+  broadcastToAll({ type: 'openBetting', questionId: hostState.currentQ });
+
+  saveHostSession();
+  runRoundTimer();
+}
+
+function toggleAutoAdvance(enabled) {
+  hostState.autoAdvance = Boolean(enabled);
+  if (!hostState.autoAdvance) {
+    clearTimeout(hostState.autoAdvanceTimer);
+    hostState.autoAdvanceTimer = null;
+  } else if (hostState.roundRevealed && !hostState.bettingOpen) {
+    scheduleAutoAdvance();
+  }
+  saveHostSession();
+}
+function scheduleAutoAdvance() {
+  clearTimeout(hostState.autoAdvanceTimer);
+  if (!hostState.autoAdvance || !hostState.roundRevealed || hostState.bettingOpen) return;
+  hostState.autoAdvanceTimer = setTimeout(() => {
+    hostState.autoAdvanceTimer = null;
+    if (hostState.autoAdvance && hostState.roundRevealed && !hostState.bettingOpen) nextQuestion();
+  }, 5000);
+}
+function checkAllBetsIn() {
+  if (!hostState.autoAdvance || !hostState.bettingOpen || hostState.roundRevealed) return;
+  const activeTeams = Object.entries(hostState.teams).filter(([, team]) => offlineMode || (team.conn && team.conn.open));
+  if (activeTeams.length && activeTeams.every(([pid]) => hostState.bets[pid])) skipTimer();
+}
+
+function skipTimer() {
+  if (!hostState.bettingOpen || hostState.roundRevealed) return;
+  clearInterval(hostState.timerInterval);
+  document.getElementById('qTimer').textContent = "⏱️ SKIPPED";
+  document.getElementById('skipTimerBtn').disabled = true;
+  playBuzzerSound();
+  revealAnswer();
+}
+
+function revealAnswer() {
+  if (hostState.roundRevealed) return;
+  clearInterval(hostState.timerInterval);
+  hostState.bettingOpen = false;
+  hostState.roundRevealed = true;
+  document.getElementById('skipTimerBtn').disabled = true;
+  broadcastToAll({ type: 'bettingClosed' });
+
+  const q = hostState.shuffledQuestions[hostState.currentQ - 1];
+
+  renderAnswer(q);
+
+  // Scoring Logic:
+  // 1. Correct teams earn their bet amount.
+  // 2. Incorrect teams lose their bet amount.
+  // 3. Teams that didn't answer lose 20% of their current balance.
+  // 4. Any pool of lost money (from wrong bets + non-answers) is divided among correct teams!
+  // 5. If all teams are correct, correct teams simply earn their bet amount (without taking from anywhere).
+
+  let wrongPool = 0;
+  const correctTeams = [];
+  const incorrectTeams = [];
+  const nonBettingTeams = [];
+
+  for (const pid of Object.keys(hostState.teams)) {
+    const bet = hostState.bets[pid];
+    if (bet) {
+      if (bet.choice === q.status) correctTeams.push(pid);
+      else {
+        incorrectTeams.push(pid);
+        wrongPool += bet.amount;
+      }
+    } else {
+      // Didn't answer: make skipping meaningful at every score level.
+      nonBettingTeams.push(pid);
+      const team = hostState.teams[pid];
+      const penalty = team.balance > 0 ? Math.max(1, Math.round(team.balance * 0.20)) : 0;
+      wrongPool += penalty;
+    }
+  }
+
+  // Bonus share from wrong pool if any correct teams exist
+  const bonusShare = correctTeams.length > 0 ? Math.floor(wrongPool / correctTeams.length) : 0;
+
+  const results = {};
+
+  for (const pid of correctTeams) {
+    const team = hostState.teams[pid];
+    const bet = hostState.bets[pid];
+    // Earn their bet amount + bonus share from wrong pool (if any)
+    const gain = bet.amount + bonusShare;
+    team.balance += gain;
+    results[pid] = { correct: true, delta: +gain };
+    sendToTeam(team, { type: 'result', correct: true, delta: +gain, newBalance: team.balance, answer: q.status, correction: q.correction, explanation: questionFeedback(q).explanation, example: questionFeedback(q).example });
+  }
+
+  for (const pid of incorrectTeams) {
+    const team = hostState.teams[pid];
+    const bet = hostState.bets[pid];
+    team.balance -= bet.amount;
+    if (team.balance < 0) team.balance = 0;
+    results[pid] = { correct: false, delta: -bet.amount };
+    sendToTeam(team, { type: 'result', correct: false, delta: -bet.amount, newBalance: team.balance, answer: q.status, correction: q.correction, explanation: questionFeedback(q).explanation, example: questionFeedback(q).example });
+  }
+
+  for (const pid of nonBettingTeams) {
+    const team = hostState.teams[pid];
+    const penalty = team.balance > 0 ? Math.max(1, Math.round(team.balance * 0.20)) : 0;
+    team.balance -= penalty;
+    if (team.balance < 0) team.balance = 0;
+    results[pid] = { correct: false, delta: -penalty, noBet: true };
+    sendToTeam(team, { type: 'result', correct: false, delta: -penalty, newBalance: team.balance, answer: q.status, correction: q.correction, explanation: questionFeedback(q).explanation, example: questionFeedback(q).example });
+  }
+
+  hostState.roundResults = results;
+  saveHostSession();
+  updateBetsDisplayRevealed(results);
+  updateLeaderboard();
+  document.getElementById('nextQuestionBtn').disabled = false;
+  scheduleAutoAdvance();
+
+}
+
+function renderQuestionArt(q) {
+  let art = document.getElementById('questionArt');
+  if (!art && window.HALLOWEEN_QUESTIONS) {
+    art = document.createElement('div'); art.id = 'questionArt'; art.className = 'halloween-art';
+    document.getElementById('qSentence').before(art);
+  }
+  if (art) { art.innerHTML = q.art && window.HALLOWEEN_QUESTIONS ? spookyArt(q.art) : ''; art.hidden = !q.art; }
+}
+function renderAnswer(q) {
+  const ar = document.getElementById('answerReveal');
+  ar.className = `answer-reveal card show ${q.status === 'LEGAL' ? 'legal-answer' : 'illegal-answer'}`;
+  const feedback = questionFeedback(q);
+  ar.innerHTML = `
+    <div class="verdict ${q.status === 'LEGAL' ? 'green' : 'red'}">${q.status === 'LEGAL' ? '✅ CORRECT' : '❌ INCORRECT'}</div>
+    <div class="correction">${escHtml(q.correction)}</div>
+    <div class="answer-explanation"><strong>WHY?</strong> ${escHtml(feedback.explanation)}</div>
+    ${feedback.example ? `<div class="answer-example"><strong>EXAMPLE:</strong> ${escHtml(feedback.example)}</div>` : ''}
+  `;
+
+}
+
+function updateBetsDisplay() {
+  const grid = document.getElementById('betsGrid');
+  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
+    const bet = hostState.bets[pid];
+    return `
+      <div class="bet-card ${bet ? 'submitted' : ''}">
+        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
+        <div class="team-name">${escHtml(team.name)}</div>
+        <div class="balance">\$${team.balance.toLocaleString()}</div>
+        ${bet
+          ? `<div class="bet-info"><span class="bet-amount">💰 \$${bet.amount.toLocaleString()}</span></div>`
+          : `<div class="bet-info" style="color:#64748b;">⏳ Waiting...</div>`}
+        ${offlineMode && hostState.bettingOpen ? offlineBetControls(pid, team, bet) : ''}
+      </div>`;
+  }).join('');
+}
+
+function updateBetsDisplayRevealed(results) {
+  const grid = document.getElementById('betsGrid');
+  grid.innerHTML = Object.entries(hostState.teams).map(([pid, team]) => {
+    const bet = hostState.bets[pid];
+    const res = results[pid];
+    let cardClass = 'bet-card';
+    if (res) {
+      if (res.noBet) cardClass += ' no-bet-reveal';
+      else if (res.correct) cardClass += ' correct-reveal';
+      else cardClass += ' incorrect-reveal';
+    }
+    return `
+      <div class="${cardClass}">
+        <button class="kick-btn" onclick="kickTeam('${pid}')" title="Remove Team">✕</button>
+        <div class="team-name">${escHtml(team.name)}</div>
+        <div class="balance">\$${team.balance.toLocaleString()}</div>
+        ${bet ? `
+          <div class="bet-info">
+            <span class="bet-amount">\$${bet.amount.toLocaleString()}</span>
+            <span class="reveal-choice ${bet.choice.toLowerCase()}">${answerLabel(bet.choice)}</span>
+          </div>
+          <div class="delta ${res.delta > 0 ? 'positive' : res.delta < 0 ? 'negative' : ''}">${
+            res.delta > 0 ? '+$' + res.delta.toLocaleString() :
+            res.delta < 0 ? '-$' + Math.abs(res.delta).toLocaleString() : '—'
+          }</div>
+        ` : `
+          <div class="bet-info" style="color:#ef4444;">❌ No bet</div>
+          <div class="delta negative">-\$${Math.abs(res.delta).toLocaleString()}</div>
+        `}
+      </div>`;
+  }).join('');
+}
+
+function updateLeaderboard() {
+  const sorted = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  document.getElementById('lbRows').innerHTML = sorted.map((t, i) => `
+    <div class="lb-row animate-in" style="animation-delay:${i*0.04}s;">
+      <div class="lb-rank">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#'+(i+1)}</div>
+      <div class="lb-name">${escHtml(t.name)}</div>
+      <div class="lb-balance">\$${t.balance.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+// ===== FINAL CHALLENGE =====
+function triggerFinalChallenge() {
+  clearInterval(hostState.timerInterval);
+  hostState.bettingOpen = false;
+  hostState.finalChallengeActive = true;
+  document.getElementById('gameLayout').classList.add('hidden');
+  document.getElementById('finalChallenge').classList.remove('hidden');
+  broadcastToAll({ type: 'finalChallenge' });
+  showFcTeam();
+  saveHostSession();
+}
+
+function showFcTeam() {
+  hostState.fcTeamOrder = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ pid, name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  const team = hostState.fcTeamOrder[0];
+  document.getElementById('fcTeam').textContent = team.name;
+  document.getElementById('fcAmount').textContent = `\$${team.balance.toLocaleString()}`;
+  document.getElementById('fcInput').value = '';
+  document.getElementById('fcFeedback').textContent = '';
+  document.getElementById('fcInput').focus();
+}
+
+let finalFeedbackPending = false;
+function checkSpelling() {
+  if (finalFeedbackPending || hostState.winner) return;
+  const input = document.getElementById('fcInput').value;
+  const team = hostState.fcTeamOrder[0];
+  const correct = numberToWords(team.balance);
+  if (normalizeSpelling(input) === normalizeSpelling(correct)) {
+    showWinner(team);
+  } else {
+    playWrongSound();
+    const pid = team.pid;
+    hostState.teams[pid].balance = Math.max(0, hostState.teams[pid].balance - 1000);
+    for (const [op, ot] of Object.entries(hostState.teams)) {
+      if (op !== pid) ot.balance += 1000;
+    }
+    for (const [p, t] of Object.entries(hostState.teams)) {
+      sendToTeam(t, { type: 'balanceUpdate', newBalance: t.balance });
+    }
+    document.getElementById('fcFeedback').innerHTML = `
+      <span class="red">❌ INCORRECT!</span><br>
+      <span style="font-size:0.85rem;color:#94a3b8;">-\$1,000 to ${escHtml(team.name)}, +\$1,000 to everyone else!</span><br>
+      <span style="font-size:0.75rem;color:#64748b;">Expected: "${correct}"</span>`;
+    saveHostSession();
+    finalFeedbackPending = true;
+    document.getElementById("fcInput").disabled = true;
+    setTimeout(() => {
+      finalFeedbackPending = false;
+      document.getElementById("fcInput").disabled = false;
+      showFcTeam();
+    }, 2500);
+  }
+}
+
+function showWinner(team) {
+  hostState.winner = team;
+  saveHostSession();
+  playCorrectSound();
+  document.getElementById('finalChallenge').classList.add('hidden');
+  document.getElementById('winnerScreen').classList.remove('hidden');
+  document.getElementById('winnerName').textContent = team.name;
+  const title = team.balance >= 1000000000 ? '🌟 BILLIONAIRE 🌟' :
+                team.balance >= 1000000 ? '💎 MILLIONAIRE 💎' : '🏆 CHAMPION 🏆';
+  document.getElementById('winnerTitle').textContent = title;
+  const sorted = Object.entries(hostState.teams)
+    .map(([pid, t]) => ({ name: t.name, balance: t.balance }))
+    .sort((a, b) => b.balance - a.balance);
+  document.getElementById('finalStandings').innerHTML = `
+    <h3 class="gold" style="margin-bottom:10px;">📊 Final Standings</h3>
+    ${sorted.map((t, i) => `
+      <div class="lb-row"><div class="lb-rank">${i===0?'👑':'#'+(i+1)}</div>
+      <div class="lb-name">${escHtml(t.name)}</div>
+      <div class="lb-balance">\$${t.balance.toLocaleString()}</div></div>
+    `).join('')}`;
+  broadcastToAll({ type: 'gameOver', winner: team.name });
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#f59e0b','#22c55e','#ef4444','#3b82f6','#a855f7','#ec4899'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw'; p.style.top = (80+Math.random()*20)+'vh';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2+Math.random()*2)+'s';
+    p.style.animationDelay = Math.random()*1.5+'s';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 5000);
+  }
+}
+
+function broadcastToAll(msg) {
+  for (const t of Object.values(hostState.teams)) sendToTeam(t, msg);
+}
+
+// ===== CLIENT =====
+function showClientJoin() {
+  role = 'client';
+  document.getElementById('roleSelect').classList.add('hidden');
+  document.getElementById('clientScreen').classList.remove('hidden');
+}
+function setJoinUi(message, busy) {
+  const button = document.getElementById('clientJoinBtn');
+  const error = document.getElementById('clientError');
+  if (error && message !== undefined) error.textContent = message;
+  if (button) {
+    button.disabled = Boolean(busy);
+    button.textContent = busy ? '⏳ Connecting…' : '🔗 Join Game';
+  }
+}
+function handleClientOffline() {
+  if (role !== 'client') return;
+  if (window.GRAMMAR_RUSH_LOCAL) {
+    // A hotspot can have LAN access while the OS reports no internet.
+    clientState.offline = false; scheduleReconnect(); return;
+  }
+  clientState.offline = true;
+  clearTimeout(clientState.reconnectTimer);
+  const status = document.getElementById('clientStatusText');
+  if (status && !document.getElementById('clientGame').classList.contains('hidden')) status.textContent = '📡 Wi‑Fi lost. Your team is saved; reconnecting when internet returns…';
+  else setJoinUi('No internet connection. Your room and team are saved.', false);
+}
+function handleClientOnline() {
+  if (role !== 'client') return;
+  clientState.offline = false;
+  if (!clientState.kicked && !clientState.connectionPaused && clientState.room) {
+    const status = document.getElementById('clientStatusText');
+    if (status && !document.getElementById('clientGame').classList.contains('hidden')) status.textContent = window.GRAMMAR_RUSH_LOCAL ? '📡 Reconectando con la laptop…' : '📡 Internet restored. Reconnecting…';
+    if (peer && peer.disconnected && !peer.destroyed) peer.reconnect();
+    scheduleReconnect();
+  }
+}
+window.addEventListener('offline', handleClientOffline);
+window.addEventListener('online', handleClientOnline);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && clientState.room && !clientState.kicked && !clientState.connectionPaused) handleClientOnline();
+});
+function pauseClientConnection() {
+  clearTimeout(clientState.reconnectTimer);
+  clearTimeout(clientState.joinTimeout);
+  const oldConn = clientState.conn;
+  const oldPeer = peer;
+  clientState.conn = null;
+  peer = null;
+  clientState.joining = false;
+  clientState.connectionPaused = true;
+  if (oldConn) oldConn.close();
+  if (oldPeer) oldPeer.destroy();
+}
+function stopClientConnection() {
+  pauseClientConnection();
+  clientState.kicked = true; // Only explicit class changes stop recovery permanently.
+  writeSaved('active', {role: 'client'});
+  window.history.replaceState(null, '', window.location.pathname + '?role=client');
+  setJoinUi('', false);
+}
+
+function changeClientClass() {
+  stopClientConnection();
+  clientState.room = '';
+  clientState.teamId = null;
+  clientState.teamName = '';
+  clientState.balance = 1000;
+  clientState.selectedChoice = null;
+  clientState.betSubmitted = false;
+  document.getElementById('clientGame').classList.add('hidden');
+  document.getElementById('clientJoin').classList.remove('hidden');
+  document.getElementById('clientRoomInput').value = '';
+  document.getElementById('clientTeamInput').value = '';
+  document.getElementById('clientRoomInput').focus();
+}
+
+function createTeamId() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+async function connectToHost() {
+  const room = document.getElementById('clientRoomInput').value.trim();
+  const name = document.getElementById('clientTeamInput').value.trim();
+  if (!/^\d{4}$/.test(room)) { setJoinUi('Enter a 4-digit room code.', false); return; }
+  if (!name) { setJoinUi('Enter your team name.', false); return; }
+  stopClientConnection();
+  setJoinUi('Connecting to the teacher…', true);
+  const saved = readSaved('client:' + room);
+  clientState.room = room;
+  clientState.teamId = saved ? saved.teamId : createTeamId();
+  clientState.teamName = saved ? saved.teamName : name;
+  clientState.balance = saved ? saved.balance : 1000;
+  clientState.kicked = false;
+  clientState.connectionPaused = false;
+  clientState.hasJoined = false;
+  clientState.offline = false;
+  clientState.joining = true;
+  clientState.reconnectAttempts = 0;
+  saveClientSession();
+  clearTimeout(clientState.reconnectTimer); clearTimeout(clientState.joinTimeout);
+  if (peer) peer.destroy();
+  try { await loadOnlineLibrary('https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js', 'Peer'); }
+  catch (_) { setJoinUi('Could not load the connection service. Please try again.', false); return; }
+  if (clientState.kicked || clientState.connectionPaused) return;
+  const connectingPeer = peer = new Peer(undefined, peerOptions());
+  connectingPeer.on('open', (id) => { if (peer !== connectingPeer) return; clientState.peerId = id; reconnectClient(); });
+  connectingPeer.on('reconnected', () => {
+    if (peer === connectingPeer && clientState.conn && clientState.conn.open && !clientState.kicked)
+      clientState.conn.send({type:'join', teamName:clientState.teamName, teamId:clientState.teamId});
+  });
+  connectingPeer.on('disconnected', () => { if (peer === connectingPeer && !clientState.kicked && !clientState.connectionPaused && !clientState.offline && !connectingPeer.destroyed) connectingPeer.reconnect(); });
+  connectingPeer.on('error', () => {
+    if (peer !== connectingPeer) return;
+    if (clientState.joining) setJoinUi('Reconnecting to the teacher…', true);
+    scheduleReconnect();
+  });
+  clientState.joinTimeout = setTimeout(() => {
+    if (!clientState.joining) return;
+    setJoinUi(window.GRAMMAR_RUSH_LOCAL
+      ? 'No llega respuesta del maestro. Comprueba que todos estén en el mismo Wi-Fi y que el servidor esté abierto.'
+      : 'No se ha podido establecer la conexión entre dispositivos. No es una medición de velocidad. Puedes usar el modo de red local.', false);
+    scheduleReconnect();
+  }, 8000);
+}
+
+function scheduleReconnect() {
+  clearTimeout(clientState.reconnectTimer);
+  if (!clientState.kicked && !clientState.connectionPaused && !clientState.offline) {
+    const delay = Math.min(8000, 800 * Math.pow(2, clientState.reconnectAttempts++));
+    clientState.reconnectTimer = setTimeout(reconnectClient, delay);
+  }
+}
+function reconnectClient() {
+  if (clientState.kicked || clientState.connectionPaused || clientState.offline || !peer || peer.destroyed) return;
+  if (clientState.conn && clientState.conn.open) {
+    // An open channel is not an acknowledged join. Retry the small handshake
+    // rather than destroy a connection which ICE may still be establishing.
+    if (clientState.joining) {
+      clientState.conn.send({type:'join', teamName:clientState.teamName, teamId:clientState.teamId});
+      scheduleReconnect();
+    }
+    return;
+  }
+  if (peer.disconnected) { peer.reconnect(); scheduleReconnect(); return; }
+  const previousConn = clientState.conn;
+  clientState.conn = null;
+  if (previousConn) previousConn.close();
+  const conn = peer.connect('ESL-AUCTION-' + clientState.room, {reliable: true});
+  clientState.conn = conn;
+  conn.on('open', () => {
+    if (clientState.conn !== conn || clientState.kicked) { conn.close(); return; }
+    clearTimeout(clientState.reconnectTimer);
+    conn.send({type: 'join', teamName: clientState.teamName, teamId: clientState.teamId});
+    if (clientState.joining) scheduleReconnect();
+  });
+  conn.on('data', data => { if (clientState.conn === conn) handleHostMessage(data); });
+  conn.on('close', () => {
+    if (clientState.conn !== conn) return;
+    document.getElementById('clientStatusText').textContent = 'Reconnecting to your class…';
+    scheduleReconnect();
+  });
+  conn.on('error', (err) => {
+    if (clientState.conn !== conn) return;
+    if (err && err.type === 'peer-unavailable') {
+      // PeerJS can report the host as unavailable during a short signaling hiccup.
+      // Retry several times before telling the student that the room is unavailable.
+      if (clientState.reconnectAttempts < 3) {
+        setJoinUi('The room is waking up… retrying connection.', true);
+        scheduleReconnect();
+      } else if (!clientState.hasJoined) {
+        // A signaling hiccup is not proof that the room is gone. Keep trying at
+        // a capped interval; the student can cancel with Change class.
+        clientState.reconnectAttempts = 0;
+        setJoinUi('No se ha localizado al maestro. Revisa el código; seguimos reintentando.', false);
+        scheduleReconnect();
+      } else {
+        const status = document.getElementById('clientStatusText');
+        if (status) status.textContent = '📡 Connection interrupted. Keeping your team saved and retrying…';
+        scheduleReconnect();
+      }
+      return;
+    }
+    scheduleReconnect();
+  });
+  clearTimeout(clientState.reconnectTimer);
+  clientState.reconnectTimer = setTimeout(() => {
+    if (clientState.conn !== conn || clientState.kicked) return;
+    if (!conn.open) { conn.close(); scheduleReconnect(); }
+  }, 25000);
+}
+
+function handleHostMessage(data) {
+  switch (data.type) {
+    case 'joinRejected':
+      // Compatibility with an older teacher tab: treat this as temporary and
+      // retry without deleting the student's saved team identity or balance.
+      clientState.joining = !clientState.hasJoined;
+      if (clientState.joining) setJoinUi('The teacher is updating the room… retrying connection.', true);
+      else document.getElementById('clientStatusText').textContent = '📡 Reconnecting to the teacher…';
+      if (clientState.conn) clientState.conn.close();
+      scheduleReconnect();
+      break;
+    case 'KICK':
+      clientState.kicked = true;
+      clearTimeout(clientState.reconnectTimer);
+      removeSaved('client:' + clientState.room); removeSaved('active');
+      document.getElementById('clientScreen').innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;text-align:center;padding:20px;"><h2>You have been removed from the game by the host.</h2></div>';
+      if (clientState.conn) clientState.conn.close();
+      break;
+    case 'joined':
+      setJoinUi('', false);
+      clientState.joining = false;
+      clientState.hasJoined = true;
+      clientState.connectionPaused = false;
+      clientState.reconnectAttempts = 0;
+      clearTimeout(clientState.joinTimeout);
+      clearTimeout(clientState.reconnectTimer);
+      clientState.balance = data.balance;
+      document.getElementById('clientJoin').classList.add('hidden');
+      document.getElementById('clientGame').classList.remove('hidden');
+      document.getElementById('clientTeamDisplay').textContent = clientState.teamName;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      document.getElementById('clientStatusText').textContent = data.lateJoin ? 'Connected! Joined the live class.' : 'Connected! Waiting for game...';
+      break;
+    case 'gameStarted':
+      document.getElementById('clientStatusText').textContent = '🎮 Game is live!';
+      showClientWaiting(); break;
+    case 'openBetting':
+      clientState.betSubmitted = false; clientState.selectedChoice = null;
+      document.getElementById('clientStatusText').textContent = `❓ Q${data.questionId} — Place your bet!`;
+      showClientBetting(); break;
+    case 'bettingClosed':
+      if (!clientState.betSubmitted) {
+        document.getElementById('clientStatusText').textContent = "⏱️ Time's up! No bet placed.";
+        showClientWaiting();
+      } break;
+    case 'betConfirmed':
+      clientState.betSubmitted = true; clientState.selectedChoice = data.choice || clientState.selectedChoice; showClientBetSubmitted(); break;
+    case 'result':
+      document.getElementById('clientStatusText').textContent = '✓ Round complete · Waiting for the next question';
+      clientState.balance = data.newBalance;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      showClientResult(data); break;
+    case 'balanceUpdate':
+      clientState.balance = data.newBalance;
+      document.getElementById('clientBalanceDisplay').textContent = clientState.balance.toLocaleString();
+      break;
+    case 'finalChallenge':
+      document.getElementById('clientStatusText').textContent = '✍️ Final Challenge!';
+      showClientPanel('clientWaiting');
+      document.getElementById('clientWaiting').innerHTML = `
+        <div style="font-size:2rem;margin-bottom:10px;">✍️</div>
+        <p style="font-size:1.1rem;color:#f59e0b;font-weight:700;">FINAL CHALLENGE</p>
+        <p style="margin-top:8px;">Watch the big screen!</p>
+        <p style="margin-top:12px;font-size:1.3rem;font-weight:700;">Your balance: \$${clientState.balance.toLocaleString()}</p>`;
+      break;
+    case 'gameOver':
+      document.getElementById('clientStatusText').textContent = '🏆 Game Over!';
+      showClientPanel('clientWaiting');
+      document.getElementById('clientWaiting').innerHTML = `
+        <div style="font-size:2.5rem;margin-bottom:10px;">🏆</div>
+        <p style="font-size:1.2rem;color:#f59e0b;font-weight:700;">GAME OVER!</p>
+        <p style="margin-top:8px;">Winner: <strong class="gold">${escHtml(data.winner)}</strong></p>
+        <p style="margin-top:12px;font-size:1.8rem;font-weight:700;color:#22c55e;">\$${clientState.balance.toLocaleString()}</p>`;
+      break;
+  }
+  saveClientSession();
+}
+
+function showClientPanel(id) {
+  ['clientWaiting','clientBetting','clientBetSubmitted','clientResult'].forEach(p =>
+    document.getElementById(p).classList.toggle('hidden', p !== id));
+}
+function showClientWaiting() { showClientPanel('clientWaiting'); }
+function showClientBetting() {
+  showClientPanel('clientBetting');
+  document.getElementById('legalBtn').classList.remove('selected');
+  document.getElementById('illegalBtn').classList.remove('selected');
+  document.getElementById('betAmountInput').value = 100;
+  document.getElementById('submitBetBtn').disabled = true;
+  clientState.selectedChoice = null;
+}
+function showClientBetSubmitted() { showClientPanel('clientBetSubmitted'); }
+function showClientResult(data) {
+  showClientPanel('clientResult');
+  const el = document.getElementById('clientResult');
+  const noBet = data.correct === null || (data.correct === false && data.delta < 0 && !clientState.selectedChoice);
+  const verdict = noBet ? '⏱️ NO BET PENALTY' : data.correct ? '✅ CORRECT!' : '❌ INCORRECT!';
+  const tone = noBet || !data.correct ? 'red' : 'green';
+  const sign = data.delta >= 0 ? '+' : '-';
+  el.innerHTML = `<div class="verdict ${tone}">${verdict}</div>
+    <div class="change ${tone}">${sign}$${Math.abs(data.delta).toLocaleString()}</div>
+    <p style="color:#94a3b8;margin-top:12px;">Answer: <strong class="${data.answer==='LEGAL'?'green':'red'}">${answerLabel(data.answer)}</strong></p>
+    <div class="feedback-title">Why?</div>
+    <div class="feedback-explanation">${escHtml(data.explanation || data.correction || 'Review the grammar rule shown by the teacher.')}</div>
+    ${data.example ? `<div class="feedback-example"><strong>Example:</strong> ${escHtml(data.example)}</div>` : ''}`;
+}
+function selectChoice(choice) {
+  clientState.selectedChoice = choice;
+  document.getElementById('legalBtn').classList.toggle('selected', choice === 'LEGAL');
+  document.getElementById('illegalBtn').classList.toggle('selected', choice === 'ILLEGAL');
+  document.getElementById('submitBetBtn').disabled = false;
+}
+function adjustBet(delta) {
+  const input = document.getElementById('betAmountInput');
+  let val = parseInt(input.value) || 0;
+  input.value = Math.max(100, Math.min(val + delta, clientState.balance));
+}
+function allIn() { document.getElementById('betAmountInput').value = clientState.balance; }
+function submitBet() {
+  if (!clientState.selectedChoice) return;
+  const amount = Math.min(Math.max(100, parseInt(document.getElementById('betAmountInput').value)||100), clientState.balance);
+  if (clientState.conn && clientState.conn.open) {
+    clientState.conn.send({ type: 'bet', choice: clientState.selectedChoice, amount });
+    document.getElementById('submitBetBtn').disabled = true;
+  }
+}
+function escHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+</script>
+</body>
+</html>

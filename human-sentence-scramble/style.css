@@ -1,0 +1,9 @@
+@import "tailwindcss" source(none);
+@source "./index.html";
+@source "./game.js";
+@media (max-width: 1023px), (max-height: 650px) {
+  body { height: auto; min-height: 100dvh; overflow: auto; }
+  header { flex-wrap: wrap; }
+  main { height: auto !important; overflow: visible !important; }
+  main > section { height: auto !important; overflow: visible !important; }
+}

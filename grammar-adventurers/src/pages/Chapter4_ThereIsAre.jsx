@@ -1,8 +1,8 @@
 import React from 'react';
 import StoryPage from '../components/StoryPage';
 import Character from '../components/Character';
-import samImg from '../assets/sam.png';
-import ivyImg from '../assets/ivy.png';
+import samImg from '../assets/sam.webp';
+import ivyImg from '../assets/ivy.webp';
 
 const Chapter4_ThereIsAre = () => {
     return (

@@ -2,6 +2,171 @@
   "version": 1,
   "games": [
     {
+      "id": "optician-sprint",
+      "title": "Optician's 20/20 Bet & Speak",
+      "levels": [
+        "A1",
+        "A2",
+        "B1"
+      ],
+      "skills": [
+        "Speaking",
+        "Vocabulary",
+        "Grammar"
+      ],
+      "theme": "classroom",
+      "description": "Team betting and speaking relay for optician vocabulary and Have you ever…? Every numbered speaker takes a turn after a 15-second team huddle.",
+      "entry": "/faro-games/semana_13/optician_sprint/index.html",
+      "source": "faro",
+      "contentModel": "fixed",
+      "duration": 30,
+      "players": "2–6 teams (everyone speaks)",
+      "offline": true,
+      "offlineReason": "All visuals, prompts, timers and sound cues run locally in the browser.",
+      "preview": "/gallery/covers/optician-sprint.svg",
+      "offlineAssets": [
+        "/faro-games/semana_13/optician_sprint/index.html",
+        "/faro-games/semana_13/optician_sprint/style.css",
+        "/faro-games/semana_13/optician_sprint/app.js",
+        "/faro-games/semana_13/optician_sprint/bank.js"
+      ],
+      "instructions": "Have each team count off #1–#N. Choose a stake before revealing the card, run the 15-second huddle so teammates coach Speaker #X, then only Speaker #X speaks aloud. Score Clean Solo (+100%), Assisted Echo (+50%), or Missed (-50%). Full crew completion awards a +300 bonus.",
+      "requirements": "One teacher laptop/projector. No student devices or internet required.",
+      "tags": [
+        "optica",
+        "optician",
+        "lentes",
+        "glasses",
+        "apuestas",
+        "betting",
+        "semana 13",
+        "have you ever"
+      ]
+    },
+    {
+      "id": "bank-vault-heist",
+      "title": "Bank Vault Auction & Relay",
+      "levels": [
+        "A1",
+        "A2",
+        "B1"
+      ],
+      "skills": [
+        "Speaking",
+        "Vocabulary",
+        "Grammar"
+      ],
+      "theme": "auction",
+      "description": "At the bank: teams bid on vault locks and rotate through every numbered speaker to unlock a +$1,000 full-crew jackpot.",
+      "entry": "/faro-games/semana_14/bank_vault/index.html",
+      "source": "faro",
+      "contentModel": "fixed",
+      "duration": 30,
+      "players": "2–6 teams (everyone speaks)",
+      "offline": true,
+      "offlineReason": "Static browser game with local bank prompts, 3-minute vocab flash and local storage.",
+      "preview": "/gallery/covers/bank-vault-heist.svg",
+      "offlineAssets": [
+        "/faro-games/semana_14/bank_vault/index.html",
+        "/faro-games/semana_14/bank_vault/style.css",
+        "/faro-games/semana_14/bank_vault/app.js",
+        "/faro-games/semana_14/bank_vault/bank.js"
+      ],
+      "instructions": "Each student owns one vault lock (#1–#N). Bid on a vault, coach Speaker #X during the huddle, and let Speaker #X deliver the bank request aloud. Unlocking all crew locks awards a +$1,000 jackpot.",
+      "requirements": "One teacher screen/projector. Keyboard shortcuts: Space (timer), R (reveal), 1/2/3 (verdict).",
+      "tags": [
+        "banco",
+        "bank",
+        "boveda",
+        "apuestas",
+        "subasta",
+        "dinero",
+        "semana 14"
+      ]
+    },
+    {
+      "id": "post-office-relay",
+      "title": "Express Parcel Relay",
+      "levels": [
+        "A1",
+        "A2",
+        "B1"
+      ],
+      "skills": [
+        "Speaking",
+        "Vocabulary"
+      ],
+      "theme": "race",
+      "description": "At the post office: teams race delivery trucks down a visual track by rotating every numbered driver to speak shipping requests aloud.",
+      "entry": "/faro-games/semana_15/post_office_relay/index.html",
+      "source": "faro",
+      "contentModel": "fixed",
+      "duration": 30,
+      "players": "2–6 teams (everyone speaks)",
+      "offline": true,
+      "offlineReason": "All track graphics, shipping prompts and vocab flash cards run locally.",
+      "preview": "/gallery/covers/post-office-relay.svg",
+      "offlineAssets": [
+        "/faro-games/semana_15/post_office_relay/index.html",
+        "/faro-games/semana_15/post_office_relay/style.css",
+        "/faro-games/semana_15/post_office_relay/app.js",
+        "/faro-games/semana_15/post_office_relay/bank.js"
+      ],
+      "instructions": "Count off Drivers #1–#N per team. Driver #X takes the mic after a quick team huddle: Clean Solo moves +2 miles, Assisted Echo moves +1 mile, and a full crew rotation earns a +2 mile lap bonus.",
+      "requirements": "One teacher screen/projector. No student phones required.",
+      "tags": [
+        "correo",
+        "post office",
+        "paquetes",
+        "carreras",
+        "race",
+        "relevo",
+        "semana 15"
+      ]
+    },
+    {
+      "id": "faro-grand-showdown",
+      "title": "Grand English Showdown",
+      "levels": [
+        "A1",
+        "A2",
+        "B1"
+      ],
+      "skills": [
+        "Speaking",
+        "Vocabulary",
+        "Grammar"
+      ],
+      "theme": "show",
+      "description": "Semester finale championship: spin the real-life scenario wheel across restaurant, shopping, health, optician, bank and post office units with mandatory speaker rotation.",
+      "entry": "/faro-games/semana_16/grand_showdown/index.html",
+      "source": "faro",
+      "contentModel": "fixed",
+      "duration": 30,
+      "players": "2–6 teams (everyone speaks)",
+      "offline": true,
+      "offlineReason": "Complete scenario wheel, prompts and scoreboard run locally with zero external dependencies.",
+      "preview": "/gallery/covers/faro-grand-showdown.svg",
+      "offlineAssets": [
+        "/faro-games/semana_16/grand_showdown/index.html",
+        "/faro-games/semana_16/grand_showdown/style.css",
+        "/faro-games/semana_16/grand_showdown/app.js",
+        "/faro-games/semana_16/grand_showdown/bank.js"
+      ],
+      "instructions": "Spin the scenario wheel, choose a stake (100/250/500), coach Speaker #X during the huddle, and judge the spoken response. Works in 15, 30 or 45 minutes with Finish & Trophy available at any time.",
+      "requirements": "One teacher screen/projector. No student devices required.",
+      "tags": [
+        "final",
+        "semestre",
+        "repaso",
+        "ruleta",
+        "apuestas",
+        "showdown",
+        "semana 16",
+        "posada"
+      ]
+    },
+    {
       "id": "optica-docente",
       "title": "Concurso de la óptica",
       "levels": [

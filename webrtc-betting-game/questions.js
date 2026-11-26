@@ -1,4 +1,4 @@
-const QUESTIONS = [
+export const QUESTIONS = [
     {
         "id": 1,
         "topic": "Study Method Trap",

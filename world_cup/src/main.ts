@@ -1,3 +1,7 @@
+import { audio, mediaPath, videos } from './media';
+import { mapping } from '../../gallery/shared/input.js';
+import { read } from '../../gallery/shared/storage.js';
+import { validatePack } from '../../gallery/shared/content.js';
 import Phaser from 'phaser';
 import { ENGLISH_TRIVIA_QUESTIONS, WORLD_CUP_QUESTIONS, type ButtonKey, type Question } from './questions';
 import './styles.css';
@@ -72,9 +76,8 @@ const VIDEO_AUDIO: Partial<Record<string, string>> = {
   [VIDEO_KEYS.save]: 'save-audio',
   [VIDEO_KEYS.championship]: 'championship-audio',
 };
-const SCHOOL_LOGO_KEY = 'school-logo-sticker';
-const SCHOOL_LOGO_WIDTH = 138;
-const SCHOOL_LOGO_HEIGHT = 139;
+
+type ControlMapping = { keys: Record<string, string>; buttons: Record<string, number> };
 
 type VideoScene = 'idle' | 'quiz' | 'penalty' | 'goal' | 'save' | 'no-winner' | 'championship';
 
@@ -90,7 +93,6 @@ const SCENE_VIDEO: Record<VideoScene, string> = {
 const VIDEO_LOOP: Record<string, boolean> = {
   [VIDEO_KEYS.idle]: true,
   [VIDEO_KEYS.quiz]: true,
-  [VIDEO_KEYS.penalty]: false,
   [VIDEO_KEYS.penaltyPrep]: true,
   [VIDEO_KEYS.goal]: false,
   [VIDEO_KEYS.save]: false,
@@ -194,8 +196,6 @@ class EnglishWorldCupScene extends Phaser.Scene {
   private heldButtonRepeatAt = new Map<string, number>();
   private nameDrafts: [string, string] = ['PLAYER 1', 'PLAYER 2'];
   private nameEntryOriginals: [string, string] = ['PLAYER 1', 'PLAYER 2'];
-  private nameStarted: [boolean, boolean] = [false, false];
-  private activeNameIndex: 0 | 1 = 0;
   private stadium!: Phaser.GameObjects.Container;
   private mediaLayer?: Phaser.GameObjects.Video;
   private videoAudio = new Map<string, Phaser.Sound.BaseSound>();
@@ -204,7 +204,6 @@ class EnglishWorldCupScene extends Phaser.Scene {
   private videoBlurFx?: Phaser.FX.Blur;
   private videoTransitionTween?: Phaser.Tweens.Tween;
   private headerBar!: Phaser.GameObjects.Rectangle;
-  private schoolLogo!: Phaser.GameObjects.Image;
   private title!: Phaser.GameObjects.Text;
   private subtitle!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
@@ -224,7 +223,13 @@ class EnglishWorldCupScene extends Phaser.Scene {
   private miniLayer!: Phaser.GameObjects.Container;
   private miniGraphics!: Phaser.GameObjects.Graphics;
   private activeMini?: MiniGameState;
-  private keyboardFallback: Array<[number, ButtonKey, Phaser.Input.Keyboard.Key]> = [];
+  private phaseTimers = new Set<number>();
+  private pressedKeys = new Set<string>();
+  private touchAxes: Array<[number, number]> = [[0, 0], [0, 0]];
+  private controlsMapping = mapping() as ControlMapping;
+  private customButtons = Boolean(read('input', {}).buttons);
+  private customQuestions = loadQuiz();
+  private customQuestionIndex = 0;
   private playerPadSlots: [number | null, number | null] = [null, null];
   private inputReadyAt = 0;
   private processingGamepadBatch = false;
@@ -242,18 +247,11 @@ class EnglishWorldCupScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.video(VIDEO_KEYS.idle, '/assets/videos/stadium_loop_v2.mp4?v=2', false);
-    this.load.video(VIDEO_KEYS.quiz, '/assets/videos/quiz_idle.mp4', false);
-    this.load.video(VIDEO_KEYS.penalty, '/assets/videos/penalty_build.mp4', false);
-    this.load.video(VIDEO_KEYS.penaltyPrep, '/assets/videos/penalty_prep_extended.mp4', false);
-    this.load.video(VIDEO_KEYS.goal, '/assets/videos/goal.mp4', false);
-    this.load.video(VIDEO_KEYS.save, '/assets/videos/save.mp4', false);
-    this.load.video(VIDEO_KEYS.championship, '/assets/videos/championship.mp4', false);
-    this.load.audio(STADIUM_AUDIO_KEY, '/assets/videos/stadium_loop_v2_audio.wav');
-    this.load.audio('goal-audio', '/assets/videos/goal_audio.wav');
-    this.load.audio('save-audio', '/assets/videos/save_audio.wav');
-    this.load.audio('championship-audio', '/assets/videos/championship_audio.wav');
-    this.load.image(SCHOOL_LOGO_KEY, '/assets/images/schoollogo-sticker.png');
+    for (const [type, filename] of Object.entries(videos)) {
+      this.load.video(VIDEO_KEYS[type as keyof typeof videos], mediaPath(filename + '.webm'), false);
+    }
+    for (const [key, filename] of Object.entries(audio)) this.load.audio(key, mediaPath(filename + '.mp3'));
+
   }
 
   create() {
@@ -261,14 +259,13 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.createMediaLayer();
     this.createVideoAudio();
     this.createUi();
-    this.createNameEntryKeyboard();
-    this.createKeyboardFallback();
+    this.createClassroomControls();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { for (const timer of this.phaseTimers) clearTimeout(timer); });
     this.showNameEntry();
   }
 
   update(time: number) {
     this.pollGamepads();
-    this.pollKeyboardFallback();
     this.ensureSoundContinuity(time);
 
     if (this.mode === 'quiz') {
@@ -311,12 +308,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.08).setDepth(-5);
     this.headerBar = this.add.rectangle(WIDTH / 2, 62, 1210, 74, 0x07111f, 0.42)
       .setStrokeStyle(2, 0xffffff, 0.1);
-    this.schoolLogo = this.add.image(34, 22, SCHOOL_LOGO_KEY)
-      .setOrigin(0, 0)
-      .setDisplaySize(SCHOOL_LOGO_WIDTH, SCHOOL_LOGO_HEIGHT)
-      .setDepth(80);
-
-    this.title = this.add.text(194, 34, 'English World Cup', {
+    this.title = this.add.text(42, 34, 'English World Cup', {
       fontFamily: GAME_FONT,
       fontSize: '24px',
       color: '#ffffff',
@@ -529,11 +521,117 @@ class EnglishWorldCupScene extends Phaser.Scene {
     badgeBg.strokeRoundedRect(x, y, width, height, PLAYER_BADGE_RADIUS);
   }
 
-  private createNameEntryKeyboard() {
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      if (this.mode !== 'name-entry') return;
-      this.handleNameKey(event);
+  private after(delay: number, callback: () => void) {
+    const timer = window.setTimeout(() => {
+      this.phaseTimers.delete(timer);
+      callback();
+    }, delay);
+    this.phaseTimers.add(timer);
+  }
+
+  private createClassroomControls() {
+    const nameForm = document.querySelector<HTMLFormElement>('#player-setup')!;
+    const controls = document.querySelector<HTMLElement>('#classroom-controls')!;
+    const legacy = ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon'];
+    const answer = (index: number) => this.handleButton(Math.floor(index / 4), BUTTON_ORDER[index % 4]);
+
+    nameForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const form = new FormData(nameForm);
+      this.nameDrafts = [String(form.get('player1')), String(form.get('player2'))];
+      this.unlockAudio();
+      this.startQuizFromNames();
     });
+    controls.addEventListener('click', event => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-answer]');
+      if (button) answer(Number(button.dataset.answer));
+    });
+    controls.querySelectorAll<HTMLButtonElement>('button[data-axis]').forEach(button => {
+      const index = Number(button.dataset.player);
+      const offset = button.dataset.axis!.split(',').map(Number) as [number, number];
+      const release = () => { this.touchAxes[index] = [0, 0]; };
+      button.addEventListener('pointerdown', event => {
+        button.setPointerCapture(event.pointerId);
+        this.touchAxes[index] = offset;
+      });
+      button.addEventListener('pointerup', release);
+      button.addEventListener('pointercancel', release);
+      button.addEventListener('lostpointercapture', release);
+      button.addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') this.touchAxes[index] = offset;
+      });
+      button.addEventListener('keyup', release);
+      button.addEventListener('blur', release);
+    });
+    window.addEventListener('keydown', event => {
+      const target = event.target as HTMLElement;
+      if (target.matches('input, textarea, select') || event.ctrlKey || event.altKey || event.metaKey) return;
+      this.pressedKeys.add(event.code);
+      if (this.mode === 'name-entry') {
+        if (event.code === this.controlsMapping.keys.confirm && !target.closest('button')) nameForm.requestSubmit();
+        return;
+      }
+      if (['stick', 'shake'].includes(this.activeMini?.type ?? '') &&
+          ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyQ', 'KeyE', 'KeyW', 'KeyZ'].includes(event.code)) {
+        event.preventDefault();
+        return;
+      }
+      const mapped = Array.from({ length: 8 }, (_, index) => this.controlsMapping.keys['answer' + (index + 1)]);
+      const match = mapped.indexOf(event.code);
+      const index = match < 0 ? legacy.indexOf(event.code) : match;
+      if (index >= 0) {
+        event.preventDefault();
+        if (!event.repeat || this.activeMini?.type === 'mash' || this.activeMini?.type === 'switch') answer(index);
+      }
+    });
+    window.addEventListener('keyup', event => this.pressedKeys.delete(event.code));
+    window.addEventListener('blur', () => { this.pressedKeys.clear(); this.touchAxes = [[0, 0], [0, 0]]; });
+    window.addEventListener('storage', () => {
+      this.controlsMapping = mapping() as ControlMapping;
+      this.customButtons = Boolean(read('input', {}).buttons);
+    });
+    window.addEventListener('message', event => {
+      if (event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'englishcode-action') return;
+      if (event.data.action === 'confirm' && this.mode === 'name-entry') nameForm.requestSubmit();
+      const match = /^answer([1-8])$/.exec(event.data.action);
+      if (match) answer(Number(match[1]) - 1);
+    });
+  }
+
+  private showControls() {
+    document.querySelector<HTMLElement>('#game')!.dataset.phase = this.mode;
+    const active = this.mode === 'quiz' || this.mode === 'minigame';
+    document.querySelector<HTMLElement>('#player-setup')!.hidden = this.mode !== 'name-entry';
+    document.querySelector<HTMLElement>('#classroom-controls')!.hidden = !active;
+    document.querySelectorAll<HTMLElement>('[data-directions]').forEach(row => {
+      row.hidden = !active || !['stick', 'shake'].includes(this.activeMini?.type ?? '');
+    });
+    document.querySelectorAll<HTMLButtonElement>('button[data-answer]').forEach((button, i) => {
+      const key = BUTTON_ORDER[i % 4];
+      const text = this.mode === 'quiz' ? this.currentQuestion.answers[key] : null;
+      button.hidden = this.mode === 'quiz' && !text;
+      button.disabled = this.mode === 'quiz' && Boolean(this.players[Math.floor(i / 4)].answer);
+      button.textContent = text ? `${key} · ${text}` : key;
+    });
+    const prompt = document.querySelector<HTMLElement>('#control-prompt')!;
+    prompt.textContent = this.mode === 'quiz' ? this.currentQuestion.prompt :
+      this.activeMini ? this.miniInstruction(this.activeMini.type) : '';
+    if (window.parent !== window) {
+      const actions = active ? Array.from({ length: 8 }, (_, index) => index)
+        .filter(index => this.mode !== 'quiz' || Boolean(this.currentQuestion.answers[BUTTON_ORDER[index % 4]]))
+        .map(index => 'answer' + (index + 1)) : this.mode === 'name-entry' ? ['confirm'] : [];
+      window.parent.postMessage({ type: 'englishcode-ready', game: 'world_cup', actions }, location.origin);
+    }
+  }
+
+  private playerAxes(index: number) {
+    const pad = this.getGamepad(index);
+    if (pad) return [pad.axes[0] ?? 0, pad.axes[1] ?? 0];
+    const [left, right, up, down] = index === 0 ? ['KeyQ', 'KeyE', 'KeyW', 'KeyZ'] :
+      ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+    const [x, y] = this.touchAxes[index];
+    return [x || Number(this.pressedKeys.has(right)) - Number(this.pressedKeys.has(left)),
+      y || Number(this.pressedKeys.has(down)) - Number(this.pressedKeys.has(up))];
   }
 
   private showNameEntry() {
@@ -546,10 +644,8 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.setHeaderVisible(false);
     this.messageText.setPosition(WIDTH / 2, 688);
     this.questionText.setText('');
-    this.messageText.setText("Type players' names");
+    this.messageText.setText("Enter player nicknames below");
     this.footerText.setText('');
-    this.activeNameIndex = 0;
-    this.nameStarted = [false, false];
     this.nameEntryOriginals = [
       this.players[0].name.trim().toUpperCase() || 'PLAYER 1',
       this.players[1].name.trim().toUpperCase() || 'PLAYER 2',
@@ -560,7 +656,10 @@ class EnglishWorldCupScene extends Phaser.Scene {
     ];
     this.players[0].name = this.nameDrafts[0];
     this.players[1].name = this.nameDrafts[1];
+    document.querySelector<HTMLInputElement>('#player-one')!.value = this.nameDrafts[0];
+    document.querySelector<HTMLInputElement>('#player-two')!.value = this.nameDrafts[1];
     this.updatePanels();
+    this.showControls();
   }
 
   private showNameEntryWithNoWinner() {
@@ -573,7 +672,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.setAnnouncementTextStyle('#7f1d1d', '#ffffff');
     this.questionText.setPosition(WIDTH / 2, 178);
     this.questionText.setText('NO WINNER');
-    this.time.delayedCall(NO_WINNER_TEXT_MS, () => {
+    this.after(NO_WINNER_TEXT_MS, () => {
       if (this.mode === 'name-entry') this.questionText.setText('');
     });
   }
@@ -597,48 +696,6 @@ class EnglishWorldCupScene extends Phaser.Scene {
     });
     this.questionNumber = 0;
     this.showQuestion();
-  }
-
-  private handleNameKey(event: KeyboardEvent) {
-    this.unlockAudio();
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      if (this.activeNameIndex === 0) {
-        this.activeNameIndex = 1;
-        this.updatePanels();
-        return;
-      }
-      this.startQuizFromNames();
-      return;
-    }
-
-    if (event.key === 'Backspace') {
-      event.preventDefault();
-      if (!this.nameStarted[this.activeNameIndex]) {
-        this.nameDrafts[this.activeNameIndex] = '';
-        this.nameStarted[this.activeNameIndex] = true;
-      }
-      this.nameDrafts[this.activeNameIndex] = this.nameDrafts[this.activeNameIndex].slice(0, -1);
-      this.players[this.activeNameIndex].name = this.nameDrafts[this.activeNameIndex] || `PLAYER ${this.activeNameIndex + 1}`;
-      this.updatePanels();
-      return;
-    }
-
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      this.activeNameIndex = this.activeNameIndex === 0 ? 1 : 0;
-      this.updatePanels();
-      return;
-    }
-
-    if (event.key.length !== 1 || !/^[a-z0-9 ]$/i.test(event.key)) return;
-    event.preventDefault();
-    const currentName = this.nameStarted[this.activeNameIndex] ? this.nameDrafts[this.activeNameIndex] : '';
-    const nextName = `${currentName}${event.key.toUpperCase()}`.trimStart().slice(0, 18);
-    this.nameStarted[this.activeNameIndex] = true;
-    this.nameDrafts[this.activeNameIndex] = nextName;
-    this.players[this.activeNameIndex].name = nextName || `PLAYER ${this.activeNameIndex + 1}`;
-    this.updatePanels();
   }
 
   private showQuestion() {
@@ -669,7 +726,9 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.footerText.setText('');
 
     this.answerCards.forEach((card) => {
-      card.answerLabel.setText(this.currentQuestion.answers[card.key]);
+      const text = this.currentQuestion.answers[card.key];
+      for (const part of [card.answerLabel, card.shadow, card.bg, card.shine, card.pill, card.buttonLabel]) part.setVisible(Boolean(text));
+      card.answerLabel.setText(text ?? '');
       card.shadow.setAlpha(0.34);
       card.bg.setAlpha(0.96);
       card.bg.setScale(1);
@@ -677,6 +736,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
       card.pill.setScale(1);
     });
     this.updatePanels();
+    this.showControls();
   }
 
   private updateQuizTimer(time: number) {
@@ -700,6 +760,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     if (this.quizResolved) return;
     this.quizResolved = true;
     this.mode = 'reveal';
+    this.showControls();
     const correct = this.currentQuestion.correct;
     const correctPlayers = this.players.map((player) => player.answer === correct);
     this.players.forEach((player, index) => {
@@ -719,7 +780,8 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.footerText.setText('');
     this.updatePanels(true);
 
-    this.time.delayedCall(1500, () => {
+    this.after(1500, () => {
+      if (this.mode !== 'reveal') return;
       if (!correctPlayers[0] && !correctPlayers[1]) {
         this.players.forEach((_, index) => this.resetPlayerForNameEntry(index));
         this.showNameEntryWithNoWinner();
@@ -794,6 +856,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.roundChip.setText('Penalty');
     this.drawMiniInstructionText();
     this.messageText.setText('Both players press A to start');
+    this.showControls();
     this.timerText.setText(`${this.miniDuration(type)}`);
     this.drawTimerBar(1, 0x38bdf8);
     this.footerText.setText('');
@@ -1001,9 +1064,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.miniGraphics.fillStyle(0x22c55e, 0.85).fillCircle(this.activeMini.targetX, this.activeMini.targetY, 42);
     this.miniGraphics.lineStyle(5, 0xffffff, 0.9).strokeCircle(this.activeMini.targetX, this.activeMini.targetY, 42);
     for (let playerIndex = 0; playerIndex < 2; playerIndex += 1) {
-      const pad = this.getGamepad(playerIndex);
-      const axisX = pad?.axes[0] ?? 0;
-      const axisY = pad?.axes[1] ?? 0;
+      const [axisX, axisY] = this.playerAxes(playerIndex);
       const x = 640 + axisX * STICK_CURSOR_X_RANGE;
       const y = 390 + axisY * STICK_CURSOR_Y_RANGE;
       const color = playerIndex === 0 ? 0x38bdf8 : 0xfacc15;
@@ -1092,9 +1153,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
   private updateShakeScore() {
     if (!this.activeMini) return;
     for (let playerIndex = 0; playerIndex < 2; playerIndex += 1) {
-      const pad = this.getGamepad(playerIndex);
-      const axisX = pad?.axes[0] ?? 0;
-      const axisY = pad?.axes[1] ?? 0;
+      const [axisX, axisY] = this.playerAxes(playerIndex);
       const last = this.activeMini.lastAxes[playerIndex];
       const delta = Math.abs(axisX - last[0]) + Math.abs(axisY - last[1]);
       if (delta > 0.32) {
@@ -1191,6 +1250,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     resetIndexesBeforeNameEntry: number[] = [],
   ) {
     this.mode = 'result';
+    this.showControls();
     this.playScene(headline === 'GOOOAL' ? 'goal' : headline === 'SAVE' ? 'save' : headline === 'NO WINNER' ? 'no-winner' : 'idle');
     this.clearCommentaryEvents();
     if (headline === 'GOOOAL') this.playCommentary(COMMENTARY_KEYS.goal, 0.9);
@@ -1218,22 +1278,22 @@ class EnglishWorldCupScene extends Phaser.Scene {
     }
     this.updatePanels(true);
     if (headline === 'GOOOAL') {
-      this.time.delayedCall(GOAL_VIDEO_MS, () => {
+      this.after(GOAL_VIDEO_MS, () => {
         if (this.mode === 'result') this.showNameEntry();
       });
       return;
     }
     if (headline === 'SAVE') {
-      this.time.delayedCall(SAVE_VIDEO_MS, () => {
+      this.after(SAVE_VIDEO_MS, () => {
         if (this.mode === 'result') this.showNameEntry();
       });
       return;
     }
     if (headline === 'NO WINNER') {
-      this.time.delayedCall(NO_WINNER_TEXT_MS, () => {
+      this.after(NO_WINNER_TEXT_MS, () => {
         if (this.mode === 'result') this.questionText.setText('');
       });
-      this.time.delayedCall(NO_WINNER_VIDEO_MS, () => {
+      this.after(NO_WINNER_VIDEO_MS, () => {
         if (this.mode === 'result') {
           resetIndexesBeforeNameEntry.forEach((index) => this.resetPlayerForNameEntry(index));
           this.showNameEntry();
@@ -1251,9 +1311,13 @@ class EnglishWorldCupScene extends Phaser.Scene {
       return;
     }
     if (this.mode === 'quiz') {
+      if (!this.currentQuestion.answers[key]) return;
       if (!this.players[playerIndex].answer) {
         this.players[playerIndex].answer = key;
         this.updatePanels();
+        document.querySelectorAll<HTMLButtonElement>('button[data-answer]').forEach((button, index) => {
+          if (Math.floor(index / 4) === playerIndex) button.disabled = true;
+        });
       }
       if (this.players.every((player) => player.answer)) {
         this.resolveQuiz();
@@ -1301,9 +1365,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
     }
 
     if (this.activeMini.type === 'stick' && key === 'A') {
-      const pad = this.getGamepad(playerIndex);
-      const axisX = pad?.axes[0] ?? 0;
-      const axisY = pad?.axes[1] ?? 0;
+      const [axisX, axisY] = this.playerAxes(playerIndex);
       const cursorX = 640 + axisX * STICK_CURSOR_X_RANGE;
       const cursorY = 390 + axisY * STICK_CURSOR_Y_RANGE;
       const distance = Phaser.Math.Distance.Between(cursorX, cursorY, this.activeMini.targetX, this.activeMini.targetY);
@@ -1406,39 +1468,10 @@ class EnglishWorldCupScene extends Phaser.Scene {
     }
   }
 
-  private pollKeyboardFallback() {
-    if (this.mode === 'name-entry' || this.isTypingName()) return;
-    this.keyboardFallback.forEach(([playerIndex, key, keyboardKey]) => {
-      if (Phaser.Input.Keyboard.JustDown(keyboardKey)) {
-        this.unlockAudio();
-        this.handleButton(playerIndex, key);
-      }
-    });
-  }
-
-  private createKeyboardFallback() {
-    const keyboard = this.input.keyboard;
-    if (!keyboard) return;
-    this.keyboardFallback = [
-      [0, 'A', keyboard.addKey('A')],
-      [0, 'B', keyboard.addKey('S')],
-      [0, 'X', keyboard.addKey('D')],
-      [0, 'Y', keyboard.addKey('F')],
-      [1, 'A', keyboard.addKey('J')],
-      [1, 'B', keyboard.addKey('K')],
-      [1, 'X', keyboard.addKey('L')],
-      [1, 'Y', keyboard.addKey('SEMICOLON')],
-    ];
-  }
-
   private getGamepad(playerIndex: number) {
     const slot = this.playerPadSlots[playerIndex];
     if (slot === null) return null;
     return navigator.getGamepads?.()[slot] ?? null;
-  }
-
-  private isTypingName() {
-    return false;
   }
 
   private assignGamepads() {
@@ -1511,6 +1544,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
   }
 
   private controllerButtonIndex(pad: Gamepad, key: ButtonKey) {
+    if (this.customButtons) return this.controlsMapping.buttons['answer' + (BUTTON_ORDER.indexOf(key) + 1)];
     return this.isNintendoLayout(pad) ? NINTENDO_BUTTONS[key] : XBOX_BUTTONS[key];
   }
 
@@ -1584,6 +1618,9 @@ class EnglishWorldCupScene extends Phaser.Scene {
   }
 
   private nextQuestion() {
+    if (this.customQuestions.length) {
+      return this.customQuestions[this.customQuestionIndex++ % this.customQuestions.length];
+    }
     if (this.englishQuestionBag.length === 0 && this.worldCupQuestionBag.length === 0) {
       this.refillQuestionBag();
     }
@@ -1605,13 +1642,13 @@ class EnglishWorldCupScene extends Phaser.Scene {
   }
 
   private shuffleQuestionAnswers(question: Question): Question {
-    const originalKeys: ButtonKey[] = ['A', 'B', 'X', 'Y'];
-    const shuffledKeys = Phaser.Utils.Array.Shuffle([...originalKeys]);
-    const answers = {} as Record<ButtonKey, string>;
+    const keys = BUTTON_ORDER.filter(key => Boolean(question.answers[key]));
+    const shuffledKeys = Phaser.Utils.Array.Shuffle([...keys]);
+    const answers: Question['answers'] = {};
     let correct: ButtonKey = 'A';
 
     shuffledKeys.forEach((originalKey, index) => {
-      const newKey = originalKeys[index];
+      const newKey = keys[index];
       answers[newKey] = question.answers[originalKey];
       if (originalKey === question.correct) {
         correct = newKey;
@@ -1639,7 +1676,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
         this.lockBadges[index].setText(ready ? 'Ready' : 'Press A');
         this.updateLockBadgeStyle(index, ready ? 0x22c55e : 0xef4444, ready ? 0x15803d : 0xb91c1c, '#ffffff');
       } else if (this.mode === 'name-entry') {
-        this.lockBadges[index].setText(index === this.activeNameIndex ? 'TYPE' : index === 0 ? 'P1' : 'P2');
+        this.lockBadges[index].setText(index === 0 ? 'P1' : 'P2');
       } else {
         this.lockBadges[index].setText(index === 0 ? 'P1' : 'P2');
       }
@@ -1704,6 +1741,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
 
   private showChampion(championName: string, championColor: string, championIndexes: number[]) {
     this.mode = 'champion';
+    this.showControls();
     this.championResetIndexes = [...championIndexes];
     this.playScene('championship');
     this.clearCommentaryEvents();
@@ -1726,10 +1764,10 @@ class EnglishWorldCupScene extends Phaser.Scene {
     this.scheduleCommentary(CHAMPION_NAME_REVEAL_MS, () => {
       if (this.mode === 'champion') this.playCommentary(COMMENTARY_KEYS.champion, 0.9);
     });
-    this.time.delayedCall(CHAMPION_NAME_REVEAL_MS, () => {
+    this.after(CHAMPION_NAME_REVEAL_MS, () => {
       if (this.mode === 'champion') this.questionText.setText(championName);
     });
-    this.time.delayedCall(CHAMPIONSHIP_VIDEO_MS, () => {
+    this.after(CHAMPIONSHIP_VIDEO_MS, () => {
       if (this.mode === 'champion') this.resetAfterChampion();
     });
   }
@@ -1754,12 +1792,12 @@ class EnglishWorldCupScene extends Phaser.Scene {
     return {
       timing: 'Press A when the ball crosses the green zone',
       mash: 'Press A as fast as possible',
-      stick: 'Move the stick to the target and press A',
+      stick: 'Move to the target, then press A',
       sequence: 'Repeat the buttons in order',
       reaction: 'Wait for the signal, then press the button',
       corners: 'Pick a corner with A B X Y',
       switch: 'Press the button that appears',
-      shake: 'Move the stick as fast as possible',
+      shake: 'Move the stick or alternate directions quickly',
     }[type];
   }
 
@@ -1829,7 +1867,7 @@ class EnglishWorldCupScene extends Phaser.Scene {
       if (this.currentVideoKey) this.startVideoTransition();
       this.currentVideoKey = videoKey;
       this.mediaLayer.changeSource(videoKey, true, loop);
-      this.time.delayedCall(80, () => {
+      this.after(80, () => {
         this.mediaLayer
           ?.setMute(muteVideo)
           .setVolume(1)
@@ -1901,6 +1939,23 @@ class EnglishWorldCupScene extends Phaser.Scene {
   }
 }
 
+function loadQuiz(): Question[] {
+  try {
+    const pack = validatePack(read('pack:world_cup', null), 'quiz');
+    if (pack.items.some((item: { options: string[] }) => item.options.length > 4)) {
+      document.querySelector('#content-notice')!.textContent = 'World Cup uses 2–4 options per question. The original questions will be used.';
+      return [];
+    }
+    return pack.items.map((item: { question: string; options: string[]; answer: string }) => ({
+      prompt: item.question,
+      answers: Object.fromEntries(item.options.map((option, index) => [BUTTON_ORDER[index], option])),
+      correct: BUTTON_ORDER[item.options.indexOf(item.answer)],
+    }));
+  } catch {
+    return [];
+  }
+}
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game',
@@ -1922,10 +1977,10 @@ const startGame = () => {
 };
 
 if ('fonts' in document) {
-  Promise.all([
+  Promise.allSettled([
     document.fonts.load(`24px ${GAME_FONT}`),
-    document.fonts.load(`42px ${ANNOUNCEMENT_FONT}`),
-  ]).finally(startGame);
+    document.fonts.load('italic 42px "Rush Driver"'),
+  ]).then(startGame);
 } else {
   startGame();
 }

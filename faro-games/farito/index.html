@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+  <meta name="theme-color" content="#11182b">
+  <title>Farito · Conversation Missions</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header><a class="brand" href="./index.html">Farito</a><a id="home" href="./index.html">Mission menu</a></header>
+  <main id="app"><p>Loading the mission…</p></main>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <dialog id="word-dialog">
+    <form method="dialog"><button aria-label="Close vocabulary">Close</button></form>
+    <h2>How do you say it?</h2>
+    <label>Spanish word <input id="lookup" maxlength="60" placeholder="abuela"></label>
+    <p id="translation" role="status">Type a word to check the local glossary.</p>
+  </dialog>
+  <script src="./app.js" type="module"></script>
+</body>
+</html>

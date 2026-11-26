@@ -2,9 +2,9 @@ import React from 'react';
 import StoryPage from '../components/StoryPage';
 import Character from '../components/Character';
 import { useGame } from '../context/GameContext';
-import timeMachineImg from '../assets/time_machine_v2.png';
-import leoImg from '../assets/leo.png';
-import miaImg from '../assets/mia.png';
+import timeMachineImg from '../assets/time_machine_v2.webp';
+import leoImg from '../assets/leo.webp';
+import miaImg from '../assets/mia.webp';
 
 const Chapter7_SimplePast = () => {
     const { isTimeMachineActive, toggleTimeMachine } = useGame();

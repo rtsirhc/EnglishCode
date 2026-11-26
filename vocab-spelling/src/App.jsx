@@ -13,12 +13,12 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    socket.connect();
-
     const onConnect = () => setIsConnected(true);
     const onDisconnect = () => {
       setIsConnected(false);
       setGameState(null);
+      setRoomId('');
+      setRole('');
     };
     const onStateUpdate = (state) => setGameState(state);
 
@@ -77,12 +77,12 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 bg-card-bg border-b border-card-border">
+      <header className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-card-bg border-b border-card-border">
         <a href="/" className="text-xl font-bold tracking-wider text-accent-gold hover:text-accent-gold-dark transition-colors">
           📝 VOCAB SPELLING BET
         </a>
 
-        <div className="flex gap-3 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           {gameState && (
             <div className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-400">
               {modeLabel}
@@ -103,7 +103,7 @@ function App() {
             </div>
           )}
           <div className={`px-3 py-1 rounded-full font-bold text-xs ${isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-            {isConnected ? '● ONLINE' : '○ OFFLINE'}
+            {isConnected ? '● ROOM OPEN' : '○ ROOM CLOSED'}
           </div>
         </div>
       </header>

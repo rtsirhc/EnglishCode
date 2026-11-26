@@ -1,27 +1,20 @@
 import { useState } from 'react';
-import { socket } from '../lib/socket';
 
-export default function Lobby({ onJoin }) {
-    const [roomId, setRoomId] = useState('AUCTION');
+
+export default function Lobby({ onJoin, notice }) {
+    const [roomId, setRoomId] = useState(() => crypto.randomUUID().slice(0, 6).toUpperCase());
     const [role, setRole] = useState('Dealer');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleJoin = (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        if (!socket.connected) {
-            socket.connect();
-        }
-
-        socket.emit('join_room', { roomId, role }, (response) => {
-            setIsLoading(false);
-            if (response.success) {
-                onJoin(roomId, role, response.state);
-            } else {
-                alert(response.message || 'Failed to join');
-            }
-        });
-    };
+    const [mode, setMode] = useState('local');
+    const [error, setError] = useState('');
+    async function handleJoin(event) {
+        event.preventDefault();
+        setIsLoading(true); setError('');
+        try { await onJoin({ roomId: roomId.trim(), role, mode }); }
+        catch (reason) { setError(reason.message); }
+        finally { setIsLoading(false); }
+    }
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] w-full">
@@ -30,11 +23,18 @@ export default function Lobby({ onJoin }) {
                     Sentence Auction
                 </h2>
 
-                <form onSubmit={handleJoin} className="space-y-6">
+                <form onSubmit={handleJoin} className="space-y-6"><fieldset disabled={isLoading} className="space-y-6">
+                    <label className="block">Connection
+                        <select className="block w-full bg-slate-900 p-3 rounded" value={mode} onChange={e => setMode(e.target.value)}>
+                            <option value="local">Same browser</option><option value="online">Separate devices</option>
+                        </select>
+                    </label>
+                    <p>{mode === 'local' ? 'Start as dealer. For a bidder screen, open another tab in this browser and enter the same code.' : 'Start the dealer first. The bidder opens this game on another device and enters the same code. Both devices need internet.'}</p>
+                    {(error || notice) && <p role="alert">{error || notice}</p>}
                     <div>
-                        <label className="block text-slate-300 mb-2 font-medium">Room Code</label>
+                        <label className="block text-slate-300 mb-2 font-medium" htmlFor="room-code">Room Code</label>
                         <input
-                            type="text"
+                            id="room-code" type="text" pattern="[A-Z0-9]{4,12}" maxLength={12} title="4–12 letters or digits"
                             value={roomId}
                             onChange={e => setRoomId(e.target.value.toUpperCase())}
                             className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white text-lg focus:outline-none focus:border-accent-gold focus:ring-1 focus:ring-accent-gold uppercase"
@@ -69,7 +69,7 @@ export default function Lobby({ onJoin }) {
                     >
                         {isLoading ? 'Connecting...' : 'Enter Auction'}
                     </button>
-                </form>
+                </fieldset></form>
             </div>
         </div>
     );

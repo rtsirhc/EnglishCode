@@ -81,6 +81,7 @@ export default function Board({ axes, grid, onCellClick, interactive = false, pr
                         // Render specific states
                         if (cellValue === 1) cellClass += ' cell-ship';
                         if (cellValue === 2) cellClass += ' cell-hit';
+                        if (cellValue === 4) cellClass += ' cell-dud';
                         if (cellValue === 3) cellClass += ' cell-miss'; // Miss or Dud
 
                         // Hover logic
@@ -89,7 +90,8 @@ export default function Board({ axes, grid, onCellClick, interactive = false, pr
                         if (isHovered && !invalid && cellValue === 1) cellClass += ' cell-preview-invalid'; // Overlap
 
                         return (
-                            <div
+                            <button
+                                type="button" disabled={!interactive} aria-label={axes.y[y] + ' / ' + axes.x[x] + ' · ' + ['Unmarked', 'Ship', 'Hit', 'Miss', 'Grammar retry'][cellValue]}
                                 key={`${x}-${y}`}
                                 className={cellClass}
                                 onClick={() => onCellClick && onCellClick(x, y)}
@@ -97,8 +99,9 @@ export default function Board({ axes, grid, onCellClick, interactive = false, pr
                                 onMouseLeave={handleMouseLeave}
                             >
                                 {cellValue === 2 && <div className="hit-marker">❌</div>}
+                                {cellValue === 4 && <span title="Grammar retry available">↻</span>}
                                 {cellValue === 3 && <div className="miss-marker">💦</div>}
-                            </div>
+                            </button>
                         );
                     })
                 ))}

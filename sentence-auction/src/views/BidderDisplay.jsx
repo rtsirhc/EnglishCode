@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { socket } from '../lib/socket';
 
-export default function BidderDisplay({ roomId, gameState }) {
-    const bankroll = gameState?.bankroll || 1000;
+export default function BidderDisplay({ gameState, updateState }) {
+    const bankroll = gameState?.bankroll ?? 1000;
     const isRevealed = gameState?.isRevealed;
-    const currentIndex = gameState?.currentQuestionIndex ?? 0;
-    const questionsList = gameState?.questions || [];
-    const currentQuestion = questionsList.length > 0 ? questionsList[currentIndex] : null;
+    const currentQuestion = gameState.currentQuestion;
     const streak = gameState?.streak || 0;
     const multiplier = streak >= 3 ? 3 : 1;
 
@@ -16,13 +13,13 @@ export default function BidderDisplay({ roomId, gameState }) {
 
     useEffect(() => {
         if (!gameState?.hasBid) {
-            setLocalBid(50);
+            setLocalBid(Math.min(50, bankroll));
         }
-    }, [gameState?.hasBid]);
+    }, [gameState?.hasBid, bankroll]);
 
     const handleSubmitBid = (e) => {
         e.preventDefault();
-        socket.emit('update_state', { roomId, newState: { currentBid: localBid, hasBid: true } });
+        updateState({ currentBid: localBid });
     };
 
     useEffect(() => {
@@ -37,7 +34,7 @@ export default function BidderDisplay({ roomId, gameState }) {
     }, [bankroll, prevBankroll]);
 
     return (
-        <div className="w-full flex justify-center items-center h-[85vh]">
+        <div className="auction-bidder w-full flex justify-center items-center h-[85vh]">
             <div className="max-w-4xl w-full flex flex-col gap-6">
 
                 {/* Top Row: Bankroll + Streak */}
@@ -83,7 +80,7 @@ export default function BidderDisplay({ roomId, gameState }) {
                             <h1 className="text-3xl md:text-5xl font-medium leading-tight text-white mb-10">{currentQuestion.sentence}</h1>
 
                             {/* Betting Interface */}
-                            {!gameState?.hasBid ? (
+                            {gameState.settled ? <p role="status">Verdict recorded. Balance: ${bankroll.toLocaleString()}.</p> : !gameState?.hasBid ? (
                                 <div className="border border-slate-600 bg-slate-900 p-8 rounded-xl max-w-xl mx-auto shadow-inner">
                                     <h3 className="text-accent-gold font-bold mb-4 tracking-wider">PLACE YOUR BID</h3>
                                     {multiplier > 1 && (
@@ -101,14 +98,14 @@ export default function BidderDisplay({ roomId, gameState }) {
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-400 font-bold">$</span>
                                                 <input
                                                     type="number"
-                                                    min="50"
+                                                    min={Math.min(50, bankroll)}
                                                     max={bankroll}
                                                     value={localBid}
-                                                    onChange={e => setLocalBid(Math.max(50, Math.min(bankroll, parseInt(e.target.value) || 50)))}
+                                                    onChange={e => setLocalBid(Math.max(Math.min(50, bankroll), Math.min(bankroll, parseInt(e.target.value) || 50)))}
                                                     className="w-full bg-slate-800 text-3xl text-white font-mono p-4 pl-10 rounded-lg outline-none border focus:border-accent-gold transition-colors"
                                                 />
                                             </div>
-                                            <button type="submit" className="bg-green-600 hover:bg-green-500 whitespace-nowrap text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg shadow-green-900/20">
+                                            <button data-game-action="confirm" type="submit" disabled={bankroll === 0} className="bg-green-600 hover:bg-green-500 whitespace-nowrap text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg shadow-green-900/20">
                                                 Confirm
                                             </button>
                                         </form>

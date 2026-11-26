@@ -7,8 +7,12 @@ export class GameManager {
         return Math.random().toString(36).substring(2, 6).toUpperCase();
     }
 
-    createRoom(vocabLists) {
-        const roomId = this.generateRoomId();
+    createRoom(vocabLists, requestedId) {
+        if (!vocabLists || !Array.isArray(vocabLists.subjects) || !Array.isArray(vocabLists.pastParticiples)) throw new Error('Provide two vocabulary lists.');
+        const clean = list => [...new Set(list.filter(item => typeof item === 'string').map(item => item.trim()).filter(Boolean))];
+        vocabLists = { subjects: clean(vocabLists.subjects), pastParticiples: clean(vocabLists.pastParticiples) };
+        if (vocabLists.subjects.length < 10 || vocabLists.pastParticiples.length < 10) throw new Error('Provide at least 10 different subjects and 10 different participles.');
+        const roomId = requestedId || this.generateRoomId();
 
         // Select 10 random subjects and 10 random past participles
         const maxSize = 10;
@@ -49,6 +53,7 @@ export class GameManager {
         if (!room) return { success: false, message: 'Room not found' };
 
         const playerIds = Object.keys(room.players);
+        if (room.players[socketId]) return { success: true, state: this.hideOpponentState(room, socketId) };
         if (playerIds.length >= 2) return { success: false, message: 'Room is full' };
 
         room.players[socketId] = {
@@ -57,6 +62,7 @@ export class GameManager {
             ships: [],
             ready: false,
             boardStatus: Array(room.boardSize.height).fill(null).map(() => Array(room.boardSize.width).fill(0)), // 0: empty, 1: ship, 2: hit, 3: miss/dud
+            duds: [],
             connected: true
         };
 
@@ -77,6 +83,11 @@ export class GameManager {
 
         // Basic validation of ships here if needed. 
         // ships is an array of coordinates like [{x: 0, y: 0}, {x: 1, y: 0}]
+        if (player.ready) return { success: false, message: 'Fleet already confirmed' };
+        if (!Array.isArray(ships) || ships.length !== 17 || new Set(ships.map(cell => cell?.x + ',' + cell?.y)).size !== 17 ||
+            ships.some(cell => !cell || !Number.isInteger(cell.x) || !Number.isInteger(cell.y) || cell.x < 0 || cell.y < 0 || cell.x >= room.boardSize.width || cell.y >= room.boardSize.height)) {
+            return { success: false, message: 'Place all 17 ship segments on different cells inside the board.' };
+        }
         player.ships = ships;
         player.ready = true;
 
@@ -103,6 +114,9 @@ export class GameManager {
         if (room.currentTurn !== socketId) return { success: false, message: 'Not your turn' };
         if (room.pendingValidation) return { success: false, message: 'Wait for current attack validation' };
 
+        if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0) return { success: false, message: 'Invalid coordinates' };
+        const opponent = Object.values(room.players).find(player => player.id !== socketId);
+        if ([2, 3].includes(opponent?.boardStatus[y]?.[x])) return { success: false, message: 'This cell was already attacked' };
         const targetParticiple = room.axes.x[x];
         const targetSubject = room.axes.y[y];
 
@@ -124,6 +138,7 @@ export class GameManager {
     validateAttack(roomId, validatorSocketId, isCorrect) {
         const room = this.rooms.get(roomId);
         if (!room) return { success: false, message: 'Room not found' };
+        if (room.status !== 'playing' || !room.players[validatorSocketId] || typeof isCorrect !== 'boolean') return { success: false, message: 'Invalid validator' };
         if (!room.pendingValidation) return { success: false, message: 'No pending attack to validate' };
         if (room.pendingValidation.attackerId === validatorSocketId) return { success: false, message: 'Attacker cannot validate their own attack' };
 
@@ -134,13 +149,14 @@ export class GameManager {
 
         if (!isCorrect) {
             // Grammar wrong -> Dud/Miss regardless of ship presence
-            opponent.boardStatus[y][x] = 3; // 3 = Miss
+            if (!attacker.duds.some(cell => cell.x === x && cell.y === y)) attacker.duds.push({ x, y }); // A grammar failure leaves an unhit ship intact.
         } else {
+            attacker.duds = attacker.duds.filter(cell => cell.x !== x || cell.y !== y);
             // Grammar correct -> Check for hit
             if (opponent.boardStatus[y][x] === 1) {
                 opponent.boardStatus[y][x] = 2; // 2 = Hit
             } else if (opponent.boardStatus[y][x] === 0) {
-                opponent.boardStatus[y][x] = 3; // 3 = Miss
+                opponent.boardStatus[y][x] = 3;
             }
         }
 
@@ -165,7 +181,7 @@ export class GameManager {
                 // Option 1: Pause game, mark disconnected.
                 // Option 2: Remove player and end game. Let's do simple end game for now if playing.
                 room.players[socketId].connected = false;
-                if (room.status === 'playing') {
+                if (room.status === 'playing' || room.status === 'setup') {
                     room.status = 'finished';
                     room.winner = Object.keys(room.players).find(id => id !== socketId);
                 }

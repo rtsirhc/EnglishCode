@@ -6,21 +6,14 @@ export default function Game2Teacher({ state }) {
   const { game2 } = state;
   const [guess, setGuess] = useState('');
   const [localGuesses, setLocalGuesses] = useState([]);
-  const [studentTimedOut, setStudentTimedOut] = useState(false);
+  const studentTimedOut = game2.studentTimedOut;
   const inputRef = useRef(null);
   const prevRound = useRef(game2.roundIndex);
-
-  useEffect(() => {
-    const onStudentTimeout = () => setStudentTimedOut(true);
-    socket.on('game2_student_timeout', onStudentTimeout);
-    return () => socket.off('game2_student_timeout', onStudentTimeout);
-  }, []);
 
   useEffect(() => {
     if (game2.roundIndex !== prevRound.current || game2.status === 'active') {
       setLocalGuesses([]);
       setGuess('');
-      setStudentTimedOut(false);
       prevRound.current = game2.roundIndex;
       setTimeout(() => inputRef.current?.focus(), 200);
     }
@@ -34,7 +27,6 @@ export default function Game2Teacher({ state }) {
     e.preventDefault();
     if (!guess.trim() || game2.status !== 'active') return;
     socket.emit('teacher_guess', { guess: guess.trim() });
-    setLocalGuesses(prev => [...prev, guess.trim()]);
     setGuess('');
     inputRef.current?.focus();
   };

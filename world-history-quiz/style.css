@@ -979,3 +979,5 @@ h1 {
     transform: translateY(0);
     transition: opacity 0.35s ease, transform 0.35s ease;
 }
+
+[hidden]{display:none!important}

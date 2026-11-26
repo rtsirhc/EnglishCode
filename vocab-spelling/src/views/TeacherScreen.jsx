@@ -63,7 +63,6 @@ export default function TeacherScreen({ roomId, gameState }) {
     if (!hasStartedTyping && val.length > 0) {
       setHasStartedTyping(true);
     }
-    socket.emit('typing_update', { roomId, text: val });
   };
 
   const handleSubmit = (e) => {
@@ -122,15 +121,16 @@ export default function TeacherScreen({ roomId, gameState }) {
       </div>
 
       {/* Two-column layout */}
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-5 items-stretch md:items-start">
         {/* LEFT — Main game area */}
         <div className="flex-1 min-w-0">
           {/* Current Word Card */}
           <div className="bg-card-bg border border-card-border rounded-2xl p-6 mb-4">
             <p className="text-slate-500 text-xs uppercase tracking-widest mb-2 text-center">Read This Word Aloud</p>
-            <h2 className="text-5xl font-extrabold text-center text-white tracking-wide">
+            <h2 className="text-3xl sm:text-5xl break-words font-extrabold text-center text-white tracking-wide">
               {currentWord}
             </h2>
+            {gameState.currentClue && <p className="mt-2 text-center text-slate-300 break-words">{gameState.currentClue}</p>}
             {betPlaced && (
               <p className="text-center text-amber-400 text-sm mt-3 font-medium">
                 Student bet: <span className="font-bold">${currentBet.toLocaleString()}</span>
@@ -155,6 +155,8 @@ export default function TeacherScreen({ roomId, gameState }) {
                 </label>
                 <input
                   ref={inputRef}
+                  aria-label="Spelling answer"
+                  maxLength={240}
                   type="text"
                   value={inputValue}
                   onChange={handleInputChange}
@@ -167,6 +169,7 @@ export default function TeacherScreen({ roomId, gameState }) {
                 />
                 <button
                   type="submit"
+                  id="spelling-confirm"
                   className="w-full mt-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl text-lg transition-all shadow-lg shadow-indigo-900/30 cursor-pointer"
                 >
                   Submit (Enter ↵)
@@ -203,6 +206,7 @@ export default function TeacherScreen({ roomId, gameState }) {
                 The word was: <span className="text-white font-bold">{currentWord}</span>
               </p>
               <button
+                id="spelling-next"
                 onClick={handleNextRound}
                 className="mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg cursor-pointer"
               >

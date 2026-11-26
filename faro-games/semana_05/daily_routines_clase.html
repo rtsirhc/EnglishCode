@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Routines</title>
+<style>
+:root{--ink:#14243b;--paper:#fffdf5;--green:#086355;--gold:#ffce44;--line:#c0c7ca}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+.app{height:100vh;height:100dvh;display:grid;grid-template-rows:76px 1fr 66px;padding:0 3.5vw}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--ink);gap:15px}
+.brand{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:800}.brand img{width:53px;height:48px;object-fit:contain}
+nav{display:flex;gap:5px}button{font:inherit;cursor:pointer;border:2px solid var(--ink);background:transparent;color:var(--ink);padding:10px 16px;border-radius:4px;font-weight:700}
+nav button{border:0;font-size:17px;padding:10px}nav button[aria-current=true]{background:var(--ink);color:white}
+button:focus-visible{outline:4px solid #c24b00;outline-offset:3px}button:disabled{opacity:.35;cursor:default}
+main{min-height:0;display:flex;flex-direction:column;justify-content:center;gap:20px;padding:24px 0}
+.eyebrow{font-size:clamp(19px,2vw,29px);font-weight:800;color:var(--green);margin:0;text-transform:uppercase;letter-spacing:1px}
+h1{font-size:clamp(37px,5.8vw,88px);line-height:1.08;letter-spacing:-2px;margin:0;text-wrap:balance}
+.instruction{font-size:clamp(22px,2.6vw,36px);margin:0;line-height:1.25}
+.hero{display:grid;grid-template-columns:180px 1fr;align-items:center;gap:35px}.art{height:180px;width:180px;background:var(--gold);display:grid;place-items:center;border:3px solid var(--ink)}
+.art svg{width:115px;height:115px}.translation{margin:15px 0 0;color:var(--green);font-size:clamp(26px,3vw,44px);font-weight:700}
+.sentence{font-size:clamp(36px,5.1vw,76px);font-weight:800;line-height:1.15;margin:0;text-wrap:balance}.sentence em{font-style:normal;color:var(--green)}
+.panel{padding:24px 28px;border-left:8px solid var(--green);background:#e7f2ed}.panel p{margin:0}.sub{font-size:clamp(24px,3vw,40px);margin:12px 0 0;line-height:1.3}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.choice{font-size:clamp(24px,3vw,42px);line-height:1.15;padding:20px;border:3px solid var(--ink);display:flex;align-items:center;gap:18px;min-height:130px}.number{font-size:clamp(33px,4vw,56px);font-weight:900}.choice.correct{background:var(--gold);border-width:5px}
+.answer{background:var(--gold);border:3px solid var(--ink);padding:18px 24px;font-size:clamp(27px,3.5vw,50px);font-weight:800;line-height:1.15}
+.answer[hidden]{display:none}.closing{display:flex;flex-direction:column;gap:14px}.closing p{font-size:clamp(30px,4vw,55px);font-weight:800;margin:0}
+footer{border-top:2px solid var(--ink);display:flex;justify-content:space-between;align-items:center;gap:10px}.controls{display:flex;gap:8px}.primary{background:var(--ink);color:white}.listen{background:var(--gold)}.counter{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}.progress{position:fixed;left:0;bottom:0;height:5px;background:var(--green);transition:width .15s}
+@media(max-height:640px) and (min-width:701px){.app{grid-template-rows:58px 1fr 56px}main{gap:12px;padding:12px 0}h1{font-size:clamp(36px,5vw,70px)}.hero{grid-template-columns:130px 1fr}.art{width:130px;height:130px}.art svg{width:90px;height:90px}.choice{min-height:95px;padding:14px}.sentence{font-size:clamp(34px,4.5vw,64px)}}
+@media(max-width:700px){.app{padding:0 5vw;grid-template-rows:108px 1fr 66px}header{flex-direction:column;align-items:stretch;justify-content:center;gap:4px}.brand{font-size:16px}.brand img{width:35px;height:30px}nav{justify-content:space-between}nav button{font-size:14px;padding:8px 4px}main{gap:15px;padding:15px 0}h1{font-size:36px;letter-spacing:-1px}.hero{grid-template-columns:70px 1fr;gap:14px}.art{height:70px;width:70px}.art svg{width:45px;height:45px}.sentence{font-size:32px}.translation{font-size:25px}.choices{grid-template-columns:1fr;gap:8px}.choice{min-height:62px;font-size:24px;padding:10px}.number{font-size:28px}.panel{padding:15px}.instruction{font-size:22px}.sub{font-size:24px}.answer{font-size:25px;padding:12px}footer button{padding:10px;font-size:14px}.counter{font-size:14px}.closing p{font-size:26px}}
+
+[hidden]{display:none!important}
+.choice{color:inherit;font:inherit;text-align:left;cursor:pointer}.choice.incorrect{border-color:#c84e42;background:#ffe9e6}.choice.correct{cursor:default}
+.routine-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr));gap:.6rem}
+.routine-fields label{display:grid;gap:.3rem;font-weight:bold}.routine-fields input{min-height:42px;padding:.4rem;border:1px solid #8da4b0;border-radius:6px;font:inherit;color:#0e3343}
+#slide p,h1,.choice{overflow-wrap:anywhere}
+@media(max-width:700px){.app{height:auto;min-height:100dvh;grid-template-rows:auto minmax(58vh,1fr) auto}
+ header{padding-block:.5rem}nav,.controls{flex-wrap:wrap}footer{min-height:56px;flex-wrap:wrap;gap:.45rem;padding:.35rem 0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand">ENGLISH · DAILY ROUTINES</div><nav aria-label="Secciones"><button data-section="start">Inicio</button><button data-section="words">Palabras</button><button data-section="story">Mi día</button><button data-section="practice">Práctica</button><button id="custom" data-section="custom" hidden>Mis preguntas</button></nav></header>
+<main id="slide" aria-live="polite"></main>
+<footer><span class="counter" id="counter"></span><div class="controls"><button id="back" aria-label="Anterior">←</button><button id="speak" class="listen" hidden>▶ Escuchar</button><button id="reveal">Ver respuesta</button><button class="primary" id="next" aria-label="Siguiente">Siguiente →</button><button id="full" aria-label="Pantalla completa" title="Pantalla completa · F">⛶</button></div></footer>
+</div><div class="progress" id="progress" aria-hidden="true"></div>
+<script type="module" src="./daily-routines.js"></script>
+</body></html>

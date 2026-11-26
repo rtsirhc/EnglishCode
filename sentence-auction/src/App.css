@@ -26,3 +26,18 @@
   flex-direction: column;
   padding: 2rem;
 }
+.auction-dealer button:disabled { opacity: .5; }
+.auction-dealer > div:first-child { height: auto; overflow: visible; }
+@media (max-width: 850px) {
+  .header { flex-wrap: wrap; gap: .5rem; padding: .75rem; }
+  .main-content { padding: .75rem; }
+  .auction-dealer { flex-direction: column-reverse; }
+  .auction-dealer > div { width: 100%; min-width: 0; }
+  .auction-dealer .grid-cols-3 { grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); }
+  .auction-dealer input { min-width: 0; }
+  .auction-dealer .p-8, .auction-bidder .p-10, .auction-bidder .p-8 { padding: 1rem; }
+  .auction-bidder { height: auto; }
+  .auction-bidder form, .auction-bidder .justify-center.gap-2 { flex-wrap: wrap; }
+  .auction-bidder .w-36 { width: 6rem; }
+  .auction-bidder .text-6xl { font-size: 2.25rem; }
+}

@@ -120,13 +120,13 @@ export default function SetupPhase({ gameState, roomId }) {
                                 )}
                             </div>
 
-                            {error && <div className="error-text">{error}</div>}
+                            {error && <div role="alert" className="error-text">{error}</div>}
 
                             <div className="action-row" style={{ marginTop: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                                 <button className="btn danger" onClick={handleReset}>Reset Board</button>
                                 <button
                                     className="btn success"
-                                    onClick={handleReady}
+                                    data-game-action="confirm" onClick={handleReady}
                                     disabled={currentShipIndex < SHIPS.length}
                                 >
                                     Confirm Placement
@@ -141,6 +141,7 @@ export default function SetupPhase({ gameState, roomId }) {
                 </div>
             </div>
 
+            <p className="board-scroll-hint">Scroll sideways to reach every column.</p>
             <div className="board-wrapper glass-panel">
                 <Board
                     axes={gameState.axes}

@@ -7,6 +7,39 @@
   </head>
   <body>
     <div id="game"></div>
+    <form id="player-setup" class="play-panel" hidden>
+      <p id="content-notice" role="status"></p>
+      <label>Player 1 nickname <input id="player-one" name="player1" maxlength="18" autocomplete="off" placeholder="Player 1"></label>
+      <label>Player 2 nickname <input id="player-two" name="player2" maxlength="18" autocomplete="off" placeholder="Player 2"></label>
+      <button type="submit">Start quiz</button>
+    </form>
+    <section id="classroom-controls" class="play-panel" aria-label="Match controls" hidden>
+      <p id="control-prompt" aria-live="polite"></p>
+      <div class="player-controls">
+        <fieldset><legend>Player 1</legend><div class="face-buttons">
+          <button type="button" data-answer="0">A</button>
+          <button type="button" data-answer="1">B</button>
+          <button type="button" data-answer="2">X</button>
+          <button type="button" data-answer="3">Y</button>
+        </div><div class="axis-buttons" data-directions hidden>
+          <button type="button" data-player="0" data-axis="-1,0">Left</button>
+          <button type="button" data-player="0" data-axis="0,-1">Up</button>
+          <button type="button" data-player="0" data-axis="0,1">Down</button>
+          <button type="button" data-player="0" data-axis="1,0">Right</button>
+        </div></fieldset>
+        <fieldset><legend>Player 2</legend><div class="face-buttons">
+          <button type="button" data-answer="4">A</button>
+          <button type="button" data-answer="5">B</button>
+          <button type="button" data-answer="6">X</button>
+          <button type="button" data-answer="7">Y</button>
+        </div><div class="axis-buttons" data-directions hidden>
+          <button type="button" data-player="1" data-axis="-1,0">Left</button>
+          <button type="button" data-player="1" data-axis="0,-1">Up</button>
+          <button type="button" data-player="1" data-axis="0,1">Down</button>
+          <button type="button" data-player="1" data-axis="1,0">Right</button>
+        </div></fieldset>
+      </div>
+    </section>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

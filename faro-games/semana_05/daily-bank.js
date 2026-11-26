@@ -1,0 +1,32 @@
+const vocab=[
+ ['wake up','despertarme','sun'],['get up','levantarme de la cama','bed'],
+ ['brush my teeth','cepillarme los dientes','brush'],['get dressed','vestirme','shirt'],
+ ['have breakfast','desayunar','plate'],['go to school','ir a la escuela','school'],
+ ['do homework','hacer tarea','book'],['go to bed','irme a la cama','moon']
+];
+export const slides=[
+ {section:'start',kind:'intro',title:'A day in my life',line:'Observa. Decide. Prueba una frase.'},
+ {section:'start',kind:'compare',title:'Wake up ≠ get up',line:'Despertarme ≠ levantarme de la cama',sentence:'I wake up. Then I get up.'},
+ ...vocab.map(([word,translation,icon])=>({section:'words',kind:'word',word,translation,icon})),
+ {section:'story',kind:'model',title:'In the morning',sentence:'I wake up at <em>six thirty</em>.',line:'6:30 · Me despierto a las seis y media.',spoken:'I wake up at six thirty.'},
+ {section:'story',kind:'model',title:'Before school',sentence:'I have breakfast at <em>seven</em>.',line:'7:00 · Desayuno a las siete.',spoken:'I have breakfast at seven.'},
+ {section:'story',kind:'model',title:'After school',sentence:'I do homework at <em>five</em>.',line:'5:00 p.m. · Hago tarea a las cinco.',spoken:'I do homework at five.'},
+ {section:'story',kind:'model',title:'At night',sentence:'I go to bed at <em>ten</em>.',line:'10:00 p.m. · Me voy a la cama a las diez.',spoken:'I go to bed at ten.'},
+ {section:'story',kind:'story',title:'Find the missing action',sentence:'At 7:00 I eat. At 7:30 I go to school.',line:'¿Qué acción falta entre despertarse y desayunar?',options:['I get dressed.','I go to bed.','I do homework.'],correct:0,answer:'I get dressed.'},
+ {section:'story',kind:'story',title:'Find the missing action',sentence:'After school I open my book. Then I write.',line:'¿Qué estoy haciendo?',options:['I do homework.','I have breakfast.','I wake up.'],correct:0,answer:'I do homework.'},
+ {section:'story',kind:'rule',title:'Una acción. Una hora.',sentence:'<em>I</em> + acción + <em>at</em> + hora',line:'I go to school at seven thirty.',answer:'Para decir a qué hora: at seven · at ten.'},
+ {section:'practice',kind:'listen',title:'¿Qué acción escuchaste?',options:['get dressed','have breakfast','go to bed'],correct:1,spoken:'I have breakfast at seven.',answer:'I have breakfast at seven.'},
+ {section:'practice',kind:'listen',title:'¿Qué acción escuchaste?',options:['do homework','wake up','go to school'],correct:0,spoken:'I do homework after school.',answer:'I do homework after school.'},
+ {section:'practice',kind:'listen',title:'¿Qué acción escuchaste?',options:['go to school','brush my teeth','get up'],correct:1,spoken:'I brush my teeth before school.',answer:'I brush my teeth before school.'},
+ {section:'practice',kind:'listen',title:'¿Qué hora escuchaste?',options:['6:30','7:00','7:30'],correct:2,spoken:'I go to school at seven thirty.',answer:'I go to school at seven thirty.'},
+ {section:'practice',kind:'listen',title:'¿Qué hora escuchaste?',options:['8:00','9:00','10:00'],correct:0,spoken:'I have breakfast at eight.',answer:'I have breakfast at eight.'},
+ {section:'practice',kind:'listen',title:'¿Qué acción escuchaste?',options:['go to bed','get dressed','wake up'],correct:2,spoken:'I wake up at six thirty.',answer:'I wake up at six thirty.'},
+ {section:'practice',kind:'complete',title:'Completa y dilo en voz baja.',sentence:'I ______ at seven.',line:'Desayuno a las siete.',answer:'I have breakfast at seven.'},
+ {section:'practice',kind:'complete',title:'Completa y dilo en voz baja.',sentence:'I go to school ___ eight.',line:'¿Qué palabra usamos antes de una hora?',answer:'I go to school at eight.'},
+ {section:'practice',kind:'complete',title:'Pon la frase en orden.',sentence:'at ten / I / go to bed',line:'Léela en voz baja.',answer:'I go to bed at ten.'},
+ {section:'practice',kind:'complete',title:'Una frase para esta acción.',sentence:'brush my teeth · 7:00',line:'Empieza con I. Usa at antes de la hora.',answer:'I brush my teeth at seven.'},
+ {section:'practice',kind:'complete',title:'¿Cuál es correcta?',sentence:'I go to bed at ten.<br>I go bed to at ten.',line:'Muestra uno o dos dedos.',answer:'1 · I go to bed at ten.'},
+ {section:'practice',kind:'complete',title:'Primero… después…',sentence:'I wake up. Then I ______.',line:'Después me levanto de la cama.',answer:'I wake up. Then I get up.'},
+ {section:'practice',kind:'personal',title:'Ahora, tu rutina.',line:'Completa con tus horarios. Practica en voz baja.'},
+ {section:'practice',kind:'end',title:'My daily routine',line:'Puedes leer una frase desde tu lugar. Compartir es opcional.'},
+];

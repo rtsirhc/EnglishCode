@@ -1,3 +1,4 @@
+import { lessonTitle } from '../data/questions'
 import { useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { cn } from '../utils/cn'
@@ -11,21 +12,21 @@ import timezoneMap from '../assets/timezone-map.png'
 const SLIDES = [
     {
         emoji: '🌍',
-        title: 'Welcome to Time Zone Travelers!',
+        title: lessonTitle || 'Welcome to Time Zone Travelers!',
         body: 'Get ready for an amazing adventure around the world!',
         bg: 'from-primary/10 to-secondary/10',
     },
     {
         emoji: '🌅',
-        title: 'The World is Big!',
-        body: 'When it is morning in Mexico, it might be night in Japan.',
+        title: 'Every team gets a turn.',
+        body: 'Answer aloud before the timer ends. Your teacher reveals the answer and records the verdict.',
         bg: 'from-accent/10 to-primary/10',
         showMap: true,
     },
     {
         emoji: '🕐',
-        title: 'We call these Time Zones!',
-        body: "Let's see how well you know them. Are you ready?",
+        title: 'Ready for a classroom challenge?',
+        body: 'Earn 5 points for a first answer or 1 point after another team has tried. The highest score wins.',
         bg: 'from-secondary/10 to-accent/10',
         showStart: true,
     },
@@ -120,9 +121,9 @@ export default function IntroView() {
                 {/* Navigation Arrows */}
                 {!isFirst && (
                     <button
-                        onClick={() => setCurrentSlide((s) => s - 1)}
+                        aria-label="Previous slide" onClick={() => setCurrentSlide((s) => s - 1)}
                         className={cn(
-                            'absolute left-6 top-1/2 -translate-y-1/2',
+                            'intro-nav absolute left-6 bottom-5 z-20',
                             'w-14 h-14 rounded-full bg-white/80 shadow-lg',
                             'flex items-center justify-center',
                             'hover:bg-white hover:scale-110 active:scale-95',
@@ -134,9 +135,9 @@ export default function IntroView() {
                 )}
                 {!isLast && (
                     <button
-                        onClick={() => setCurrentSlide((s) => s + 1)}
+                        aria-label="Next slide" onClick={() => setCurrentSlide((s) => s + 1)}
                         className={cn(
-                            'absolute right-6 top-1/2 -translate-y-1/2',
+                            'intro-nav absolute right-6 bottom-5 z-20',
                             'w-14 h-14 rounded-full bg-white/80 shadow-lg',
                             'flex items-center justify-center',
                             'hover:bg-white hover:scale-110 active:scale-95',

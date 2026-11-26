@@ -4,10 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEGA-CONSOLE 30-WORD FINAL OVERRIDE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Mega Console</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -51,9 +48,10 @@
                     <div class="section-label">INPUT CODE</div>
                     <div id="word-mask" class="word-mask"></div>
                     <div id="options-container" class="options-container hidden"></div>
-                    <input type="text" id="word-input" autocomplete="off" spellcheck="false" autofocus placeholder="">
+                    <input type="text" id="word-input" aria-label="Target word" autocomplete="off" spellcheck="false">
                     <div id="input-focus-border"></div>
                     <button id="hint-btn" class="cyber-btn small hint-btn">DECRYPT LETTER [-50 PTS]</button>
+                    <button id="submit-btn" class="cyber-btn small">CHECK WORD</button>
                 </div>
 
                 <div id="feedback-message" class="feedback"></div>
@@ -70,9 +68,9 @@
 
                     <div id="leaderboard-section">
                         <div class="input-name-container">
-                            <p>IDENTIFY YOURSELF AGENT:</p>
-                            <input type="text" id="player-name" maxlength="10" placeholder="ENTER NAME">
-                            <button id="save-score-btn" class="cyber-btn small">UPLOAD DATA</button>
+                            <label for="player-name">AGENT NICKNAME</label>
+                            <input type="text" id="player-name" maxlength="10" placeholder="Optional nickname">
+                            <button id="save-score-btn" class="cyber-btn small">SAVE SCORE ON THIS DEVICE</button>
                         </div>
                         <div id="high-scores" class="hidden">
                             <h3>TOP 3 OPERATIVES</h3>
@@ -96,7 +94,7 @@
         </footer>
     </div>
     <script src="words.js"></script>
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 
 </html>

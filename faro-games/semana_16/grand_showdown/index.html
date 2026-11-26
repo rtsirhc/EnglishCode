@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grand English Showdown · Semester Finale</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="badge">CUP</span>
+      <div>
+        <h1>Grand English Showdown</h1>
+        <p class="subtitle">Semester Finale · Spin real-life scenarios &amp; everyone speaks</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-sound" class="btn btn-ghost" type="button" aria-pressed="true">Sound: ON</button>
+      <button id="btn-full" class="btn btn-ghost" type="button">Fullscreen</button>
+      <button id="btn-finish" class="btn btn-gold" type="button" hidden>Finish &amp; Trophy</button>
+      <button id="btn-reset" class="btn btn-danger" type="button" hidden>New Cup</button>
+    </div>
+  </header>
+
+  <main id="screen-setup" class="screen">
+    <section class="panel">
+      <h2>Semester Finale Setup (Works in 15, 30 or 45 Minutes)</h2>
+      <p class="lead">Spin the Real-Life Wheel across all semester units! Every team counts off <strong>#1–#N</strong> so every student takes the mic.</p>
+      <div class="setup-grid">
+        <label class="field">
+          <span>CEFR Level</span>
+          <select id="opt-level">
+            <option value="A1">A1 — Guided Survival English</option>
+            <option value="A2" selected>A2 — Everyday Conversations (Core)</option>
+            <option value="B1">B1 — Complications &amp; Follow-Ups</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Teams</span>
+          <select id="opt-teams">
+            <option value="2">2 Teams</option>
+            <option value="3">3 Teams</option>
+            <option value="4">4 Teams</option>
+            <option value="5" selected>5 Teams</option>
+            <option value="6">6 Teams</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Speakers per Team</span>
+          <select id="opt-speakers">
+            <option value="3">3 Speakers</option>
+            <option value="4">4 Speakers</option>
+            <option value="5" selected>5 Speakers</option>
+            <option value="6">6 Speakers</option>
+            <option value="7">7 Speakers</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Huddle Timer</span>
+          <select id="opt-timer">
+            <option value="15" selected>15s</option>
+            <option value="20">20s</option>
+            <option value="30">30s</option>
+          </select>
+        </label>
+      </div>
+      <div class="setup-cta">
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">Launch Semester Cup</button>
+        <button id="btn-resume" class="btn btn-secondary btn-xl" type="button" hidden>Resume Saved Cup</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-play" class="screen" hidden>
+    <section id="scoreboard" class="scoreboard"></section>
+
+    <div class="turn-banner">
+      <div class="pill"><span class="label">ACTIVE TEAM</span><strong id="active-team">Team 1</strong></div>
+      <div class="pill"><span class="label">CHALLENGER ON MIC</span><strong id="active-speaker" class="gold-txt">SPEAKER #1</strong></div>
+      <div class="pill pill-grow"><span class="label">ROUND</span><strong id="round-num">1</strong></div>
+      <button id="btn-switch-speaker" class="btn btn-ghost btn-sm" type="button">Switch #</button>
+    </div>
+
+    <section id="phase-spin" class="card-panel center-panel">
+      <div class="wheel-stage">
+        <div class="wheel-wrap" aria-hidden="true">
+          <div class="wheel-pointer"></div>
+          <svg id="wheel-svg" class="wheel-svg" viewBox="0 0 240 240">
+            <g transform="translate(120,120)">
+              <path d="M0,0 L0,-112 A112,112 0 0,1 97,-56 Z" fill="#6d28d9"/>
+              <path d="M0,0 L97,-56 A112,112 0 0,1 97,56 Z" fill="#db2777"/>
+              <path d="M0,0 L97,56 A112,112 0 0,1 0,112 Z" fill="#0d9488"/>
+              <path d="M0,0 L0,112 A112,112 0 0,1 -97,56 Z" fill="#d97706"/>
+              <path d="M0,0 L-97,56 A112,112 0 0,1 -97,-56 Z" fill="#2563eb"/>
+              <path d="M0,0 L-97,-56 A112,112 0 0,1 0,-112 Z" fill="#16a34a"/>
+              <circle r="112" fill="none" stroke="#f5b942" stroke-width="8"/>
+              <circle r="28" fill="#0e081f" stroke="#fde047" stroke-width="5"/>
+              <text y="6" fill="#fde047" font-family="monospace" font-size="14" font-weight="900" text-anchor="middle">SPIN</text>
+            </g>
+          </svg>
+        </div>
+        <div class="wheel-readout">
+          <div class="wheel-place" id="wheel-place">READY TO SPIN</div>
+          <button id="btn-spin" class="btn btn-gold btn-xl" type="button">Spin Real-Life Wheel</button>
+        </div>
+      </div>
+      <div id="bet-row" class="bet-row" hidden>
+        <p class="hint">Choose stake for <strong id="bet-who">Team 1 · Speaker #1</strong>:</p>
+        <div class="bet-grid" id="bet-buttons">
+          <button class="btn-bet" data-bet="100" type="button"><strong>100</strong><span>Safe</span></button>
+          <button class="btn-bet" data-bet="250" type="button"><strong>250</strong><span>Bold</span></button>
+          <button class="btn-bet" data-bet="500" type="button"><strong>500</strong><span>Champion</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="phase-play" class="card-panel" hidden>
+      <div class="challenge-head">
+        <span class="cat-tag" id="ch-place">SCENARIO</span>
+        <span class="stake-tag" id="ch-stake">250 PTS</span>
+        <div class="timer-box">
+          <span id="timer-display">15s</span>
+          <button id="btn-timer" class="btn btn-ghost btn-sm" type="button">Start Huddle</button>
+        </div>
+      </div>
+      <h2 class="big-prompt" id="ch-prompt"></h2>
+      <p class="frame-box" id="ch-frame" hidden></p>
+
+      <div class="answer-box" id="ch-answer-box" hidden>
+        <div class="answer-label">MODEL RESPONSE</div>
+        <p class="answer-text" id="ch-answer"></p>
+        <p class="answer-tip" id="ch-tip"></p>
+      </div>
+
+      <div class="judge-bar">
+        <button id="btn-reveal" class="btn btn-secondary" type="button">Reveal Model (R)</button>
+        <div class="verdict-group">
+          <button id="btn-clean" class="btn btn-success" type="button">Clean Solo (+100%) [1]</button>
+          <button id="btn-echo" class="btn btn-warn" type="button">Assisted Echo (+50%) [2]</button>
+          <button id="btn-miss" class="btn btn-danger" type="button">Missed / Explain (-50%) [3]</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-podium" class="screen" hidden>
+    <section class="panel">
+      <h2>Semester Championship Trophy Podium</h2>
+      <p id="podium-summary" class="lead"></p>
+      <ol id="podium-list" class="podium-list"></ol>
+      <button id="btn-again" class="btn btn-primary btn-xl" type="button">Play Again</button>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

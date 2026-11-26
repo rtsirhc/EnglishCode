@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import socket from '../socket';
 import Game1Student from '../components/Game1Student';
 import Game2Student from '../components/Game2Student';
 import FinalScore from '../components/FinalScore';
 
 export default function StudentView() {
+  const { state: roomInfo } = useLocation();
   const [state, setState] = useState(null);
   const [connected, setConnected] = useState(false);
 
@@ -22,6 +24,8 @@ export default function StudentView() {
     };
   }, []);
 
+  if (!roomInfo || (!socket.connected && !state)) return <Navigate to="/" replace />;
+  if (!connected && state) return <main className="p-8"><h1>Room closed</h1><Link to="/">Return to room setup</Link></main>;
   if (!state) {
     return (
       <div className="min-h-screen flex items-center justify-center">

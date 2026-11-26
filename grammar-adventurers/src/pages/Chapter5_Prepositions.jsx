@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StoryPage from '../components/StoryPage';
 import Character from '../components/Character';
-import miaImg from '../assets/mia.png';
+import miaImg from '../assets/mia.webp';
 
 const Chapter5_Prepositions = () => {
     const [catPosition, setCatPosition] = useState('on');

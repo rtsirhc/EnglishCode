@@ -12,7 +12,7 @@ function Confetti() {
       duration: `${2 + Math.random() * 3}s`,
       size: `${6 + Math.random() * 8}px`,
     }));
-  }, []);
+  }, [role]);
 
   return (
     <>
@@ -54,10 +54,11 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
 
   // Fetch leaderboard on mount
   useEffect(() => {
+    if (role !== 'Teacher') return;
     socket.emit('get_leaderboard', (lb) => {
       if (Array.isArray(lb)) setLeaderboard(lb);
     });
-  }, []);
+  }, [role]);
 
   const handlePlayAgain = () => {
     socket.emit('restart_game', { roomId });
@@ -82,7 +83,7 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
         </p>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-deep-bg rounded-xl p-4">
             <p className={`text-3xl font-extrabold ${money < 0 ? 'text-red-400' : 'text-green-400'}`}>
               {money < 0 ? '-' : ''}${Math.abs(money).toLocaleString()}
@@ -98,7 +99,7 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
             <p className="text-slate-500 text-xs mt-1 uppercase">Accuracy</p>
           </div>
           <div className="bg-deep-bg rounded-xl p-4">
-            <p className="text-cyan-400 text-3xl font-extrabold">{finalTime ? formatTime(finalTime) : (elapsedTime ? formatTime(elapsedTime) : '--')}</p>
+            <p className="text-cyan-400 text-3xl font-extrabold">{formatTime(finalTime ?? elapsedTime ?? 0)}</p>
             <p className="text-slate-500 text-xs mt-1 uppercase">Final Time</p>
           </div>
         </div>
@@ -117,10 +118,9 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
         )}
       </div>
 
-      {/* Leaderboard */}
-      <div className="bg-card-bg border border-card-border rounded-2xl p-6 mb-6 text-left">
+      {role === 'Teacher' && <div className="bg-card-bg border border-card-border rounded-2xl p-6 mb-6 text-left">
         <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-4 text-center">
-          🏆 Best Times Leaderboard
+          🏆 Best times on this browser
         </h3>
         {leaderboard.length === 0 ? (
           <p className="text-slate-600 text-center text-sm py-4">No records yet. Complete a full game to set a time!</p>
@@ -164,7 +164,7 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
             ))}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Review List */}
       {reviewList.length > 0 && (
@@ -194,7 +194,7 @@ export default function ResultsScreen({ money, reviewList, totalWords, wordsComp
       {/* Play Again */}
       {role === 'Teacher' && (
         <button
-          onClick={handlePlayAgain}
+          id="spelling-next" onClick={handlePlayAgain}
           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-4 px-10 rounded-xl text-lg transition-all shadow-lg shadow-green-900/30 cursor-pointer"
         >
           🔄 Play Again

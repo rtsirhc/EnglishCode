@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTeacherSync, useStudentSync } from './hooks/useSync';
 import { useGameState } from './hooks/useGameState';
@@ -21,33 +21,9 @@ const INITIAL_STATE = {
 };
 
 function TeacherApp() {
-  const { broadcastState, broadcastSpin } = useTeacherSync();
+  const [displayId] = useState(() => crypto.randomUUID());
+  const { broadcastState, broadcastSpin } = useTeacherSync(displayId);
   const { state, actions } = useGameState(broadcastState, broadcastSpin);
-  const [spinTrigger, setSpinTrigger] = useState(0);
-  const [spinTarget, setSpinTarget] = useState(null);
-
-  // Wrap spinWheel to also trigger the local wheel animation
-  const handleSpin = useCallback(() => {
-    actions.spinWheel();
-  }, [actions]);
-
-  // After spinWheel updates state, detect the new _lastSpinTarget
-  // We use a wrapper that reads the target from state after spinWheel runs
-  const wrappedSpin = useCallback(() => {
-    // We need to get the target index after the state update
-    // So we use a small trick: spinWheel sets _lastSpinTarget in state
-    handleSpin();
-  }, [handleSpin]);
-
-  // Detect spin target changes to trigger animation
-  const lastTarget = state._lastSpinTarget;
-
-  // Use effect-like approach: track spin trigger via state changes
-  const onSpinWithAnimation = useCallback(() => {
-    actions.spinWheel();
-    // We'll read the new target from the updated state in the next render
-  }, [actions]);
-
   // Champion screen shown on both views
   if (state.phase === 'champion') {
     return <ChampionScreen state={state} onReset={actions.gameReset} isTeacher />;
@@ -60,6 +36,7 @@ function TeacherApp() {
   return (
     <TeacherPanel
       state={state}
+      displayId={displayId}
       onSpin={actions.spinWheel}
       onRevealWord={actions.revealWord}
       onLiveUpdate={actions.liveUpdate}
@@ -74,7 +51,8 @@ function TeacherApp() {
 }
 
 function StudentApp() {
-  const { syncedState, spinEvent } = useStudentSync(INITIAL_STATE);
+  const displayId = new URLSearchParams(useLocation().search).get('room');
+  const { syncedState, spinEvent } = useStudentSync(INITIAL_STATE, displayId);
 
   if (!syncedState || syncedState.phase === 'setup') {
     return (
@@ -95,7 +73,7 @@ function StudentApp() {
 
 export default function App() {
   const location = useLocation();
-  const isTeacher = location.pathname === '/teacher';
+  const isTeacher = location.pathname !== '/student';
 
   return isTeacher ? <TeacherApp /> : <StudentApp />;
 }

@@ -1,97 +1,44 @@
-import { useState, useEffect } from 'react';
-import { socket } from './lib/socket';
+import { useState, useEffect, useRef } from 'react';
+import { bindGameControls } from '../../gallery/shared/runtime.js';
+import { openRoom } from './lib/room';
 import Lobby from './views/Lobby';
 import DealerDashboard from './views/DealerDashboard';
 import BidderDisplay from './views/BidderDisplay';
 import './App.css';
 
-function App() {
-  const [gameState, setGameState] = useState(null);
-  const [roomId, setRoomId] = useState('');
-  const [role, setRole] = useState('');
-  const [isConnected, setIsConnected] = useState(socket.connected);
-
+export default function App() {
+  const [state, setState] = useState(null);
+  const [session, setSession] = useState(null);
+  const [notice, setNotice] = useState('');
+  const room = useRef(null);
+  useEffect(() => () => room.current?.close(), []);
   useEffect(() => {
-    socket.connect();
-
-    function onConnect() {
-      setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-      setGameState(null); // Return to lobby on disconnect
-    }
-
-    function onGameStateUpdate(state) {
-      setGameState(state);
-    }
-
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('game_state_update', onGameStateUpdate);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('game_state_update', onGameStateUpdate);
-      socket.disconnect();
-    };
-  }, []);
-
-  const handleJoinLobby = (joinedRoomId, selectedRole, state) => {
-    setRoomId(joinedRoomId);
-    setRole(selectedRole);
-    setGameState(state);
-  };
-
-  const renderView = () => {
-    if (!gameState) {
-      return <Lobby onJoin={handleJoinLobby} />;
-    }
-
-    if (role === 'Dealer') {
-      return <DealerDashboard roomId={roomId} gameState={gameState} />;
-    }
-
-    if (role === 'Bidder') {
-      return <BidderDisplay roomId={roomId} gameState={gameState} />;
-    }
-
-    return null;
-  };
-
-  return (
-    <div className="app-container">
-      <header className="header">
-        <a href="/" className="logo cursor-pointer tracking-wider">⚖️ THE SENTENCE AUCTION</a>
-
-        <div className="flex gap-6 items-center">
-          {role && (
-            <div className="text-slate-300 font-bold px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700">
-              <span className="text-slate-500 mr-2">ROLE:</span>
-              <span className={role === 'Dealer' ? 'text-accent-gold' : 'text-indigo-400'}>
-                {role.toUpperCase()}
-              </span>
-            </div>
-          )}
-          {roomId && (
-            <div className="text-slate-300 font-bold px-4 py-1.5 rounded-full bg-slate-800 border border-slate-700">
-              <span className="text-slate-500 mr-2">ROOM:</span>
-              <span className="text-white">{roomId}</span>
-            </div>
-          )}
-          <div className={`px-4 py-1.5 rounded-full font-bold text-sm ${isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-            {isConnected ? 'ONLINE' : 'OFFLINE'}
-          </div>
-        </div>
-      </header>
-
-      <main className="main-content">
-        {renderView()}
-      </main>
-    </div>
-  );
+    if (!session) return;
+    const keys = session.role === 'Dealer' ? ['answer1', 'answer2', 'answer3', 'next'] : ['confirm'];
+    const actions = Object.fromEntries(keys.map(key => [key, () => {
+      document.querySelector('[data-game-action="' + key + '"]')?.click();
+    }]));
+    return bindGameControls('sentence-auction', actions);
+  }, [session]);
+  function leave(message = '') {
+    room.current?.close(); room.current = null;
+    setSession(null); setState(null); setNotice(message);
+  }
+  async function join(options) {
+    setNotice('');
+    room.current = await openRoom({ ...options, onState: setState, onClose: leave });
+    setState(room.current.state); setSession(options);
+  }
+  const View = session?.role === 'Dealer' ? DealerDashboard : BidderDisplay;
+  return <div className="app-container">
+    <header className="header">
+      <a href="/" target="_top" className="logo">⚖ Sentence Auction</a>
+      {session && <div>{session.role} · Room <strong>{session.roomId}</strong>
+        <button className="ml-4 underline" onClick={() => leave()}>Leave room</button></div>}
+    </header>
+    <main className="main-content">
+      {session && state ? <View gameState={state} updateState={patch => room.current?.update(patch)} />
+        : <Lobby onJoin={join} notice={notice} />}
+    </main>
+  </div>;
 }
-
-export default App;

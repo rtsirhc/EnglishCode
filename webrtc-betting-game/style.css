@@ -224,3 +224,20 @@ input:focus { border-color: #f59e0b; }
   .game-layout { grid-template-columns: 1fr; }
   .leaderboard-panel { max-height: 250px; }
 }
+
+select { color: #e2e8f0; background: #1e293b; border: 1px solid #64748b; border-radius: 8px; padding: 10px; margin: 8px; }
+button.role-card { font: inherit; font-weight: 700; color: inherit; }
+.join-link { display: block; overflow-wrap: anywhere; }
+#client-question { margin-bottom: 1rem; overflow-wrap: anywhere; }
+.lb-name { overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .host-header { flex-wrap: wrap; }
+}
+.round-rule { margin-bottom: 1rem; color: #cbd5e1; }
+#btn-mute { color: #e2e8f0; }
+.lb-balance.debt { color: #fca5a5; }
+@media (max-width: 768px) {
+    .game-layout { flex: none; overflow: visible; }
+    .game-left { overflow: visible; }
+}

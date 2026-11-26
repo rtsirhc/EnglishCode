@@ -45,6 +45,10 @@ export default function PlayerView() {
     const [searchParams] = useSearchParams();
     const codeFromUrl = searchParams.get('code');
 
+    const [mode, setMode] = useState(searchParams.get('mode') === 'online' ? 'online' : 'local');
+    const [busy, setBusy] = useState(false);
+    useEffect(() => () => socket.close(), []);
+
     const [joined, setJoined] = useState(false);
     const [roomCode, setRoomCode] = useState(codeFromUrl || '');
     const [playerName, setPlayerName] = useState('');
@@ -54,7 +58,6 @@ export default function PlayerView() {
     const [betAmount, setBetAmount] = useState(100);
     const [answer, setAnswer] = useState('');
     const [answerSubmitted, setAnswerSubmitted] = useState(false);
-    const [stealSent, setStealSent] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [lastPhase, setLastPhase] = useState(null);
     const [buzzerTapped, setBuzzerTapped] = useState(false);
@@ -69,7 +72,6 @@ export default function PlayerView() {
                 if (state.phase === 'betting') {
                     setAnswerSubmitted(false);
                     setAnswer('');
-                    setStealSent(false);
                     setBuzzerTapped(false);
                     setShowResult(false);
                     setBetAmount(Math.min(100, state.myBalance || 100));
@@ -80,9 +82,6 @@ export default function PlayerView() {
                 if (state.phase === 'listening_active') {
                     setAnswer('');
                     setAnswerSubmitted(false);
-                }
-                if (state.phase === 'speaking_active') {
-                    setStealSent(false);
                 }
                 if (state.phase === 'round_result') {
                     setShowResult(true);
@@ -109,7 +108,9 @@ export default function PlayerView() {
             return;
         }
         setError('');
-        socket.emit('join_room', { roomCode: roomCode.trim(), playerName: playerName.trim() }, (res) => {
+        setBusy(true);
+        socket.emit('join_room', { roomCode: roomCode.trim(), mode, playerName: playerName.trim() }, (res) => {
+            setBusy(false);
             if (res.success) {
                 setJoined(true);
                 setPlayerKey(res.playerKey);
@@ -117,7 +118,7 @@ export default function PlayerView() {
                 setError(res.error || 'Could not join');
             }
         });
-    }, [roomCode, playerName]);
+    }, [roomCode, playerName, mode]);
 
     const placeBet = () => {
         const gs = gameState;
@@ -145,12 +146,11 @@ export default function PlayerView() {
     };
 
     const requestSteal = () => {
-        if (stealSent) return;
-        setStealSent(true);
         socket.emit('request_steal', { roomCode, playerKey });
     };
 
     const gs = gameState;
+    const stealSent = gs?.stealRequest?.from === playerKey && Boolean(gs?.stealRequest);
     const formatMoney = (n) => `$${(n || 0).toLocaleString()}`;
 
     // ─── JOIN SCREEN ───
@@ -183,24 +183,30 @@ export default function PlayerView() {
                     <input
                         className="input-field"
                         type="text"
-                        placeholder="Room Code"
+                        placeholder="Room Code" aria-label="Room code"
                         value={roomCode}
                         onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                        maxLength={4}
+                        maxLength={8}
                         style={{ textAlign: 'center', fontSize: '1.5rem', fontFamily: 'var(--font-mono)', letterSpacing: '8px', marginBottom: '12px' }}
                     />
 
                     <input
                         className="input-field"
                         type="text"
-                        placeholder="Your Name"
+                        placeholder="Nickname" aria-label="Nickname"
                         value={playerName}
                         onChange={(e) => setPlayerName(e.target.value)}
                         maxLength={20}
                         style={{ marginBottom: '20px' }}
                     />
 
-                    <button className="btn btn-gold btn-lg btn-block" onClick={joinRoom}>
+                    <label style={{ display: 'block', marginBottom: '16px' }}>Connection
+                        <select className="input-field" value={mode} disabled={busy} onChange={e => setMode(e.target.value)}>
+                            <option value="local">Same browser · three tabs</option>
+                            <option value="online">Separate devices · internet</option>
+                        </select>
+                    </label>
+                    <button disabled={busy} className="btn btn-gold btn-lg btn-block" onClick={joinRoom}>
                         Join
                     </button>
                 </div>
@@ -305,7 +311,7 @@ export default function PlayerView() {
                         </div>
                     </div>
 
-                    <button className="btn btn-gold btn-lg btn-block" onClick={placeBet}>
+                    <button className="btn btn-gold btn-lg btn-block" id="showdown-confirm" onClick={placeBet}>
                         🔒 Lock Bet
                     </button>
                 </div>
@@ -342,7 +348,7 @@ export default function PlayerView() {
                         <p style={{ color: 'var(--text-secondary)' }}>Waiting for result...</p>
                     </div>
                 ) : (
-                    <button className="buzzer-btn" onClick={tapBuzzer}>
+                    <button className="buzzer-btn" id="showdown-buzzer" onClick={tapBuzzer}>
                         BUZZ!
                     </button>
                 )}
@@ -386,7 +392,7 @@ export default function PlayerView() {
                         />
                         <button
                             className="btn btn-green btn-block"
-                            onClick={submitAnswer}
+                            id="showdown-confirm" onClick={submitAnswer}
                             disabled={!answer.trim() || answerSubmitted}
                         >
                             {answerSubmitted ? '⏳ Checking...' : '✅ Submit Answer'}
@@ -527,7 +533,7 @@ export default function PlayerView() {
             );
         }
 
-        const iWon = r?.winner === playerKey;
+        const iWon = r?.allCorrect || r?.winner === playerKey;
         return (
             <div style={{
                 ...mobileStyles.fullPage,
@@ -544,16 +550,17 @@ export default function PlayerView() {
                         color: iWon ? 'var(--accent-green)' : 'var(--accent-red)',
                         marginBottom: '8px',
                     }}>
-                        {iWon ? 'You Win This Round!' : 'You Lost This Round'}
+                        {iWon ? 'You Win This Round!' : 'Round Complete'}
                     </h2>
                     <p style={{
                         fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '2rem',
                         color: iWon ? 'var(--accent-green)' : 'var(--accent-red)',
                         marginBottom: '16px',
                     }}>
-                        {iWon ? '+' : '-'}{formatMoney(r?.amount || 0)}
+                        {iWon ? '+' : ''}{formatMoney(iWon ? (r?.allCorrect ? gs.myBet : r?.amount) : 0)}
                     </p>
                     <div className="balance-chip large">💰 {formatMoney(myBalance)}</div>
+                    {gs.currentQuestion && <p style={{ marginTop: '16px', overflowWrap: 'anywhere' }}>{gs.currentQuestion.sentence}</p>}
                     <p style={{ color: 'var(--text-dim)', marginTop: '16px', fontSize: '0.85rem' }}>
                         Waiting for next round...
                     </p>

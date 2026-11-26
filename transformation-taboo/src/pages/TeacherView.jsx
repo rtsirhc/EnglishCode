@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import socket from '../socket';
 import TeacherLobby from '../components/TeacherLobby';
 import Game1Teacher from '../components/Game1Teacher';
@@ -6,6 +7,7 @@ import Game2Teacher from '../components/Game2Teacher';
 import FinalScore from '../components/FinalScore';
 
 export default function TeacherView() {
+  const { state: roomInfo } = useLocation();
   const [state, setState] = useState(null);
   const [connected, setConnected] = useState(false);
 
@@ -27,6 +29,8 @@ export default function TeacherView() {
     socket.emit('teacher_reset');
   };
 
+  if (!roomInfo || (!socket.connected && !state)) return <Navigate to="/" replace />;
+  if (!connected && state) return <main className="p-8"><h1>Room closed</h1><Link to="/">Return to room setup</Link></main>;
   if (!state) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -61,7 +65,7 @@ export default function TeacherView() {
           <span className="text-2xl">🎓</span>
           <div>
             <h1 className="text-slate-800 font-black text-lg leading-none">Teacher Panel</h1>
-            <p className="text-slate-400 text-xs">{phaseLabel}</p>
+            <p className="text-slate-400 text-xs">{phaseLabel}</p><p className="font-bold">Room {roomInfo.room} · {roomInfo.mode === 'local' ? 'Same browser' : 'Separate devices'}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">

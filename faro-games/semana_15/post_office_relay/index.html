@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Express Parcel Relay</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="badge">MAIL</span>
+      <div>
+        <h1>Express Parcel Relay</h1>
+        <p class="subtitle">At the post office · Every driver takes the wheel</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-review" class="btn btn-secondary" type="button">3-Min Mail Flash</button>
+      <button id="btn-sound" class="btn btn-ghost" type="button" aria-pressed="true">Sound: ON</button>
+      <button id="btn-full" class="btn btn-ghost" type="button">Fullscreen</button>
+      <button id="btn-finish" class="btn btn-accent" type="button" hidden>Finish &amp; Podium</button>
+      <button id="btn-reset" class="btn btn-danger" type="button" hidden>New Race</button>
+    </div>
+  </header>
+
+  <main id="screen-setup" class="screen">
+    <section class="panel">
+      <h2>Parcel Relay Setup (Zero Student Phones)</h2>
+      <p class="lead">Count off <strong>Driver #1, #2, #3...</strong> on each team. Every turn passes the wheel to the next driver! First truck to <strong>12 miles</strong> (or highest mileage at the bell) wins.</p>
+      <div class="setup-grid">
+        <label class="field">
+          <span>CEFR Level</span>
+          <select id="opt-level">
+            <option value="A1">A1 — Guided Post Office Frames</option>
+            <option value="A2" selected>A2 — Everyday Shipping (Core)</option>
+            <option value="B1">B1 — Customs, Delays &amp; Tracking</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Teams (Trucks)</span>
+          <select id="opt-teams">
+            <option value="2">2 Trucks</option>
+            <option value="3">3 Trucks</option>
+            <option value="4">4 Trucks</option>
+            <option value="5" selected>5 Trucks</option>
+            <option value="6">6 Trucks</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Drivers per Team (#1–#N)</span>
+          <select id="opt-speakers">
+            <option value="3">3 Drivers</option>
+            <option value="4">4 Drivers</option>
+            <option value="5" selected>5 Drivers</option>
+            <option value="6">6 Drivers</option>
+            <option value="7">7 Drivers</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Race Distance</span>
+          <select id="opt-goal">
+            <option value="10">10 Miles (Quick 15–20 min)</option>
+            <option value="12" selected>12 Miles (Standard 30 min)</option>
+            <option value="16">16 Miles (Full 45 min)</option>
+          </select>
+        </label>
+      </div>
+      <div class="setup-cta">
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">Start Parcel Race</button>
+        <button id="btn-resume" class="btn btn-secondary btn-xl" type="button" hidden>Resume Saved Race</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-play" class="screen" hidden>
+    <section id="track" class="track-panel" aria-label="Delivery race track"></section>
+
+    <div class="turn-banner">
+      <div class="pill"><span class="label">ACTIVE TRUCK</span><strong id="active-team">Team 1</strong></div>
+      <div class="pill"><span class="label">DRIVER ON THE MIC</span><strong id="active-speaker" class="gold-txt">DRIVER #1</strong></div>
+      <div class="pill pill-grow"><span class="label">STOP</span><strong id="round-num">1</strong></div>
+      <button id="btn-switch-speaker" class="btn btn-ghost btn-sm" type="button">Switch Driver #</button>
+    </div>
+
+    <section class="card-panel">
+      <div class="challenge-head">
+        <span class="cat-tag" id="ch-cat">DELIVERY STOP</span>
+        <span class="move-tag">Clean Solo = +2 mi · Echo = +1 mi</span>
+        <div class="timer-box">
+          <span id="timer-display">15s</span>
+          <button id="btn-timer" class="btn btn-ghost btn-sm" type="button">Start Huddle</button>
+        </div>
+      </div>
+
+      <h2 class="big-prompt" id="ch-prompt"></h2>
+      <p class="frame-box" id="ch-frame" hidden></p>
+
+      <div class="answer-box" id="ch-answer-box" hidden>
+        <div class="answer-label">MODEL POST OFFICE LINE</div>
+        <p class="answer-text" id="ch-answer"></p>
+        <p class="answer-tip" id="ch-tip"></p>
+      </div>
+
+      <div class="judge-bar">
+        <button id="btn-reveal" class="btn btn-secondary" type="button">Reveal Model (R)</button>
+        <div class="verdict-group">
+          <button id="btn-clean" class="btn btn-success" type="button">Express Turbo (+2 mi) [1]</button>
+          <button id="btn-echo" class="btn btn-warn" type="button">Standard Mail (+1 mi) [2]</button>
+          <button id="btn-miss" class="btn btn-danger" type="button">Red Light / Explain (0 mi) [3]</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="screen-podium" class="screen" hidden>
+    <section class="panel">
+      <h2>Express Parcel Relay Podium</h2>
+      <p id="podium-summary" class="lead"></p>
+      <ol id="podium-list" class="podium-list"></ol>
+      <button id="btn-again" class="btn btn-primary btn-xl" type="button">Race Again</button>
+    </section>
+  </main>
+
+  <dialog id="review-dialog" class="modal">
+    <div class="modal-head">
+      <h2>3-Minute Post Office Vocab Flash</h2>
+      <button id="btn-close-review" class="btn btn-ghost" type="button">Close</button>
+    </div>
+    <p class="hint">Tap any card to reveal a useful shipping phrase.</p>
+    <div id="review-grid" class="review-grid"></div>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

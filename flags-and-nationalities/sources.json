@@ -1,0 +1,17 @@
+{
+  "retrieved": "2026-11-22",
+  "countries": {
+    "source": "https://github.com/mledoze/countries",
+    "license": "ODbL-1.0",
+    "archiveSHA256": "f0fc7f7234b96ce8d26920ef439b224a890cddf715183edf5655764a93895435"
+  },
+  "flags": {
+    "source": "https://github.com/lipis/flag-icons",
+    "license": "MIT",
+    "archiveSHA256": "f0a5d32b7e0b430857a87ed8e60d3ff1686949590321bb85ebfa72f0acd00d67"
+  },
+  "population": {
+    "source": "https://api.worldbank.org/v2/country/all/indicator/SP.POP.TOTL?date=2023&format=json&per_page=400",
+    "year": 2023
+  }
+}

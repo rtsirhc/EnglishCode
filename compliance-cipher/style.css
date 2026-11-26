@@ -1,0 +1,17 @@
+@import "tailwindcss" source("./");
+[hidden] { display: none !important; }
+.panel { padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid #334155; border-radius: 1rem; background: #0f172a; }
+.field { width: 100%; border: 1px solid #475569; border-radius: .65rem; background: #020617; padding: .75rem; color: #f1f5f9; }
+.primary, .secondary { border-radius: .65rem; padding: .75rem 1rem; cursor: pointer; font-weight: 650; }
+.primary { background: #059669; color: white; }
+.secondary { background: #1e293b; border: 1px solid #475569; }
+button:disabled { opacity: .55; cursor: wait; }
+:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; }
+progress { accent-color: #10b981; }
+#clue, #leaderboard { overflow-wrap: anywhere; }
+
+.invite-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+@media (max-width: 600px) {
+  .invite-panel { grid-template-columns: minmax(0, 1fr); }
+  #qrcode { justify-self: start; }
+}

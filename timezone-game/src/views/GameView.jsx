@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
-import { TIMER_DURATION } from '../store/gameStore'
 import LayoutContainer from '../components/LayoutContainer'
 import Scoreboard from '../components/Scoreboard'
 import MapDisplay from '../components/MapDisplay'
@@ -14,44 +13,20 @@ import TimerBar from '../components/TimerBar'
  * Respects paused state — interval only ticks when not paused.
  */
 export default function GameView() {
-    const timer = useGameStore((s) => s.timer)
     const paused = useGameStore((s) => s.paused)
     const tick = useGameStore((s) => s.tick)
     const handleTimeout = useGameStore((s) => s.handleTimeout)
     const gameState = useGameStore((s) => s.gameState)
 
-    const intervalRef = useRef(null)
-
-    // Drive the countdown timer
+    const currentTurn = useGameStore(s => s.currentTurn)
+    const turnLocked = useGameStore(s => s.turnLocked)
     useEffect(() => {
-        if (gameState !== 'playing' || paused) {
-            // Clear interval when paused or not playing
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current)
-                intervalRef.current = null
-            }
-            return
-        }
-
-        intervalRef.current = setInterval(() => {
-            const newTimer = tick()
-            if (newTimer <= 0) {
-                clearInterval(intervalRef.current)
-                intervalRef.current = null
-                // Small delay so the user sees "0s" before the turn switches
-                setTimeout(() => {
-                    handleTimeout()
-                }, 500)
-            }
+        if (gameState !== 'playing' || paused || turnLocked) return
+        const interval = setInterval(() => {
+            if (tick() <= 0) handleTimeout()
         }, 1000)
-
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current)
-                intervalRef.current = null
-            }
-        }
-    }, [gameState, paused, timer === TIMER_DURATION])
+        return () => clearInterval(interval)
+    }, [gameState, paused, turnLocked, currentTurn, tick, handleTimeout])
 
     return (
         <LayoutContainer>

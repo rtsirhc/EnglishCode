@@ -1,4 +1,4 @@
-const questions = [
+export const questions = [
     // Present Passive Voice - Science Focus
     { q: "What planet is known as the 'Red Planet'?", a: ["mars"], clue: "Solar System" },
     { q: "What gas is used by plants for photosynthesis?", a: ["carbon dioxide", "co2"], clue: "We breathe it out" },

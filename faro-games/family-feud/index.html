@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132434">
+  <title>Classroom Survey Show</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header>
+    <h1>Classroom Survey Show</h1>
+    <div class="tools" id="host-tools">
+      <a id="projector" target="_blank" rel="noopener" hidden>Open projector ↗</a>
+      <button id="hardware">Controller</button>
+    </div>
+  </header>
+  <main>
+    <section id="setup" class="setup">
+      <div class="intro">
+        <h2>Take the survey stage.</h2>
+        <p>Two teams guess the most popular answers. Three strikes give the other team a chance to steal.</p>
+      </div>
+      <form id="settings" class="setup-card">
+        <label>Team A <input id="team-a" value="Team A" maxlength="24" required></label>
+        <label>Team B <input id="team-b" value="Team B" maxlength="24" required></label>
+        <label>Survey deck
+          <select id="level">
+            <option value="1">A1 · Daily life</option>
+            <option value="2">A2 · Routines and places</option>
+            <option value="3">B1 · Habits and decisions</option>
+          </select>
+        </label>
+        <div class="tools"><button class="primary" type="submit">New game</button><button id="resume" type="button" hidden>Resume saved game</button></div>
+      </form>
+    </section>
+    <section id="waiting" hidden><h2>Waiting for the host</h2><p>Open a game in the teacher tab to start the projector.</p></section>
+    <section id="game" hidden>
+      <div class="scoreboard" aria-label="Scoreboard">
+        <div class="team-score" id="score-a"><span id="name-a"></span><strong id="points-a"></strong></div>
+        <div class="round-score"><span id="round"></span><strong id="pot"></strong><span id="multiplier"></span></div>
+        <div class="team-score" id="score-b"><span id="name-b"></span><strong id="points-b"></strong></div>
+      </div>
+      <div class="stage">
+        <div class="stage-heading">
+          <p id="phase"></p>
+          <h2 id="question"></h2>
+        </div>
+        <div id="answers" class="answers"></div>
+        <div class="stage-status"><span id="feedback" role="status"></span><span id="strikes" aria-live="polite"></span><span id="timer" role="timer"></span></div>
+      </div>
+      <section id="host-controls" class="host-controls" aria-label="Teacher controls">
+        <div class="tools">
+          <button id="buzz-a">Buzz A</button><button id="buzz-b">Buzz B</button>
+          <button id="next" class="primary">Open survey</button>
+          <button id="clock">Start 10-second timer</button>
+          <button id="strike">Strike</button>
+          <button id="undo">Undo</button>
+          <button id="menu">Setup</button>
+        </div>
+        <form id="answer-form" class="answer-form">
+          <label for="typed">Spoken answer</label>
+          <input id="typed" maxlength="250" placeholder="Type what the team said" autocomplete="off" required>
+          <button id="check" type="submit">Check match</button>
+          <button id="record" type="button" hidden>Dictate on device</button>
+        </form>
+        <details id="reference">
+          <summary>Teacher answer list</summary>
+          <div id="reference-answers" class="reference-answers"></div>
+        </details>
+        <p id="notice" role="status"></p>
+      </section>
+    </section>
+  </main>
+  <dialog id="hardware-dialog">
+    <form method="dialog" class="tools"><h2>Controllers</h2><button>Close</button></form>
+    <p>Use the gallery controls for keyboard, touch and gamepad. A and B buzz in. Number keys select teacher answers.</p>
+    <p>An Arduino can send A or B over serial. This mode uses 115,200 baud.</p>
+    <div class="tools">
+      <button id="connect">Connect Arduino</button>
+      <label><input id="swap" type="checkbox"> Swap Arduino buzzers</label>
+    </div>
+    <p id="hardware-status" role="status"></p>
+    <button id="install-speech" hidden>Enable offline English dictation</button>
+    <p id="speech-status" role="status"></p>
+  </dialog>
+  <script src="./app.js" type="module"></script>
+</body>
+</html>

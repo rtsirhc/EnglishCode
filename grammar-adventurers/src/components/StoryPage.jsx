@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useControls } from '../controls';
 import { useGame } from '../context/GameContext';
 
 const StoryPage = ({ title, ChapterContent, NextChapterPath, PrevChapterPath, CharacterArea }) => {
     const { isTimeMachineActive } = useGame();
 
+    useControls(Boolean(NextChapterPath));
     return (
         <div className={`flex flex-col min-h-screen overflow-hidden ${isTimeMachineActive ? 'bg-gray-200' : 'bg-slate-50'}`}>
 
@@ -35,26 +37,12 @@ const StoryPage = ({ title, ChapterContent, NextChapterPath, PrevChapterPath, Ch
                     </div>
                 </div>
 
-                {/* Page Turn Arrows (Overlay) */}
-                <div className="absolute inset-0 pointer-events-none flex justify-between items-center px-4 md:px-8 z-50">
-                    {PrevChapterPath ? (
-                        <Link to={PrevChapterPath} className="pointer-events-auto opacity-50 hover:opacity-100 transition transform hover:-translate-x-1 duration-300">
-                            <div className="w-14 h-14 bg-white/80 backdrop-blur rounded-full shadow-lg flex items-center justify-center text-3xl text-adventure-blue hover:text-adventure-red border-2 border-slate-200">
-                                ⬅️
-                            </div>
-                        </Link>
-                    ) : <div></div>}
-
-                    {NextChapterPath ? (
-                        <Link to={NextChapterPath} className="pointer-events-auto opacity-80 hover:opacity-100 transition transform hover:translate-x-1 duration-300">
-                            <div className="w-14 h-14 bg-white/90 backdrop-blur rounded-full shadow-xl flex items-center justify-center text-3xl text-adventure-green hover:text-green-600 border-2 border-green-200 animate-pulse-slow">
-                                ➡️
-                            </div>
-                        </Link>
-                    ) : <div></div>}
-                </div>
-
             </div>
+            <nav aria-label="Chapter navigation" className="flex gap-3 justify-between px-4 py-4 bg-white border-t border-slate-200">
+                {PrevChapterPath && <Link to={PrevChapterPath} className="p-2 font-bold text-slate-800">← Previous</Link>}
+                <Link to="/index" className="p-2 font-bold text-slate-800">Contents</Link>
+                {NextChapterPath && <Link to={NextChapterPath} data-adventure-next className="p-2 font-bold text-blue-800">Next →</Link>}
+            </nav>
         </div>
     );
 };

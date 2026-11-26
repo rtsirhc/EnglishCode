@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { cn } from '../utils/cn'
 import { playSound } from '../utils/sounds'
@@ -12,9 +12,13 @@ import { motion, AnimatePresence } from 'framer-motion'
  * Uses framer-motion for entrance slide-in animation.
  */
 export default function QuestionCard() {
+    const questionCount = useGameStore(s => s.questionCount)
     const getCurrentQuestion = useGameStore((s) => s.getCurrentQuestion)
     const getActiveTeam = useGameStore((s) => s.getActiveTeam)
     const submitAnswer = useGameStore((s) => s.submitAnswer)
+    const currentTurn = useGameStore(s => s.currentTurn)
+    const feedbackTimer = useRef(null)
+    useEffect(() => () => clearTimeout(feedbackTimer.current), [])
     const attemptCount = useGameStore((s) => s.attemptCount)
 
     const [feedback, setFeedback] = useState(null) // 'correct' | 'wrong' | null
@@ -27,7 +31,7 @@ export default function QuestionCard() {
     // Reset answer reveal state when question changes
     useEffect(() => {
         setShowingAnswer(false)
-    }, [question?.id])
+    }, [question?.id, currentTurn])
 
     if (!question) return null
 
@@ -36,6 +40,7 @@ export default function QuestionCard() {
 
         const result = submitAnswer(isCorrect)
 
+        if (!result) return
         if (result.correct) {
             setFeedback('correct')
             setLastPoints(result.points)
@@ -46,7 +51,8 @@ export default function QuestionCard() {
         }
 
         // Clear feedback after animation
-        setTimeout(() => {
+        feedbackTimer.current = setTimeout(() => {
+            useGameStore.getState().finishFeedback()
             setFeedback(null)
             setLastPoints(0)
             setShowingAnswer(false)
@@ -89,7 +95,7 @@ export default function QuestionCard() {
                 >
                     {/* Question Number */}
                     <div className="text-sm font-semibold text-text-secondary mb-2">
-                        Question {question.id} / 30
+                        Question {question.id} / {questionCount}
                     </div>
 
                     {/* Question Text */}
@@ -101,7 +107,7 @@ export default function QuestionCard() {
                     <div className="flex flex-col items-center justify-center gap-6 min-h-[120px]">
                         {!showingAnswer ? (
                             <motion.button
-                                onClick={() => setShowingAnswer(true)}
+                                data-game-action="confirm" onClick={() => { setShowingAnswer(true); useGameStore.setState({ paused: true }); }}
                                 disabled={!!feedback}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -124,7 +130,7 @@ export default function QuestionCard() {
                                 </div>
                                 <div className="flex items-center justify-center gap-4 sm:gap-6 flex-wrap">
                                     <motion.button
-                                        onClick={() => handleAnswer(true)}
+                                        data-game-action="answer1" onClick={() => handleAnswer(true)}
                                         disabled={!!feedback}
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
@@ -141,7 +147,7 @@ export default function QuestionCard() {
                                         CORRECT
                                     </motion.button>
                                     <motion.button
-                                        onClick={() => handleAnswer(false)}
+                                        data-game-action="answer2" onClick={() => handleAnswer(false)}
                                         disabled={!!feedback}
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}

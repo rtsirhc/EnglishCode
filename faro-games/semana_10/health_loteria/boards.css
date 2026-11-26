@@ -1,0 +1,24 @@
+.board-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 0 0 .55rem; }
+.board-links select { padding: .5rem; font: inherit; }
+.board-links a { color: #103e43; font-weight: 700; }
+#player-board header a { color: white; }
+#player-board header { gap: .5rem; min-height: 56px; padding: .65rem 1rem; background: #103e43; color: white; }
+main.player-loteria { display: block; width: min(100%, 64rem); margin: auto; padding: 1rem; overflow: visible; }
+.player-loteria p { text-align: center; }
+#incoming { font-weight: 700; min-height: 1.5em; }
+.loteria-grid { display: grid; grid-template-columns: repeat(var(--size),minmax(0,1fr)); gap: clamp(.25rem,1.5vw,.75rem); margin-bottom: 1rem; }
+.board-cell { min-height: 4.25rem; border: 2px solid #b2c2bc; background: #fff; padding: .25rem; display: grid; place-items: center; gap: .3rem; font-size: clamp(.75rem,2.6vw,1.1rem); overflow-wrap: anywhere; }
+.board-cell .art { display: block; width: 100%; max-width: 115px; height: auto; aspect-ratio: 1; }
+.board-cell[aria-pressed=true] { border-color: #196758; background: #d6f6df; }
+.board-cell[aria-pressed=true] strong::after { content: ' ✓'; }
+#claim { background: #103e43; color: white; }
+@media (max-width: 650px) {
+  #caller { height: auto; min-height: 100dvh; grid-template-rows: auto minmax(260px, 1fr) auto; }
+  #caller main { min-height: 260px; }
+  #caller #clue { padding-inline: .8rem; }
+}
+@media print {
+  #player-board header { background: transparent; color: #103e43; }
+  #player-board header a, .player-loteria > p, .player-loteria .board-links { display: none; }
+  .board-cell { break-inside: avoid; print-color-adjust: exact; }
+}

@@ -1,3 +1,5 @@
+import { bindGameControls } from '../gallery/shared/runtime.js';
+import { validatePath, validateIndictment } from './validation.js';
 const narrativeLog = document.getElementById('narrative-log');
 const taskInstructions = document.getElementById('task-instructions');
 const textInput = document.getElementById('text-input');
@@ -11,7 +13,10 @@ const evidenceDisplay = document.getElementById('evidence-display');
 const evidenceContent = document.getElementById('evidence-content');
 
 let currentPhase = 0;
-let caseStatus = "Active";
+let phaseComplete = false;
+let triviaIndex = 0;
+let transitionTimer = null;
+let disposeControls = () => {};
 
 const phases = {
     0: {
@@ -27,30 +32,22 @@ const phases = {
         task: "Write a short report (3-5 sentences) explaining how the killer entered. You MUST use the following prepositions correctly: <strong>at, into, onto, off, in, on</strong>.",
         type: "text",
         image: "map.png",
-        validation: (text) => {
-            const requiredWords = ['at', 'into', 'onto', 'off', 'in', 'on'];
-            const lowerText = text.toLowerCase();
-            const missed = requiredWords.filter(word => !lowerText.includes(word));
-            return {
-                valid: missed.length === 0,
-                message: missed.length === 0 ? "Excellent work. The path is clear." : `The evidence is incomplete. You missed: ${missed.join(', ')}.`
-            };
-        }
+        validation: validatePath
     },
     2: {
         title: "The Tense Timeline",
-        narrative: "With the entry point established, you turn your attention to the suspects. Three people were in the manor tonight. One is lying about their timeline. Listen closely to their alibis.",
-        task: "Identify the liar based on their incorrect use of tenses (Simple Past vs Past Perfect).",
+        narrative: "With the entry point established, you turn your attention to the suspects. The medical examiner has confirmed that Blackwood died at 8:25 PM. Three people were in the manor tonight. One alibi contradicts that time.",
+        task: "Identify the alibi that places his death before the confirmed time. Read how the past perfect orders the events.",
         type: "choice",
         options: [
             { text: "The Butler: 'I was polishing the silver when I heard the scream. I had finished dinner service an hour before.'", correct: false },
             { text: "The Maid: 'I arrived at the study at 9 PM. But Lord Blackwood was already dead. I saw him through the keyhole.'", correct: false },
-            { text: "The Nephew: 'I didn't do it! I arrived at 8:30 PM. Before that, I met my friend at the pub.'", correct: true }
+            { text: "The Nephew: 'I arrived at 8:20 PM. Lord Blackwood had already died before I arrived.'", correct: true }
         ],
         validation: (choiceIndex) => {
             return {
                 valid: choiceIndex === 2,
-                message: choiceIndex === 2 ? "Correct. He said 'I met', but since it happened *before* he arrived (which is also past), he should have said 'I had met'. The timeline doesn't add up!" : "That alibi seems grammatically consistent. Try again."
+                message: choiceIndex === 2 ? "Correct. Had already died places the death before his arrival at 8:20 PM, but the confirmed death time is 8:25 PM." : "That alibi fits the confirmed death time. Try again."
             };
         }
     },
@@ -62,28 +59,16 @@ const phases = {
         questions: [
             { q: "Which sentence implies the person is still in Paris?", options: ["She went to Paris.", "She has gone to Paris."], answer: 1 },
             { q: "Which sentence implies a finished time period?", options: ["I have seen him today.", "I saw him yesterday."], answer: 1 },
-            { q: "'When I arrived, the train left.' - Did wait for me?", options: ["Yes (implied)", "No (implied it left simultaneously or just after)"], answer: 1 } // Trying to be precise here.
+            { q: "Which sentence clearly places the departure before my arrival?", options: ["When I arrived, the train left.", "When I arrived, the train had left."], answer: 1 } // Trying to be precise here.
         ],
         currentQuestion: 0
     },
     4: {
         title: "The Final Report",
         narrative: "The phone unlocks. It reveals a text message sent at 8:25 PM: 'The old man is finished.' You have the motive, the method, and the opportunity. Now, you must file the official indictment.",
-        task: "Write a 100-word indictment. Use at least 5 of the prepositions (at, into, onto, off, in, on) and at least 3 sentences in the Past Perfect.",
+        task: "Write an indictment of at least 100 words. Use at least 5 of the prepositions (at, into, onto, off, in, on) and at least 3 sentences in the Past Perfect.",
         type: "text",
-        validation: (text) => {
-            const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
-            const preps = ['at', 'into', 'onto', 'off', 'in', 'on'];
-            const lowerText = text.toLowerCase();
-            const prepCount = preps.reduce((count, p) => lowerText.includes(p) ? count + 1 : count, 0);
-            const pastPerfectCount = (lowerText.match(/had\s+\w+/g) || []).length;
-
-            if (wordCount < 50) return { valid: false, message: `Report too short (${wordCount}/100 words). Elaborate on the details.` };
-            if (prepCount < 5) return { valid: false, message: `Not enough key prepositions used (found approx ${prepCount}). Needed 5.` }; // Lenient count
-            if (pastPerfectCount < 3) return { valid: false, message: `You need more Past Perfect sentences (found approx ${pastPerfectCount}/3). Use 'had + verb'.` };
-
-            return { valid: true, message: "Indictment Filed. The case is closed." };
-        }
+        validation: validateIndictment
     },
     5: {
         title: "Case Closed",
@@ -98,28 +83,38 @@ const evidenceModal = document.getElementById('evidence-modal');
 const closeIndictmentModal = document.getElementById('close-modal');
 
 const evidenceData = {
-    1: { id: "evidence-slot-1", text: "<strong>Path Established:</strong><br>Killer entered via the <em>front gate</em>, moved <em>into</em> the rose garden, climbed <em>onto</em> the balcony, and entered <em>in</em> the study room." },
-    2: { id: "evidence-slot-2", text: "<strong>Suspect Identified:</strong><br>The Nephew lied. He used the Simple Past ('met') for an earlier action, contradicting the sequence. He arrived *after* the murder." },
+    1: { id: "evidence-slot-1", text: "<strong>Path Established:</strong><br>The killer stopped <em>at</em> the front gate, moved <em>into</em> the rose garden, climbed <em>onto</em> the balcony, climbed <em>off</em> the trellis and stood <em>in</em> the study, leaving mud <em>on</em> the rug." },
+    2: { id: "evidence-slot-2", text: "<strong>Suspect Identified:</strong><br>The Nephew claimed Blackwood had died before 8:20 PM. That contradicts the confirmed death time of 8:25 PM." },
     3: { id: "evidence-slot-3", text: "<strong>Decrypted Message:</strong><br><em>'The old man is finished.'</em> Sent at 8:25 PM.<br>Motive confirmed." }
 };
 
 function initGame() {
     renderPhase(0);
+    textInput.addEventListener('input', () => {
+        if (!phaseComplete) return;
+        phaseComplete = false;
+        nextBtn.classList.add('hidden');
+        submitBtn.classList.remove('hidden');
+        feedback.classList.add('hidden');
+        updateControls();
+    });
 
     submitBtn.addEventListener('click', handleSubmit);
     nextBtn.addEventListener('click', nextPhase);
 
     viewEvidenceBtn.addEventListener('click', () => {
         evidenceModal.classList.remove('hidden');
+        closeIndictmentModal.focus();
+        updateControls();
     });
 
     closeIndictmentModal.addEventListener('click', () => {
-        evidenceModal.classList.add('hidden');
+        closeEvidence();
     });
 
     window.addEventListener('click', (event) => {
         if (event.target === evidenceModal) {
-            evidenceModal.classList.add('hidden');
+            closeEvidence();
         }
     });
 }
@@ -133,14 +128,19 @@ function unlockEvidence(phaseIndex) {
         slot.classList.add('unlocked');
 
         // Visual cue
-        viewEvidenceBtn.style.color = 'var(--success-color)';
+        viewEvidenceBtn.style.color = '#a3d5a7';
         setTimeout(() => viewEvidenceBtn.style.color = '', 1000);
     }
 }
 
 function renderPhase(phaseIndex) {
+    clearTimeout(transitionTimer);
+    transitionTimer = null;
+    phaseComplete = false;
     currentPhase = phaseIndex;
     const phaseData = phases[phaseIndex];
+    document.getElementById('case-status').textContent = phaseIndex === 5 ? 'Case closed' : phaseData.title;
+    nextBtn.textContent = 'Proceed to Next Phase';
 
     // Update UI
     narrativeLog.innerHTML = phaseData.narrative;
@@ -176,6 +176,7 @@ function renderPhase(phaseIndex) {
     } else if (phaseData.type === 'text') {
         textInput.classList.remove('hidden');
         textInput.value = '';
+        nextBtn.textContent = 'Approve report & continue';
         submitBtn.textContent = "Submit Report";
     } else if (phaseData.type === 'choice') {
         optionsContainer.classList.remove('hidden');
@@ -199,10 +200,14 @@ function renderPhase(phaseIndex) {
         feedback.textContent = "CONGRATULATIONS!";
         feedback.classList.remove('hidden');
         feedback.classList.add('feedback-success');
+        nextBtn.textContent = 'New investigation';
+        nextBtn.classList.remove('hidden');
     }
+    updateControls();
 }
 
 function renderTrivia(qIndex) {
+    triviaIndex = qIndex;
     const phaseData = phases[3];
     optionsContainer.classList.remove('hidden');
     optionsContainer.innerHTML = '';
@@ -223,31 +228,40 @@ function renderTrivia(qIndex) {
         btn.onclick = () => handleTriviaAnswer(qIndex, idx);
         optionsContainer.appendChild(btn);
     });
+    updateControls();
 }
 
 function handleTriviaAnswer(qIndex, choiceIndex) {
+    if (currentPhase !== 3 || qIndex !== triviaIndex || phaseComplete || transitionTimer) return;
     const phaseData = phases[3];
     const q = phaseData.questions[qIndex];
     if (choiceIndex === q.answer) {
         showFeedback("Correct.", "success");
-        setTimeout(() => {
+        optionsContainer.querySelectorAll('button').forEach(button => button.disabled = true);
+        transitionTimer = setTimeout(() => {
+            transitionTimer = null;
             if (qIndex + 1 < phaseData.questions.length) {
                 renderTrivia(qIndex + 1);
                 feedback.classList.add('hidden');
             } else {
+                phaseComplete = true;
                 showFeedback("Access Granted. All encryptions bypassed.", "success");
                 submitBtn.classList.add('hidden');
                 nextBtn.classList.remove('hidden');
+                updateControls();
             }
         }, 1000);
+        updateControls();
     } else {
         showFeedback("Access Denied. Incorrect answer.", "error");
     }
 }
 
 function handleChoice(choiceIndex) {
+    if (currentPhase !== 2 || phaseComplete) return;
     const result = phases[currentPhase].validation(choiceIndex);
     if (result.valid) {
+        phaseComplete = true;
         showFeedback(result.message, "success");
         submitBtn.classList.add('hidden');
         nextBtn.classList.remove('hidden');
@@ -256,9 +270,11 @@ function handleChoice(choiceIndex) {
     } else {
         showFeedback(result.message, "error");
     }
+    updateControls();
 }
 
 function handleSubmit() {
+    if (phaseComplete) return;
     if (currentPhase === 0) {
         nextPhase();
         return;
@@ -268,6 +284,7 @@ function handleSubmit() {
         const text = textInput.value;
         const result = phases[currentPhase].validation(text);
         if (result.valid) {
+            phaseComplete = true;
             showFeedback(result.message, "success");
             submitBtn.classList.add('hidden');
             nextBtn.classList.remove('hidden');
@@ -275,10 +292,12 @@ function handleSubmit() {
             showFeedback(result.message, "error");
         }
     }
+    updateControls();
 }
 
 function nextPhase() {
-    // Unlock evidence for the phase we just finished
+    if (currentPhase === 5) { location.reload(); return; }
+    if (currentPhase !== 0 && !phaseComplete) return;
     unlockEvidence(currentPhase);
     renderPhase(currentPhase + 1);
 }
@@ -289,4 +308,34 @@ function showFeedback(msg, type) {
     feedback.className = `feedback-msg feedback-${type}`;
 }
 
+function closeEvidence() {
+    evidenceModal.classList.add('hidden');
+    viewEvidenceBtn.focus();
+    updateControls();
+}
+function updateControls() {
+    disposeControls();
+    const actions = { hint: () => {
+        if (evidenceModal.classList.contains('hidden')) viewEvidenceBtn.click();
+        else closeEvidence();
+    } };
+    if (!evidenceModal.classList.contains('hidden')) actions.confirm = closeEvidence;
+    else {
+        if (!nextBtn.classList.contains('hidden')) actions.next = nextPhase;
+        else if (!submitBtn.classList.contains('hidden')) actions.confirm = handleSubmit;
+        optionsContainer.querySelectorAll('button').forEach((button, index) => {
+            if (!button.disabled) actions['answer' + (index + 1)] = () => button.click();
+        });
+    }
+    disposeControls = bindGameControls('paradox-blackwood', actions);
+}
+window.addEventListener('keydown', event => {
+    if (evidenceModal.classList.contains('hidden')) return;
+    if (event.key === 'Escape') closeEvidence();
+    if (event.key === 'Tab') {
+        event.preventDefault();
+        closeIndictmentModal.focus();
+    }
+});
+window.addEventListener('pagehide', () => clearTimeout(transitionTimer));
 initGame();

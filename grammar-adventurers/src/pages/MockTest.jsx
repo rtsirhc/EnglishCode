@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://slkvapwjsthhbshunwvl.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsa3ZhcHdqc3RoaGJzaHVud3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyODc2MjcsImV4cCI6MjA4Njg2MzYyN30.a1wv5xUd7MbphcpOrAVTojVTkNUE_lgl0Md5famx2Ck';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { validatePack } from '../../../gallery/shared/content.js';
+import { useControls } from '../controls';
+import { read, write } from '../../../gallery/shared/storage.js';
 
 const MockTest = () => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -14,7 +12,7 @@ const MockTest = () => {
     const [studentName, setStudentName] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
-    const questions = [
+    const builtIn = [
         { id: 1, text: "Every day, Leo ______ up at 7 AM.", options: ["wake", "wakes", "waking"], correct: "wakes" },
         { id: 2, text: "I ______ pizza.", options: ["like", "likes", "liking"], correct: "like" },
         { id: 3, text: "She ______ play soccer.", options: ["don't", "doesn't", "isn't"], correct: "doesn't" },
@@ -53,38 +51,41 @@ const MockTest = () => {
         {
             id: 20, type: "reading",
             passage: "The Time Machine was not a toy. It was a powerful invention created by Professor Zoom. It could travel 100 years into the past or the future in just one second! But there was one rule: never touch the red button unless it is an emergency.",
-            text: "What was the important rule?", options: ["Travel only 100 years.", "Never touch the red button.", "Always visit the future."], correct: "Never touch the red button."
+            text: "When may someone touch the red button?", options: ["Travel only 100 years.", "Only in an emergency.", "Always visit the future."], correct: "Only in an emergency."
         }
     ];
 
-    const handleAnswer = (option) => {
-        setSelectedAnswer(option);
-        if (option === questions[currentQuestion].correct) {
-            setScore(score + 1);
-        }
+    const [pack] = useState(() => {
+        try { return validatePack(read('pack:grammar-adventurers', null), 'quiz'); }
+        catch { return null; }
+    });
+    const questions = pack?.items.map(item => ({ text: item.question, options: item.options, correct: item.answer, explanation: item.explanation })) ?? builtIn;
+    const pending = useRef(null);
+    useEffect(() => () => clearTimeout(pending.current), []);
+    useControls(false, showResults || selectedAnswer !== null ? 0 : questions[currentQuestion].options.length);
 
-        setTimeout(() => {
-            if (currentQuestion < questions.length - 1) {
+    function handleAnswer(option) {
+        if (pending.current !== null || selectedAnswer !== null) return;
+        setSelectedAnswer(option);
+        if (option === questions[currentQuestion].correct) setScore(value => value + 1);
+        pending.current = setTimeout(() => {
+            pending.current = null;
+            if (currentQuestion + 1 < questions.length) {
                 setCurrentQuestion(currentQuestion + 1);
                 setSelectedAnswer(null);
-            } else {
-                setShowResults(true);
-            }
+            } else setShowResults(true);
         }, 1200);
-    };
+    }
 
-    const submitResult = async () => {
-        if (!studentName.trim()) return;
-
-        try {
-            await supabase
-                .from('exam_results')
-                .insert([{ student_name: studentName, score: score }]);
+    const [saveError, setSaveError] = useState('');
+    const submitResult = () => {
+        const stored = read('grammar-adventurers:scores', []);
+        const previous = Array.isArray(stored) ? stored : [];
+        const result = { nickname: studentName.trim() || 'Player', score, total: questions.length, at: new Date().toISOString() };
+        if (write('grammar-adventurers:scores', [...previous.slice(-49), result])) {
             setSubmitted(true);
-        } catch (error) {
-            console.error('Error submitting score:', error);
-            alert('Oh no! Something went wrong saving your score.');
-        }
+            setSaveError('');
+        } else setSaveError('Browser storage is unavailable. You can keep playing without saving.');
     };
 
     const navigate = useNavigate();
@@ -96,30 +97,31 @@ const MockTest = () => {
         setSelectedAnswer(null);
         setStudentName('');
         setSubmitted(false);
+        setSaveError('');
     };
 
     if (showResults) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-500 flex flex-col items-center justify-center p-8 text-white">
-                <div className="bg-white text-slate-800 p-12 rounded-3xl shadow-2xl text-center max-w-2xl w-full">
+                <div className="bg-white text-slate-800 p-5 sm:p-12 rounded-3xl shadow-2xl text-center max-w-2xl w-full">
                     <h1 className="text-5xl font-comic font-bold mb-6 text-adventure-blue">Test Complete! 🎓</h1>
                     <p className="text-2xl mb-4">You scored:</p>
-                    <div className="text-8xl font-bold text-green-500 mb-8">{score} / 20</div>
+                    <div className="text-5xl sm:text-8xl font-bold text-green-500 mb-8">{score} / {questions.length}</div>
 
                     {!submitted ? (
                         <div className="mb-8 p-6 bg-slate-50 rounded-xl border-2 border-slate-200">
-                            <label className="block text-lg font-bold mb-2 text-slate-600">Type your full name to save & continue:</label>
-                            <div className="flex gap-2">
+                            <label htmlFor="adventure-nickname" className="block text-lg font-bold mb-2 text-slate-600">Nickname (optional). Scores stay in this browser:</label>
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input
-                                    type="text"
+                                    type="text" id="adventure-nickname" maxLength={40}
                                     value={studentName}
                                     onChange={(e) => setStudentName(e.target.value)}
-                                    placeholder="e.g. Christine Lee"
-                                    className="flex-grow p-3 border-2 border-slate-300 rounded-lg text-lg focus:border-adventure-blue focus:outline-none"
+                                    placeholder="Player"
+                                    className="min-w-0 flex-grow p-3 border-2 border-slate-300 rounded-lg text-lg focus:border-adventure-blue focus:outline-none"
                                 />
                                 <button
                                     onClick={submitResult}
-                                    disabled={!studentName.trim()}
+
                                     className="px-6 py-3 bg-adventure-green text-white font-bold rounded-lg hover:bg-green-600 disabled:opacity-50"
                                 >
                                     Save 💾
@@ -128,42 +130,37 @@ const MockTest = () => {
                         </div>
                     ) : (
                         <div className="mb-8 p-4 bg-green-100 text-green-700 rounded-xl font-bold text-xl">
-                            ✅ Score saved for {studentName}!
+                            ✅ Score saved on this device for {studentName.trim() || 'Player'}!
                         </div>
                     )}
 
+                    {saveError && <p role="alert" className="text-red-700">{saveError}</p>}
                     <p className="text-xl mb-8">
-                        {score === 20 ? "PERFECT SCORE! You are a Grammar Master! 🌟" :
-                            score >= 15 ? "Great job! You are a true adventurer! 🚀" :
+                        {score === questions.length ? "PERFECT SCORE! You are a Grammar Master! 🌟" :
+                            score >= questions.length * 0.75 ? "Great job! You are a true adventurer! 🚀" :
                                 "Good practice! Try again to get a perfect score! 💪"}
                     </p>
 
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex flex-wrap gap-4 justify-center">
                         <button
                             onClick={handleTryAgain}
-                            disabled={!submitted}
-                            className={`px-8 py-4 font-bold rounded-full text-xl shadow-lg transition transform ${submitted
-                                ? "bg-blue-500 hover:bg-blue-600 text-white hover:scale-105"
-                                : "bg-slate-300 text-slate-500 cursor-not-allowed opacity-50"
-                                }`}
+
+                            className={`px-8 py-4 font-bold rounded-full text-xl shadow-lg transition transform bg-blue-500 hover:bg-blue-600 text-white hover:scale-105`}
                         >
                             Try Again 🔄
                         </button>
 
                         <button
                             onClick={() => navigate('/')}
-                            disabled={!submitted}
-                            className={`px-8 py-4 font-bold rounded-full text-xl shadow-lg transition transform ${submitted
-                                ? "bg-adventure-yellow hover:bg-yellow-400 text-white hover:scale-105"
-                                : "bg-slate-300 text-slate-500 cursor-not-allowed opacity-50"
-                                }`}
+
+                            className={`px-8 py-4 font-bold rounded-full text-xl shadow-lg transition transform bg-adventure-yellow hover:bg-yellow-400 text-white hover:scale-105`}
                         >
                             Back to Home 🏠
                         </button>
                     </div>
                     {!submitted && (
                         <p className="mt-4 text-sm text-slate-500 italic">
-                            * Please save your name to enable buttons
+                            Saving is optional. Your score is never sent to a server.
                         </p>
                     )}
                 </div>
@@ -179,13 +176,13 @@ const MockTest = () => {
             <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-white">
                 {/* Header */}
                 <div className="bg-adventure-blue p-6 text-white flex justify-between items-center">
-                    <h2 className="text-2xl font-bold">Mock Test 📝</h2>
-                    <div className="text-xl font-bold">Question {currentQuestion + 1} / 20</div>
+                    <h2 className="text-2xl font-bold">{pack?.title ?? "Mock Test 📝"}</h2>
+                    <div className="text-xl font-bold">Question {currentQuestion + 1} / {questions.length}</div>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="w-full bg-slate-200 h-2">
-                    <div className="bg-green-500 h-2 transition-all duration-500" style={{ width: `${((currentQuestion) / 20) * 100}%` }}></div>
+                    <div className="bg-green-500 h-2 transition-all duration-500" style={{ width: `${((currentQuestion) / questions.length) * 100}%` }}></div>
                 </div>
 
                 {/* Content */}
@@ -204,7 +201,8 @@ const MockTest = () => {
                         {question.options.map((option, idx) => (
                             <button
                                 key={idx}
-                                onClick={() => !selectedAnswer && handleAnswer(option)}
+                                data-adventure-answer={idx + 1}
+                                onClick={() => handleAnswer(option)}
                                 disabled={selectedAnswer !== null}
                                 className={`
                                     p-4 rounded-xl text-xl font-bold border-2 transition-all text-left px-8
@@ -219,6 +217,7 @@ const MockTest = () => {
                             </button>
                         ))}
                     </div>
+                    {selectedAnswer !== null && question.explanation && <p role="status" className="mt-4 text-slate-700">{question.explanation}</p>}
                 </div>
             </div>
         </div>
