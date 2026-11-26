@@ -31,3 +31,5 @@ __pycache__/
 # Local QA reports & temp sessions
 browser-control-reports/
 :memory:.ses
+.vercel
+.env*

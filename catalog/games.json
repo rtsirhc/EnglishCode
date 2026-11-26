@@ -3,7 +3,7 @@
   "games": [
     {
       "id": "optician-sprint",
-      "title": "Optician's 20/20 Bet & Speak",
+      "title": "Focus Lab 20/20",
       "levels": [
         "A1",
         "A2",
@@ -15,7 +15,7 @@
         "Grammar"
       ],
       "theme": "classroom",
-      "description": "Team betting and speaking relay for optician vocabulary and Have you ever…? Every numbered speaker takes a turn after a 15-second team huddle.",
+      "description": "Live eye-exam game where ALL teams play at once across 3 optical modes: Blurry Vision (sharpen focus), Better 1 or Better 2? (simultaneous vote), and Snellen Eye Chart.",
       "entry": "/faro-games/semana_13/optician_sprint/index.html",
       "source": "faro",
       "contentModel": "fixed",
@@ -30,7 +30,7 @@
         "/faro-games/semana_13/optician_sprint/app.js",
         "/faro-games/semana_13/optician_sprint/bank.js"
       ],
-      "instructions": "Have each team count off #1–#N. Choose a stake before revealing the card, run the 15-second huddle so teammates coach Speaker #X, then only Speaker #X speaks aloud. Score Clean Solo (+100%), Assisted Echo (+50%), or Missed (-50%). Full crew completion awards a +300 bonus.",
+      "instructions": "Count off #1-#N per team. Mode 1 (Blurry Vision): click lens sharper (Space) while teams race to buzz in and speak. Mode 2 (Better 1 or 2?): all teams vote simultaneously with 1 or 2 fingers, then Speaker #X explains the error for a +150 bonus. Mode 3 (Snellen Chart): reveal shrinking lines and complete the optician dialogue aloud.",
       "requirements": "One teacher laptop/projector. No student devices or internet required.",
       "tags": [
         "optica",

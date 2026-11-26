@@ -1,380 +1,313 @@
-import { REVIEW_CARDS, VISUALS, CHALLENGES } from './bank.js';
+import { REVIEW_CARDS, BLURRY_ROUNDS, AB_ROUNDS, SNELLEN_ROUNDS } from './bank.js';
 
-const STORAGE_KEY = 'englishcode:optician-sprint:v1';
+const STORAGE_KEY = 'englishcode:focus-lab-2020:v2';
 const $ = (id) => document.getElementById(id);
 
 let audioCtx = null;
-function beep(freq = 520, dur = 0.11, type = 'sine') {
+function beep(freq = 540, dur = 0.09, type = 'sine') {
   if (!state.sound) return;
   try {
     audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    gain.gain.value = 0.12;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + dur);
-  } catch { /* ignore audio errors */ }
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq; g.gain.value = 0.12;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch {}
 }
 
-const defaultState = () => ({
+const BLUR_STEPS = [
+  { px: 16, pts: 500, diopter: 'FOCUS 1/4 · -4.00 D (500 PTS)' },
+  { px: 9,  pts: 350, diopter: 'FOCUS 2/4 · -2.50 D (350 PTS)' },
+  { px: 4,  pts: 200, diopter: 'FOCUS 3/4 · -1.00 D (200 PTS)' },
+  { px: 0,  pts: 100, diopter: 'FOCUS 4/4 · 20/20 CLEAR (100 PTS)' }
+];
+
+const MODE_ORDER = ['blurry', 'ab', 'snellen'];
+
+const fresh = () => ({
   screen: 'setup',
   level: 'A2',
   teamCount: 5,
   speakersPerTeam: 5,
-  huddleSeconds: 15,
   sound: true,
   teams: [],
-  activeTeam: 0,
-  speakerTurn: 1,
   round: 1,
-  phase: 'bet',
-  currentStake: 200,
-  currentCard: null,
-  usedIndices: [],
-  revealed: false
+  speakerTurn: 1,
+  mode: 'blurry',
+  blurryIdx: 0,
+  abIdx: 0,
+  snellenIdx: 0,
+  blurStep: 0,
+  revealed: false,
+  snellenVisible: 1,
+  abSpotlight: 0,
+  scoredThisRound: []
 });
 
-let state = defaultState();
-let timerId = null;
-let timeLeft = 15;
+let state = fresh();
+const save = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {} };
+const load = () => { try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); return d?.teams?.length >= 2 ? d : null; } catch { return null; } };
 
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (parsed && Array.isArray(parsed.teams) && parsed.teams.length >= 2) return parsed;
-  } catch { /* ignore */ }
-  return null;
-}
-
-function stopTimer() {
-  if (timerId) { clearInterval(timerId); timerId = null; }
-}
-
-function pickCard() {
-  const pool = CHALLENGES[state.level] || CHALLENGES.A2;
-  let available = pool.map((_, idx) => idx).filter((idx) => !state.usedIndices.includes(idx));
-  if (!available.length) {
-    state.usedIndices = [];
-    available = pool.map((_, idx) => idx);
-  }
-  const idx = available[Math.floor(Math.random() * available.length)];
-  state.usedIndices.push(idx);
-  return pool[idx];
-}
-
-function startNewGame() {
-  stopTimer();
-  const level = $('opt-level').value;
-  const teamCount = Number($('opt-teams').value);
-  const speakersPerTeam = Number($('opt-speakers').value);
-  const huddleSeconds = Number($('opt-timer').value);
-
+function startExam() {
+  const n = Number($('opt-teams').value);
   state = {
-    ...defaultState(),
+    ...fresh(),
     screen: 'play',
-    level,
-    teamCount,
-    speakersPerTeam,
-    huddleSeconds,
+    level: $('opt-level').value,
+    teamCount: n,
+    speakersPerTeam: Number($('opt-speakers').value),
     sound: state.sound,
-    teams: Array.from({ length: teamCount }, (_, i) => ({
-      name: `Team ${i + 1}`,
-      score: 500,
-      spoken: []
-    })),
-    activeTeam: 0,
-    speakerTurn: 1,
-    round: 1,
-    phase: 'bet',
-    currentCard: null
+    teams: Array.from({ length: n }, (_, i) => ({ name: `Team ${i + 1}`, score: 0 }))
   };
-  prepareBetPhase();
-  saveState();
+  save();
   render();
 }
 
-function prepareBetPhase() {
-  stopTimer();
-  state.phase = 'bet';
-  state.revealed = false;
-  state.currentCard = pickCard();
-  timeLeft = state.huddleSeconds;
+function awardTeam(idx, pts, allowBonus = false) {
+  const t = state.teams[idx];
+  if (!t) return;
+  const already = state.scoredThisRound.includes(idx);
+  if (already && !allowBonus) return;
+  const add = already ? 150 : pts;
+  t.score += add;
+  if (!already) state.scoredThisRound.push(idx);
+  beep(already ? 920 : 760, 0.12, 'triangle');
+  save();
+  render(idx);
 }
 
-function chooseBet(raw) {
-  const team = state.teams[state.activeTeam];
-  let stake = 200;
-  if (raw === 'all') {
-    stake = Math.max(200, team.score);
+function nextRound(forcedMode = null) {
+  if (forcedMode) {
+    state.mode = forcedMode;
   } else {
-    stake = Number(raw);
-  }
-  state.currentStake = stake;
-  state.phase = 'challenge';
-  state.revealed = false;
-  timeLeft = state.huddleSeconds;
-  beep(640, 0.09);
-  saveState();
-  render();
-}
-
-function applyVerdict(kind) {
-  stopTimer();
-  const team = state.teams[state.activeTeam];
-  const sp = state.speakerTurn;
-
-  if (kind === 'clean') {
-    team.score += state.currentStake;
-    if (!team.spoken.includes(sp)) team.spoken.push(sp);
-    beep(780, 0.14);
-  } else if (kind === 'echo') {
-    team.score += Math.round(state.currentStake * 0.5);
-    if (!team.spoken.includes(sp)) team.spoken.push(sp);
-    beep(560, 0.12);
-  } else {
-    team.score = Math.max(0, team.score - Math.round(state.currentStake * 0.5));
-    beep(240, 0.2, 'sawtooth');
-  }
-
-  if (team.spoken.length >= state.speakersPerTeam) {
-    team.score += 300;
-    team.spoken = [];
-  }
-
-  state.activeTeam = (state.activeTeam + 1) % state.teams.length;
-  if (state.activeTeam === 0) {
+    // Advance index of previous mode
+    if (state.mode === 'blurry') state.blurryIdx = (state.blurryIdx + 1) % BLURRY_ROUNDS.length;
+    if (state.mode === 'ab') state.abIdx = (state.abIdx + 1) % AB_ROUNDS.length;
+    if (state.mode === 'snellen') state.snellenIdx = (state.snellenIdx + 1) % SNELLEN_ROUNDS.length;
+    const nextIdx = (MODE_ORDER.indexOf(state.mode) + 1) % MODE_ORDER.length;
+    state.mode = MODE_ORDER[nextIdx];
+    state.round += 1;
     state.speakerTurn = (state.speakerTurn % state.speakersPerTeam) + 1;
   }
-  state.round += 1;
-  prepareBetPhase();
-  saveState();
+  state.blurStep = 0;
+  state.revealed = false;
+  state.snellenVisible = 1;
+  state.abSpotlight = 0;
+  state.scoredThisRound = [];
+  beep(520, 0.08);
+  save();
   render();
 }
 
-function toggleTimer() {
-  const btn = $('btn-timer-toggle');
-  if (timerId) {
-    stopTimer();
-    btn.textContent = 'Resume Huddle';
-    return;
-  }
-  if (timeLeft <= 0) timeLeft = state.huddleSeconds;
-  btn.textContent = 'Pause';
-  timerId = setInterval(() => {
-    timeLeft -= 1;
-    updateTimerUI();
-    if (timeLeft <= 3 && timeLeft > 0) beep(500, 0.06);
-    if (timeLeft <= 0) {
-      stopTimer();
-      beep(880, 0.25, 'triangle');
-      btn.textContent = 'Speak Now!';
-    }
-  }, 1000);
-}
-
-function updateTimerUI() {
-  const display = $('timer-display');
-  const box = display.parentElement;
-  display.textContent = `${Math.max(0, timeLeft)}s`;
-  box.classList.toggle('urgent', timeLeft <= 3);
-}
-
-function renderScoreboard() {
-  const board = $('scoreboard');
-  board.innerHTML = '';
-  state.teams.forEach((team, idx) => {
-    const card = document.createElement('div');
-    card.className = 'team-card' + (idx === state.activeTeam ? ' active' : '');
-    card.title = 'Click to select this team';
-    card.addEventListener('click', () => {
-      if (state.phase === 'bet') {
-        state.activeTeam = idx;
-        saveState();
-        render();
-      }
-    });
-
-    const top = document.createElement('div');
-    top.className = 'team-top';
-    const nameEl = document.createElement('span');
-    nameEl.className = 'team-name';
-    nameEl.textContent = team.name;
-    const scoreEl = document.createElement('span');
-    scoreEl.className = 'team-score';
-    scoreEl.textContent = `${team.score}`;
-    top.append(nameEl, scoreEl);
-
-    const dots = document.createElement('div');
-    dots.className = 'speaker-dots';
-    for (let s = 1; s <= state.speakersPerTeam; s += 1) {
-      const dot = document.createElement('span');
-      dot.className = 's-dot';
-      if (team.spoken.includes(s)) dot.classList.add('done');
-      if (idx === state.activeTeam && s === state.speakerTurn) dot.classList.add('now');
-      dot.textContent = `${s}`;
-      dots.append(dot);
-    }
-
-    const meta = document.createElement('div');
-    meta.className = 'team-meta';
-    meta.textContent = `Crew: ${team.spoken.length}/${state.speakersPerTeam} (+300 bonus)`;
-
-    card.append(top, dots, meta);
-    board.append(card);
+function renderTeams(flashIdx = -1) {
+  const strip = $('teams-strip');
+  strip.innerHTML = '';
+  state.teams.forEach((t, idx) => {
+    const pill = document.createElement('div');
+    pill.className = 'team-pill' + (idx === flashIdx ? ' flash' : '');
+    const n = document.createElement('span'); n.className = 't-name'; n.textContent = t.name;
+    const s = document.createElement('span'); s.className = 't-score'; s.textContent = `${t.score}`;
+    pill.append(n, s);
+    strip.append(pill);
   });
 }
 
-function renderPodium() {
-  const sorted = [...state.teams].sort((a, b) => b.score - a.score);
-  $('podium-summary').textContent = `Completed ${state.round - 1} speaking rounds at level ${state.level}.`;
-  const list = $('podium-list');
-  list.innerHTML = '';
-  sorted.forEach((t, idx) => {
-    const li = document.createElement('li');
-    li.className = 'podium-row' + (idx === 0 ? ' first' : '');
-    const left = document.createElement('span');
-    left.textContent = `#${idx + 1} · ${t.name}`;
-    const right = document.createElement('span');
-    right.textContent = `${t.score} pts`;
-    li.append(left, right);
-    list.append(li);
+function renderAwardGrid(containerId, pts, includeEcho = false, allowBonus = false) {
+  const grid = $(containerId);
+  grid.innerHTML = '';
+  state.teams.forEach((t, idx) => {
+    const scored = state.scoredThisRound.includes(idx);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-award' + (scored ? ' scored' : '');
+    btn.textContent = scored ? (allowBonus ? `${t.name} ✓ (+150 Mic)` : `${t.name} ✓`) : `${t.name} (+${pts})`;
+    btn.addEventListener('click', () => awardTeam(idx, pts, allowBonus));
+    grid.append(btn);
+
+    if (includeEcho && !scored) {
+      const half = Math.round(pts * 0.5);
+      const eb = document.createElement('button');
+      eb.type = 'button';
+      eb.className = 'btn-award echo';
+      eb.textContent = `Echo +${half}`;
+      eb.title = `${t.name} assisted echo`;
+      eb.addEventListener('click', () => awardTeam(idx, half, false));
+      grid.append(eb);
+    }
   });
 }
 
-function render() {
+function render(flashIdx = -1) {
   $('screen-setup').hidden = state.screen !== 'setup';
   $('screen-play').hidden = state.screen !== 'play';
   $('screen-podium').hidden = state.screen !== 'podium';
   $('btn-finish').hidden = state.screen !== 'play';
   $('btn-reset').hidden = state.screen === 'setup';
   $('btn-sound').textContent = `Sound: ${state.sound ? 'ON' : 'OFF'}`;
-  $('btn-sound').setAttribute('aria-pressed', String(state.sound));
 
   if (state.screen === 'setup') {
-    const saved = loadState();
+    const saved = load();
     $('btn-resume').hidden = !saved || saved.screen !== 'play';
     return;
   }
 
   if (state.screen === 'podium') {
-    renderPodium();
+    const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+    $('podium-summary').textContent = `Completed ${state.round} live eye-exam rounds at level ${state.level}.`;
+    const list = $('podium-list'); list.innerHTML = '';
+    sorted.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.className = 'podium-row' + (i === 0 ? ' first' : '');
+      const a = document.createElement('span'); a.textContent = `#${i + 1} · ${t.name}`;
+      const b = document.createElement('span'); b.textContent = `${t.score} pts`;
+      li.append(a, b); list.append(li);
+    });
     return;
   }
 
-  renderScoreboard();
-  const team = state.teams[state.activeTeam];
-  $('active-team-name').textContent = team.name;
-  $('active-speaker-num').textContent = `SPEAKER #${state.speakerTurn}`;
-  $('round-counter').textContent = `${state.round} (${state.level})`;
+  renderTeams(flashIdx);
+  $('speaker-badge').textContent = `SPEAKER #${state.speakerTurn}`;
+  $('round-badge').textContent = `ROUND ${state.round} · ${state.level}`;
 
-  $('phase-bet').hidden = state.phase !== 'bet';
-  $('phase-challenge').hidden = state.phase !== 'challenge';
+  $('stage-blurry').hidden = state.mode !== 'blurry';
+  $('stage-ab').hidden = state.mode !== 'ab';
+  $('stage-snellen').hidden = state.mode !== 'snellen';
 
-  const card = state.currentCard || pickCard();
-  if (state.phase === 'bet') {
-    $('bet-category').textContent = `NEXT CATEGORY: ${card.cat}`;
-    $('bet-teaser').textContent = `${team.name} — How much do you bet on Speaker #${state.speakerTurn}?`;
+  if (state.mode === 'blurry') {
+    const item = BLURRY_ROUNDS[state.blurryIdx % BLURRY_ROUNDS.length];
+    const step = BLUR_STEPS[Math.min(state.blurStep, BLUR_STEPS.length - 1)];
+    $('mode-badge').textContent = 'MODE 1 · BLURRY VISION';
+    $('points-badge').textContent = `PRIZE: ${step.pts} PTS`;
+    $('blur-pts-inline').textContent = `${step.pts}`;
+    $('blur-viewport').innerHTML = item.svg;
+    $('blur-viewport').style.filter = `blur(${state.revealed ? 0 : step.px}px)`;
+    $('diopter-tag').textContent = state.revealed ? '20/20 CRYSTAL CLEAR' : step.diopter;
+    $('blur-question').textContent = item.question;
+    $('blur-frame').hidden = state.level === 'B1';
+    $('blur-frame').textContent = `Frame: ${item.frame}`;
+    $('btn-sharpen').disabled = state.blurStep >= BLUR_STEPS.length - 1 || state.revealed;
+    $('blur-answer-box').hidden = !state.revealed;
+    $('blur-answer').textContent = item.answer;
+    $('blur-tip').textContent = item.tip;
+    renderAwardGrid('blur-award-grid', step.pts, true, false);
+  } else if (state.mode === 'ab') {
+    const item = AB_ROUNDS[state.abIdx % AB_ROUNDS.length];
+    $('mode-badge').textContent = 'MODE 2 · BETTER 1 OR BETTER 2?';
+    $('points-badge').textContent = 'VOTE: +200 · EXPLAIN: +150';
+    $('lens-1-text').textContent = item.l1;
+    $('lens-2-text').textContent = item.l2;
+
+    const l1 = $('lens-1'), l2 = $('lens-2');
+    l1.className = 'lens-card'; l2.className = 'lens-card';
+    $('lens-1-status').textContent = '';
+    $('lens-2-status').textContent = '';
+
+    if (state.revealed) {
+      l1.classList.add(item.correct === 1 ? 'correct' : 'wrong');
+      l2.classList.add(item.correct === 2 ? 'correct' : 'wrong');
+      $('lens-1-status').textContent = item.correct === 1 ? '✓ 20/20 CLEAR' : '✗ BLURRY ERROR';
+      $('lens-2-status').textContent = item.correct === 2 ? '✓ 20/20 CLEAR' : '✗ BLURRY ERROR';
+    } else if (state.abSpotlight === 1) {
+      l1.classList.add('spotlight'); l2.classList.add('dimmed');
+    } else if (state.abSpotlight === 2) {
+      l2.classList.add('spotlight'); l1.classList.add('dimmed');
+    }
+
+    $('ab-explain-box').hidden = !state.revealed;
+    $('ab-explain').textContent = item.explain;
+    renderAwardGrid('ab-award-grid', 200, false, true);
   } else {
-    $('ch-category').textContent = card.cat;
-    $('ch-stake').textContent = `STAKE: ${state.currentStake} PTS`;
-    $('ch-prompt').textContent = card.prompt;
-
-    const vis = $('ch-visual');
-    if (card.visual && VISUALS[card.visual]) {
-      vis.hidden = false;
-      vis.innerHTML = VISUALS[card.visual];
-    } else {
-      vis.hidden = true;
-      vis.innerHTML = '';
-    }
-
-    const frame = $('ch-frame');
-    if (card.frame) {
-      frame.hidden = false;
-      frame.textContent = `Frame: ${card.frame}`;
-    } else {
-      frame.hidden = true;
-    }
-
-    $('ch-answer-box').hidden = !state.revealed;
-    $('ch-answer').textContent = card.answer;
-    $('ch-tip').textContent = card.tip || '';
-    $('btn-reveal').textContent = state.revealed ? 'Hide Model (R)' : 'Reveal Model (R)';
-    $('btn-timer-toggle').textContent = timerId ? 'Pause' : 'Start Huddle';
-    updateTimerUI();
+    const item = SNELLEN_ROUNDS[state.snellenIdx % SNELLEN_ROUNDS.length];
+    $('mode-badge').textContent = 'MODE 3 · SNELLEN EYE CHART';
+    $('points-badge').textContent = 'CLEAN READ: +300 PTS';
+    $('snellen-task').textContent = item.task;
+    $('snellen-hint').hidden = state.level === 'B1';
+    $('snellen-hint').textContent = item.hint;
+    const box = $('snellen-lines'); box.innerHTML = '';
+    item.lines.forEach((line, i) => {
+      const div = document.createElement('div');
+      div.className = `s-line s-line-${i}` + (i >= state.snellenVisible && !state.revealed ? ' hidden-line' : '');
+      div.textContent = line;
+      box.append(div);
+    });
+    $('btn-snellen-next-line').disabled = state.snellenVisible >= item.lines.length || state.revealed;
+    $('snellen-answer-box').hidden = !state.revealed;
+    $('snellen-answer').textContent = item.answer;
+    $('snellen-tip').textContent = item.tip;
+    renderAwardGrid('snellen-award-grid', 300, true, false);
   }
 }
 
-function buildReviewModal() {
-  const grid = $('review-grid');
-  grid.innerHTML = '';
-  REVIEW_CARDS.forEach((item) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'review-card';
-    const w = document.createElement('strong');
-    w.textContent = item.word;
-    const sub = document.createElement('span');
-    sub.textContent = `${item.es} — tap for sentence`;
-    btn.append(w, sub);
-    btn.addEventListener('click', () => {
-      const open = btn.classList.toggle('revealed');
-      sub.textContent = open ? `"${item.phrase}"` : `${item.es} — tap for sentence`;
-    });
-    grid.append(btn);
-  });
-}
+// Controls
+$('btn-start').addEventListener('click', startExam);
+$('btn-resume').addEventListener('click', () => { const s = load(); if (s) { state = s; render(); } });
+$('btn-again').addEventListener('click', () => { state.screen = 'setup'; save(); render(); });
+$('btn-reset').addEventListener('click', () => { state.screen = 'setup'; save(); render(); });
+$('btn-finish').addEventListener('click', () => { state.screen = 'podium'; save(); render(); });
+$('btn-sound').addEventListener('click', () => { state.sound = !state.sound; save(); render(); });
+$('btn-full').addEventListener('click', () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}));
+$('btn-rot-speaker').addEventListener('click', () => { state.speakerTurn = (state.speakerTurn % state.speakersPerTeam) + 1; save(); render(); });
 
-$('btn-start').addEventListener('click', startNewGame);
-$('btn-resume').addEventListener('click', () => {
-  const saved = loadState();
-  if (saved) { state = saved; timeLeft = state.huddleSeconds; render(); }
+$('btn-sharpen').addEventListener('click', () => {
+  if (state.blurStep < BLUR_STEPS.length - 1) {
+    state.blurStep += 1;
+    beep(380 + state.blurStep * 110, 0.08, 'square');
+    save(); render();
+  }
 });
-$('btn-play-again').addEventListener('click', () => { state.screen = 'setup'; saveState(); render(); });
-$('btn-reset').addEventListener('click', () => { stopTimer(); state.screen = 'setup'; saveState(); render(); });
-$('btn-finish').addEventListener('click', () => { stopTimer(); state.screen = 'podium'; saveState(); render(); });
-$('btn-sound').addEventListener('click', () => { state.sound = !state.sound; saveState(); render(); });
-$('btn-full').addEventListener('click', () => {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
-});
-$('btn-next-speaker').addEventListener('click', () => {
-  state.speakerTurn = (state.speakerTurn % state.speakersPerTeam) + 1;
-  saveState();
+$('btn-blur-reveal').addEventListener('click', () => { state.revealed = !state.revealed; beep(780, 0.12); render(); });
+
+$('btn-ab-flip').addEventListener('click', () => {
+  state.abSpotlight = state.abSpotlight === 1 ? 2 : 1;
+  beep(state.abSpotlight === 1 ? 480 : 620, 0.07);
   render();
 });
+$('lens-1').addEventListener('click', () => { if (!state.revealed) { state.abSpotlight = 1; beep(480, 0.07); render(); } });
+$('lens-2').addEventListener('click', () => { if (!state.revealed) { state.abSpotlight = 2; beep(620, 0.07); render(); } });
+$('btn-ab-reveal').addEventListener('click', () => { state.revealed = true; beep(840, 0.15, 'triangle'); render(); });
 
-$('bet-buttons').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-bet]');
-  if (btn) chooseBet(btn.dataset.bet);
+$('btn-snellen-next-line').addEventListener('click', () => {
+  const item = SNELLEN_ROUNDS[state.snellenIdx % SNELLEN_ROUNDS.length];
+  if (state.snellenVisible < item.lines.length) {
+    state.snellenVisible += 1;
+    beep(500 + state.snellenVisible * 80, 0.08);
+    save(); render();
+  }
 });
+$('btn-snellen-reveal').addEventListener('click', () => { state.revealed = !state.revealed; beep(780, 0.12); render(); });
 
-$('btn-timer-toggle').addEventListener('click', toggleTimer);
-$('btn-reveal').addEventListener('click', () => { state.revealed = !state.revealed; render(); });
-$('btn-clean').addEventListener('click', () => applyVerdict('clean'));
-$('btn-echo').addEventListener('click', () => applyVerdict('echo'));
-$('btn-miss').addEventListener('click', () => applyVerdict('miss'));
+$('btn-next-round').addEventListener('click', () => nextRound());
+document.querySelectorAll('.mini-mode').forEach((b) => b.addEventListener('click', () => nextRound(b.dataset.mode)));
 
-$('btn-review').addEventListener('click', () => { buildReviewModal(); $('review-dialog').showModal(); });
+$('btn-review').addEventListener('click', () => {
+  const g = $('review-grid'); g.innerHTML = '';
+  REVIEW_CARDS.forEach((item) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'review-card';
+    const w = document.createElement('strong'); w.textContent = item.word;
+    const s = document.createElement('span'); s.textContent = `${item.es} — tap for sentence`;
+    b.append(w, s);
+    b.addEventListener('click', () => { const o = b.classList.toggle('revealed'); s.textContent = o ? `"${item.phrase}"` : `${item.es} — tap for sentence`; });
+    g.append(b);
+  });
+  $('review-dialog').showModal();
+});
 $('btn-close-review').addEventListener('click', () => $('review-dialog').close());
 
 document.addEventListener('keydown', (e) => {
-  if ($('review-dialog').open || state.screen !== 'play' || state.phase !== 'challenge') return;
-  if (e.key.toLowerCase() === 'r') $('btn-reveal').click();
-  if (e.key === '1') $('btn-clean').click();
-  if (e.key === '2') $('btn-echo').click();
-  if (e.key === '3') $('btn-miss').click();
-  if (e.key === ' ') { e.preventDefault(); toggleTimer(); }
+  if ($('review-dialog').open || state.screen !== 'play') return;
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (state.mode === 'blurry') $('btn-sharpen').click();
+    else if (state.mode === 'ab') $('btn-ab-flip').click();
+    else $('btn-snellen-next-line').click();
+  }
+  if (e.key.toLowerCase() === 'r') {
+    if (state.mode === 'blurry') $('btn-blur-reveal').click();
+    else if (state.mode === 'ab') $('btn-ab-reveal').click();
+    else $('btn-snellen-reveal').click();
+  }
+  if (e.key.toLowerCase() === 'n') $('btn-next-round').click();
 });
 
 render();
